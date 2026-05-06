@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -9,6 +10,7 @@ interface ProductCardProps {
   subtitle?: string;
   aspectRatio?: "square" | "portrait";
   className?: string;
+  href?: string;
 }
 
 export function ProductCard({
@@ -19,12 +21,16 @@ export function ProductCard({
   subtitle,
   aspectRatio = "square",
   className,
+  href = "#",
 }: ProductCardProps) {
   return (
-    <div className={cn(
-      "flex flex-col bg-white border border-outline-variant group rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300",
-      className
-    )}>
+    <Link 
+      href={href}
+      className={cn(
+        "flex flex-col bg-white border border-outline-variant group rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300",
+        className
+      )}
+    >
       <div className={cn(
         "overflow-hidden bg-white p-8 flex items-center justify-center relative",
         aspectRatio === "square" ? "aspect-square" : "aspect-[4/5]"
@@ -54,11 +60,11 @@ export function ProductCard({
         </div>
         <div className="flex flex-row justify-between items-center mt-2 border-t border-outline-variant/20 pt-4">
           <span className="text-primary font-bold text-lg">{price}</span>
-          <button className="bg-primary text-on-primary w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary-container transition-colors shadow-md">
+          <div className="bg-primary text-on-primary w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary-container transition-colors shadow-md">
             <span className="material-symbols-outlined text-xl">add_shopping_cart</span>
-          </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -46,6 +46,7 @@ export default function ProductsPage() {
               tag="Di Sản" 
               image="/images/product-root.png"
               aspectRatio="portrait"
+              href="/products/imperial-heritage-red-ginseng"
             />
             <ProductCard 
               name="Cao Hồng Sâm Hoàng Gia" 
@@ -54,6 +55,7 @@ export default function ProductsPage() {
               tag="Bán Chạy" 
               image="/images/product-extract.png"
               aspectRatio="portrait"
+              href="/products/imperial-heritage-red-ginseng"
             />
             <ProductCard 
               name="Nhân Sâm Tươi Thượng Hạng" 
@@ -61,6 +63,7 @@ export default function ProductsPage() {
               subtitle="Vùng Geumsan • 1KG" 
               image="/images/product-slices.png"
               aspectRatio="portrait"
+              href="/products/imperial-heritage-red-ginseng"
             />
             <ProductCard 
               name="Tinh Chất Nước Sâm Đậm Đặc" 
@@ -68,6 +71,7 @@ export default function ProductsPage() {
               subtitle="Hộp 30 Gói" 
               image="/images/product-tea.png"
               aspectRatio="portrait"
+              href="/products/imperial-heritage-red-ginseng"
             />
             <ProductCard 
               name="Bộ Quà Tặng Bách Niên" 
@@ -76,6 +80,7 @@ export default function ProductsPage() {
               tag="Limited" 
               image="/images/product-giftbox.png"
               aspectRatio="portrait"
+              href="/products/imperial-heritage-red-ginseng"
             />
             <ProductCard 
               name="Viên Nang Hồng Sâm Nguyên Chất" 
@@ -83,6 +88,7 @@ export default function ProductsPage() {
               subtitle="60 Viên • 500MG" 
               image="/images/product-capsules.png"
               aspectRatio="portrait"
+              href="/products/imperial-heritage-red-ginseng"
             />
           </div>
 
