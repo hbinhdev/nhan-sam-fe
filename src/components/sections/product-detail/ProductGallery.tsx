@@ -1,11 +1,19 @@
 import Image from "next/image";
 
-export function ProductGallery() {
+export function ProductGallery({
+  name = "Imperial Heritage Red Ginseng",
+  imageUrl,
+}: {
+  name?: string;
+  imageUrl?: string;
+}) {
+  const mainImage = imageUrl || "/images/product-imperial-main.png";
+
   const images = [
-    { src: "/images/product-imperial-main.png", alt: "Imperial Heritage Red Ginseng Root" },
-    { src: "/images/product-imperial-extract.png", alt: "Red Ginseng Extract Pouring" },
-    { src: "/images/product-imperial-box.png", alt: "Ginseng in Luxury Wooden Box" },
-    { src: "/images/product-imperial-main.png", alt: "Imperial Heritage Details" },
+    { src: mainImage, alt: name },
+    { src: mainImage, alt: `${name} view 1` },
+    { src: mainImage, alt: `${name} view 2` },
+    { src: mainImage, alt: `${name} view 3` },
   ];
 
   return (

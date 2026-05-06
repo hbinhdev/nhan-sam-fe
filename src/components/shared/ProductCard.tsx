@@ -3,10 +3,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
-  name: string;
-  price: string;
+  name?: string;
+  price?: string;
   tag?: string;
-  image: string;
+  image?: string;
   subtitle?: string;
   aspectRatio?: "square" | "portrait";
   className?: string;
@@ -23,21 +23,27 @@ export function ProductCard({
   className,
   href = "#",
 }: ProductCardProps) {
+  const safeName = name?.trim() || "Sản phẩm ...";
+  const safePrice = price?.trim() || "1.234.567đ";
+  const safeImage = image?.trim() || "/images/product-root.png";
+
   return (
-    <Link 
+    <Link
       href={href}
       className={cn(
         "flex flex-col bg-white border border-outline-variant group rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300",
-        className
+        className,
       )}
     >
-      <div className={cn(
-        "overflow-hidden bg-white p-8 flex items-center justify-center relative",
-        aspectRatio === "square" ? "aspect-square" : "aspect-[4/5]"
-      )}>
+      <div
+        className={cn(
+          "overflow-hidden bg-white p-8 flex items-center justify-center relative",
+          aspectRatio === "square" ? "aspect-square" : "aspect-[4/5]",
+        )}
+      >
         <Image
-          alt={`Sản phẩm ${name} của Heritage Ginseng`}
-          src={image}
+          alt={`Sản phẩm ${safeName} của Heritage Ginseng`}
+          src={safeImage}
           fill
           className="object-contain p-8 group-hover:scale-105 transition-transform duration-500"
         />
@@ -55,13 +61,15 @@ export function ProductCard({
             </p>
           )}
           <h3 className="text-lg font-serif text-primary min-h-[54px] leading-tight group-hover:text-secondary transition-colors">
-            {name}
+            {safeName}
           </h3>
         </div>
         <div className="flex flex-row justify-between items-center mt-2 border-t border-outline-variant/20 pt-4">
-          <span className="text-primary font-bold text-lg">{price}</span>
+          <span className="text-primary font-bold text-lg">{safePrice}</span>
           <div className="bg-primary text-on-primary w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary-container transition-colors shadow-md">
-            <span className="material-symbols-outlined text-xl">add_shopping_cart</span>
+            <span className="material-symbols-outlined text-xl">
+              add_shopping_cart
+            </span>
           </div>
         </div>
       </div>
