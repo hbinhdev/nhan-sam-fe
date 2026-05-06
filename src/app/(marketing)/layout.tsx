@@ -24,6 +24,7 @@ export default function MarketingLayout({
             <Link className="text-[13px] font-medium uppercase text-on-surface-variant hover:text-primary transition-colors" href="#">Quà tặng</Link>
             <Link className="text-[13px] font-medium uppercase text-on-surface-variant hover:text-primary transition-colors" href="#">Hành trình</Link>
             <Link className="text-[13px] font-medium uppercase text-on-surface-variant hover:text-primary transition-colors" href="#">Tri thức</Link>
+            <Link className="text-[13px] font-medium uppercase text-on-surface-variant hover:text-primary transition-colors" href="/contact">Liên hệ</Link>
           </nav>
 
           {/* CTA + Utilities - Right */}
