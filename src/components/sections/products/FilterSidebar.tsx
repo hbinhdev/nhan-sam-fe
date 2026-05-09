@@ -40,6 +40,7 @@ export function FilterSidebar({ filters, filterOptions }: FilterSidebarProps) {
 
   const updateParams = (updates: Record<string, string | undefined>) => {
     const params = new URLSearchParams(searchParams.toString());
+    params.delete("page");
 
     Object.entries(updates).forEach(([key, value]) => {
       if (!value) {

@@ -19,6 +19,7 @@ export type ProductSummary = {
   usagePurpose?: string | null;
   usageInstructions?: string | null;
   ginsengAge?: string | null;
+  isBestSeller?: boolean;
   category?: CategorySummary | null;
 };
 
@@ -39,6 +40,7 @@ export type ProductFilterParams = {
   ginsengAge?: string;
   brand?: string;
   origin?: string;
+  isBestSeller?: boolean;
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001/api";
@@ -57,7 +59,7 @@ function resolveApiBaseUrl() {
 
 const API_BASE_URL = resolveApiBaseUrl();
 
-function buildQuery(params: Record<string, string | number | undefined>) {
+function buildQuery(params: Record<string, string | number | boolean | undefined>) {
   const query = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -120,6 +122,7 @@ function sanitizeProduct(value: unknown): ProductSummary | null {
     usageInstructions:
       typeof item.usageInstructions === "string" ? item.usageInstructions : null,
     ginsengAge: typeof item.ginsengAge === "string" ? item.ginsengAge : null,
+    isBestSeller: typeof item.isBestSeller === "boolean" ? item.isBestSeller : false,
     category: sanitizeCategorySummary(item.category),
   };
 }
@@ -150,6 +153,7 @@ export async function getProducts(params?: ProductFilterParams) {
       ginsengAge: params?.ginsengAge,
       brand: params?.brand,
       origin: params?.origin,
+      isBestSeller: params?.isBestSeller,
     })}`,
   );
 

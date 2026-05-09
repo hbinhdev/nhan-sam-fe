@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/sections/product-detail/ProductGallery";
 import { ProductInfo } from "@/components/sections/product-detail/ProductInfo";
 import { CertificationSection } from "@/components/sections/product-detail/CertificationSection";
@@ -11,6 +11,12 @@ import {
   getProducts,
   type ProductSummary,
 } from "@/lib/product-api";
+import {
+  getProductReviewSummary,
+  getProductReviews,
+  type ProductReview,
+  type ProductReviewSummary,
+} from "@/lib/product-review-api";
 
 const RELATED_PRODUCTS_LIMIT = 4;
 
@@ -86,6 +92,23 @@ export default async function ProductDetailPage({
     relatedProducts = [];
   }
 
+  let reviews: ProductReview[] = [];
+  let reviewSummary: ProductReviewSummary | undefined;
+
+  if (product.id) {
+    try {
+      const [reviewsResponse, summaryResponse] = await Promise.all([
+        getProductReviews(product.id),
+        getProductReviewSummary(product.id),
+      ]);
+      reviews = reviewsResponse.data;
+      reviewSummary = summaryResponse;
+    } catch {
+      reviews = [];
+      reviewSummary = undefined;
+    }
+  }
+
   return (
     <main className="max-w-[1280px] mx-auto px-6 py-12 flex flex-col">
       {/* SECTION 1: PRODUCT HERO */}
@@ -110,7 +133,11 @@ export default async function ProductDetailPage({
       <ProductTabs product={product} />
 
       {/* SECTION 4: REVIEWS */}
-      <ProductReviews />
+      <ProductReviews
+        productId={product.id}
+        reviews={reviews}
+        summary={reviewSummary}
+      />
 
       {/* SECTION 5: RELATED PRODUCTS */}
       <section className="py-24 border-t border-outline-variant/30">

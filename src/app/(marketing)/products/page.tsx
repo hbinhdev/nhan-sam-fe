@@ -1,4 +1,5 @@
 import { ProductCard } from "@/components/shared/ProductCard";
+import Link from "next/link";
 import {
   FilterSidebar,
   type FilterOptions,
@@ -13,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type ProductsSearchParams = {
+  page?: string;
   categoryId?: string;
   minPrice?: string;
   maxPrice?: string;
@@ -25,6 +27,8 @@ type ProductsSearchParams = {
 type ProductsPageProps = {
   searchParams?: Promise<ProductsSearchParams>;
 };
+
+const PRODUCTS_PER_PAGE = 9;
 
 function parseNumber(value?: string) {
   if (!value) {
@@ -40,7 +44,9 @@ function toUniqueSorted(values: Array<string | null | undefined>) {
     .map((item) => item?.trim())
     .filter((item): item is string => Boolean(item));
 
-  return Array.from(new Set(normalized)).sort((a, b) => a.localeCompare(b, "vi"));
+  return Array.from(new Set(normalized)).sort((a, b) =>
+    a.localeCompare(b, "vi"),
+  );
 }
 
 function buildFilterOptions(products: ProductSummary[]): FilterOptions {
@@ -56,6 +62,8 @@ export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const rawPage = Number(resolvedSearchParams?.page ?? "1");
+  const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
   const activeCategoryId = resolvedSearchParams?.categoryId;
 
   const activeFilters = {
@@ -72,6 +80,8 @@ export default async function ProductsPage({
 
   let products: ProductSummary[] = [];
   let totalProducts = 0;
+  let apiPage = currentPage;
+  let apiLimit = PRODUCTS_PER_PAGE;
   let productError: string | null = null;
 
   let filterOptions: FilterOptions = {
@@ -84,14 +94,14 @@ export default async function ProductsPage({
   try {
     categories = await getCategories();
   } catch {
-    categoryError = "Khong tai duoc danh muc.";
+    categoryError = "Không tải được danh mục.";
   }
 
   try {
     const [filteredResponse, optionsResponse] = await Promise.all([
       getProducts({
-        page: 1,
-        limit: 12,
+        page: currentPage,
+        limit: PRODUCTS_PER_PAGE,
         categoryId: activeCategoryId,
         minPrice: parseNumber(activeFilters.minPrice),
         maxPrice: parseNumber(activeFilters.maxPrice),
@@ -108,11 +118,44 @@ export default async function ProductsPage({
 
     products = filteredResponse.data;
     totalProducts = filteredResponse.total;
+    apiPage = filteredResponse.page;
+    apiLimit = filteredResponse.limit;
 
     filterOptions = buildFilterOptions(optionsResponse.data);
   } catch {
-    productError = "Khong tai duoc san pham.";
+    productError = "Không tải được sản phẩm.";
   }
+
+  const totalPages = Math.ceil(totalProducts / apiLimit);
+  const canGoPrevious = apiPage > 1;
+  const canGoNext = apiPage < totalPages;
+
+  const paginationBaseQuery: Record<string, string | undefined> = {
+    categoryId: activeCategoryId,
+    minPrice: activeFilters.minPrice,
+    maxPrice: activeFilters.maxPrice,
+    usagePurpose: activeFilters.usagePurpose,
+    ginsengAge: activeFilters.ginsengAge,
+    brand: activeFilters.brand,
+    origin: activeFilters.origin,
+  };
+
+  const buildProductsLink = (page: number) => {
+    const params = new URLSearchParams();
+
+    Object.entries(paginationBaseQuery).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      }
+    });
+
+    if (page > 1) {
+      params.set("page", String(page));
+    }
+
+    const queryString = params.toString();
+    return queryString ? `/products?${queryString}` : "/products";
+  };
 
   return (
     <main className="max-w-[1280px] mx-auto px-6 py-16 flex flex-col gap-12">
@@ -134,7 +177,15 @@ export default async function ProductsPage({
       <CategoryTabs
         categories={categories}
         activeCategoryId={activeCategoryId}
-        currentQuery={resolvedSearchParams}
+        currentQuery={{
+          categoryId: activeCategoryId,
+          minPrice: activeFilters.minPrice,
+          maxPrice: activeFilters.maxPrice,
+          usagePurpose: activeFilters.usagePurpose,
+          ginsengAge: activeFilters.ginsengAge,
+          brand: activeFilters.brand,
+          origin: activeFilters.origin,
+        }}
         errorMessage={categoryError}
       />
 
@@ -167,7 +218,7 @@ export default async function ProductsPage({
             </div>
           ) : products.length === 0 ? (
             <div className="py-16 text-center text-on-surface-variant">
-              Chua co san pham.
+              Chưa có sản phẩm nào.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-16">
@@ -191,16 +242,39 @@ export default async function ProductsPage({
           )}
 
           {/* PAGINATION */}
-          <div className="mt-12 flex justify-center gap-2">
-            <PaginationButton active>1</PaginationButton>
-            <PaginationButton>2</PaginationButton>
-            <PaginationButton>3</PaginationButton>
-            <PaginationButton>
-              <span className="material-symbols-outlined text-sm">
-                chevron_right
-              </span>
-            </PaginationButton>
-          </div>
+          {totalPages > 1 && (
+            <div className="mt-12 flex justify-center gap-2">
+              <PaginationButton
+                href={buildProductsLink(Math.max(1, apiPage - 1))}
+                disabled={!canGoPrevious}
+              >
+                <span className="material-symbols-outlined text-sm">
+                  chevron_left
+                </span>
+              </PaginationButton>
+
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (page) => (
+                  <PaginationButton
+                    key={page}
+                    href={buildProductsLink(page)}
+                    active={page === apiPage}
+                  >
+                    {page}
+                  </PaginationButton>
+                ),
+              )}
+
+              <PaginationButton
+                href={buildProductsLink(Math.min(totalPages, apiPage + 1))}
+                disabled={!canGoNext}
+              >
+                <span className="material-symbols-outlined text-sm">
+                  chevron_right
+                </span>
+              </PaginationButton>
+            </div>
+          )}
         </div>
       </div>
     </main>
@@ -210,20 +284,33 @@ export default async function ProductsPage({
 function PaginationButton({
   children,
   active = false,
+  disabled = false,
+  href,
 }: {
   children: React.ReactNode;
   active?: boolean;
+  disabled?: boolean;
+  href: string;
 }) {
+  const className = cn(
+    "w-12 h-12 flex items-center justify-center rounded-xl transition-all text-sm font-bold",
+    active
+      ? "bg-primary text-on-primary shadow-lg shadow-primary/20"
+      : "border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary",
+    disabled && "pointer-events-none opacity-40",
+  );
+
+  if (disabled) {
+    return (
+      <span className={className} aria-disabled="true">
+        {children}
+      </span>
+    );
+  }
+
   return (
-    <button
-      className={cn(
-        "w-12 h-12 flex items-center justify-center rounded-xl transition-all text-sm font-bold",
-        active
-          ? "bg-primary text-on-primary shadow-lg shadow-primary/20"
-          : "border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary",
-      )}
-    >
+    <Link href={href} className={className}>
       {children}
-    </button>
+    </Link>
   );
 }
