@@ -25,6 +25,12 @@ export default function MarketingLayout({
           </nav>
 
           <div className="flex items-center space-x-6 text-primary dark:text-red-500">
+            <Link 
+              href="/cart" 
+              className="hidden lg:flex bg-primary text-on-primary px-6 h-11 items-center rounded-xl text-label-caps text-xs tracking-widest hover:bg-primary-container transition-all"
+            >
+              MUA NGAY
+            </Link>
             <Link href="/cart" className="flex items-center focus:outline-none hover:text-primary/70 transition-all duration-300 relative">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>shopping_cart</span>
             </Link>

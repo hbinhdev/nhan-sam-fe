@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export function CartSummary() {
   return (
@@ -43,9 +44,12 @@ export function CartSummary() {
             </div>
           </div>
 
-          <button className="w-full bg-primary text-on-primary py-5 rounded-xl text-label-caps tracking-widest hover:bg-primary-container transition-all flex items-center justify-center gap-3">
+          <Link 
+            href="/checkout"
+            className="w-full bg-primary text-on-primary py-5 rounded-xl text-label-caps tracking-widest hover:bg-primary-container transition-all flex items-center justify-center gap-3"
+          >
             TIẾN HÀNH THANH TOÁN <span className="material-symbols-outlined">arrow_forward</span>
-          </button>
+          </Link>
 
           <div className="mt-8 flex justify-center items-center gap-6 text-on-surface-variant">
             <span className="material-symbols-outlined text-2xl">payments</span>
