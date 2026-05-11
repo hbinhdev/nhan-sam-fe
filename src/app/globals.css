@@ -41,7 +41,35 @@
   --radius-sm: 0.125rem;
   --radius-md: 0.25rem;
   --radius-lg: 0.5rem;
-  --radius-full: 0.75rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Typography aligned with desgin.md */
+  --text-headline-sm: 1.5rem; /* 24px (H3) */
+  --text-headline-sm--line-height: 1.2;
+  --text-headline-sm--font-weight: 600;
+
+  --text-headline-md: 2rem; /* 32px (H2) */
+  --text-headline-md--line-height: 1.2;
+  --text-headline-md--font-weight: 600;
+
+  --text-display-lg: 3rem; /* 48px (H1) */
+  --text-display-lg--line-height: 1.2;
+  --text-display-lg--font-weight: 700;
+  --text-display-lg--letter-spacing: -0.02em;
+
+  --text-label-caps: 0.875rem; /* 14px (Small) */
+  --text-label-caps--line-height: 1;
+  --text-label-caps--font-weight: 500;
+  --text-label-caps--letter-spacing: 0.1em;
+
+  --text-body-md: 1rem; /* 16px */
+  --text-body-md--line-height: 1.6;
+  --text-body-md--font-weight: 400;
+
+  --text-body-lg: 1.125rem; /* 18px */
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--font-weight: 400;
 }
 
 :root {
@@ -68,7 +96,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem; /* 12px for desgin.md rule 7 */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
