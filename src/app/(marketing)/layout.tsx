@@ -12,10 +12,13 @@ export default function MarketingLayout({
       {/* TopAppBar */}
       <header className="bg-white dark:bg-stone-950 border-b border-yellow-600/20 dark:border-yellow-900/30 sticky top-0 z-50">
         <div className="flex justify-between items-center w-full px-12 h-20 max-w-screen-2xl mx-auto">
-          <Link href="/" className="text-2xl font-serif font-bold text-primary dark:text-red-500 uppercase tracking-widest">
+          <Link
+            href="/"
+            className="text-2xl font-serif font-bold text-primary dark:text-red-500 uppercase tracking-widest"
+          >
             Heritage Ginseng
           </Link>
-          
+
           <nav className="hidden md:flex items-center space-x-8">
             <NavLink href="/">Trang Chủ</NavLink>
             <NavLink href="/products">Sản Phẩm</NavLink>
@@ -24,18 +27,25 @@ export default function MarketingLayout({
             <NavLink href="#">Chứng Nhận</NavLink>
             <NavLink href="/contact">Liên Hệ</NavLink>
           </nav>
-          
-          <AuthHeaderActions />
 
           <div className="flex items-center space-x-6 text-primary dark:text-red-500">
-            <Link 
+            {/* <Link 
               href="/cart" 
               className="hidden lg:flex bg-primary text-on-primary px-6 h-11 items-center rounded-xl text-label-caps text-xs tracking-widest hover:bg-primary-container transition-all"
             >
               MUA NGAY
-            </Link>
-            <Link href="/cart" className="flex items-center focus:outline-none hover:text-primary/70 transition-all duration-300 relative">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>shopping_cart</span>
+            </Link> */}
+            <AuthHeaderActions />
+            <Link
+              href="/cart"
+              className="flex items-center focus:outline-none hover:text-primary/70 transition-all duration-300 relative"
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                shopping_cart
+              </span>
             </Link>
             <button className="flex items-center focus:outline-none hover:text-primary/70 transition-all duration-300">
               <span className="material-symbols-outlined">person</span>
@@ -69,10 +79,16 @@ export default function MarketingLayout({
   );
 }
 
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function NavLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
-    <Link 
-      href={href} 
+    <Link
+      href={href}
       className="font-serif text-sm tracking-wide uppercase text-stone-600 dark:text-stone-400 hover:text-primary transition-colors"
     >
       {children}
@@ -80,10 +96,16 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   );
 }
 
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+function FooterLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
-    <Link 
-      href={href} 
+    <Link
+      href={href}
       className="font-serif text-xs tracking-tighter text-stone-500 dark:text-stone-400 hover:text-yellow-700 underline transition-all"
     >
       {children}
