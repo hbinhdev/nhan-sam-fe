@@ -1,30 +1,60 @@
-import { buttonVariants } from "@/components/ui/button";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import { Sidebar } from '@/components/dashboard/Sidebar';
+import { Header } from '@/components/dashboard/Header';
+import { ThemeProvider } from "@/components/shared/ThemeProvider";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) setIsSidebarOpen(false);
+      else setIsSidebarOpen(true);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 border-r bg-muted/30 p-6 flex flex-col">
-        <div className="font-bold text-xl mb-8">Admin Panel</div>
-        <nav className="flex-1 space-y-2">
-          <Link href="/dashboard" className="block px-4 py-2 rounded-md hover:bg-accent">Overview</Link>
-          <Link href="#" className="block px-4 py-2 rounded-md hover:bg-accent">Settings</Link>
-        </nav>
-        <Link
-          href="/"
-          className={cn(buttonVariants({ variant: "outline" }), "mt-auto")}
-        >
-          Back to Site
-        </Link>
-      </aside>
-      <main className="flex-1 p-8">
-        {children}
-      </main>
-    </div>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="light"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <div className="admin-theme min-h-screen bg-background text-foreground flex font-sans transition-colors duration-300">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          isMobile={isMobile} 
+        />
+
+        <div
+          className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
+            !isMobile ? (isSidebarOpen ? 'ml-[240px]' : 'ml-[70px]') : 'ml-0'
+          }`}>
+          
+          <Header toggleSidebar={toggleSidebar} />
+
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+            <div className="mx-auto max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+    </ThemeProvider>
   );
 }
