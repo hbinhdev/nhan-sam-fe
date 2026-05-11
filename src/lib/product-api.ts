@@ -14,6 +14,8 @@ export type ProductSummary = {
   stock?: number | null;
   imageUrl?: string | null;
   thumbnail?: string | null;
+  images?: string[];
+  videoUrl?: string | null;
   origin?: string | null;
   brand?: string | null;
   usagePurpose?: string | null;
@@ -116,6 +118,10 @@ function sanitizeProduct(value: unknown): ProductSummary | null {
     stock: typeof item.stock === "number" ? item.stock : null,
     imageUrl: typeof item.imageUrl === "string" ? item.imageUrl : null,
     thumbnail: typeof item.thumbnail === "string" ? item.thumbnail : null,
+    images: Array.isArray(item.images)
+      ? item.images.filter((media): media is string => typeof media === "string" && media.trim().length > 0)
+      : [],
+    videoUrl: typeof item.videoUrl === "string" ? item.videoUrl : null,
     origin: typeof item.origin === "string" ? item.origin : null,
     brand: typeof item.brand === "string" ? item.brand : null,
     usagePurpose: typeof item.usagePurpose === "string" ? item.usagePurpose : null,

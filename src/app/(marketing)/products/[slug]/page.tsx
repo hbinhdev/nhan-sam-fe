@@ -116,6 +116,9 @@ export default async function ProductDetailPage({
         <ProductGallery
           name={product.name}
           imageUrl={product.imageUrl || product.thumbnail || undefined}
+          thumbnail={product.thumbnail || product.imageUrl || undefined}
+          images={product.images}
+          videoUrl={product.videoUrl}
         />
         <ProductInfo
           name={product.name}
