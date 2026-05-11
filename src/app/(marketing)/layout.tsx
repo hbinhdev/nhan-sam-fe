@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { AuthHeaderActions } from "@/components/shared/auth/AuthHeaderActions";
 
 export default function MarketingLayout({
   children,
@@ -23,6 +24,8 @@ export default function MarketingLayout({
             <NavLink href="#">Chứng Nhận</NavLink>
             <NavLink href="/contact">Liên Hệ</NavLink>
           </nav>
+          
+          <AuthHeaderActions />
 
           <div className="flex items-center space-x-6 text-primary dark:text-red-500">
             <Link 
@@ -41,9 +44,7 @@ export default function MarketingLayout({
         </div>
       </header>
 
-      <main className="flex-1">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
 
       {/* Footer */}
       <footer className="bg-stone-100 dark:bg-stone-900 border-t border-yellow-600/10">

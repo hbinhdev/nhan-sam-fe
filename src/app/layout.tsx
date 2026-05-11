@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Noto_Serif, Manrope } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/shared/QueryProvider";
+import { ToastProvider } from "@/components/shared/toast/ToastProvider";
 
 const notoSerif = Noto_Serif({ subsets: ["latin", "vietnamese"], variable: "--font-serif" });
 const manrope = Manrope({ subsets: ["latin", "vietnamese"], variable: "--font-manrope" });
@@ -28,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${notoSerif.variable} ${manrope.variable} font-manrope min-h-full flex flex-col antialiased`}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </QueryProvider>
       </body>
     </html>
   );
