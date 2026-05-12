@@ -12,24 +12,23 @@ import {
   Area
 } from 'recharts';
 
-const data = [
-  { name: 'Mon', revenue: 4000 },
-  { name: 'Tue', revenue: 3000 },
-  { name: 'Wed', revenue: 2000 },
-  { name: 'Thu', revenue: 2780 },
-  { name: 'Fri', revenue: 1890 },
-  { name: 'Sat', revenue: 2390 },
-  { name: 'Sun', revenue: 3490 }
-];
+type RevenueChartProps = {
+  data: Array<{ name: string; revenue: number }>;
+};
 
-export function RevenueChart() {
+export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card className="col-span-1 lg:col-span-2">
       <CardHeader>
-        <CardTitle>Revenue Overview</CardTitle>
+        <CardTitle>Approved Ratings Distribution</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
+          {data.length === 0 ? (
+            <div className="h-full w-full flex items-center justify-center text-sm text-slate-500">
+              No rating data available.
+            </div>
+          ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}
@@ -61,7 +60,7 @@ export function RevenueChart() {
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: '#64748b', fontSize: 12 }}
-                tickFormatter={(value) => `$${value}`} 
+                tickFormatter={(value) => `${value}`} 
               />
               <Tooltip
                 contentStyle={{
@@ -81,6 +80,7 @@ export function RevenueChart() {
               />
             </AreaChart>
           </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

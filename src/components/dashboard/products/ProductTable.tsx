@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   Table,
   TableBody,
@@ -7,25 +7,38 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from '@/components/ui/badge';
+import { Badge, badgeVariants } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
-import { products } from '@/data/mockData';
+import type { VariantProps } from 'class-variance-authority';
+import { Edit, Eye, Trash2 } from 'lucide-react';
+import type { ProductSummary } from '@/lib/product-api';
 
-export function ProductTable() {
-  const getStockStatus = (status: string) => {
-    switch (status) {
-      case 'In Stock':
-        return 'success';
-      case 'Low Stock':
-        return 'warning';
-      case 'Out of Stock':
-        return 'danger';
-      default:
-        return 'default';
-    }
-  };
+type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
 
+type ProductTableProps = {
+  products: ProductSummary[];
+  onView: (product: ProductSummary) => void;
+  onEdit: (product: ProductSummary) => void;
+  onDelete: (product: ProductSummary) => void;
+};
+
+function getStockBadge(stock: number | null | undefined): BadgeVariant {
+  if (!stock || stock <= 0) return 'danger';
+  if (stock <= 10) return 'warning';
+  return 'success';
+}
+
+function getStockLabel(stock: number | null | undefined) {
+  if (!stock || stock <= 0) return 'Out of stock';
+  if (stock <= 10) return 'Low stock';
+  return 'In stock';
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('vi-VN').format(value) + ' VND';
+}
+
+export function ProductTable({ products, onView, onEdit, onDelete }: ProductTableProps) {
   return (
     <div className="rounded-md border border-slate-200 dark:border-slate-800">
       <Table>
@@ -33,10 +46,11 @@ export function ProductTable() {
           <TableRow>
             <TableHead className="w-[100px]">Image</TableHead>
             <TableHead>Product Name</TableHead>
+            <TableHead>SKU</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Stock</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Best Seller</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -45,29 +59,49 @@ export function ProductTable() {
             <TableRow key={product.id}>
               <TableCell>
                 <img
-                  src={product.image}
+                  src={product.imageUrl || product.thumbnail || '/images/product-root.png'}
                   alt={product.name}
                   className="h-10 w-10 rounded-md object-cover bg-slate-100"
                 />
               </TableCell>
               <TableCell className="font-medium">{product.name}</TableCell>
-              <TableCell>{product.category}</TableCell>
-              <TableCell>{product.price.toLocaleString()}đ</TableCell>
-              <TableCell>{product.stock}</TableCell>
+              <TableCell>{product.sku || '-'}</TableCell>
+              <TableCell>{product.category?.name || '-'}</TableCell>
+              <TableCell>{formatCurrency(product.price)}</TableCell>
               <TableCell>
-                <Badge variant={getStockStatus(product.status) as any}>
-                  {product.status}
+                <Badge variant={getStockBadge(product.stock)}>
+                  {getStockLabel(product.stock)} ({product.stock ?? 0})
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant={product.isBestSeller ? 'success' : 'secondary'}>
+                  {product.isBestSeller ? 'Yes' : 'No'}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    className="h-8 w-8 text-slate-700"
+                    onClick={() => onView(product)}
+                  >
+                    <Eye size={16} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    className="h-8 w-8 text-slate-700"
+                    onClick={() => onEdit(product)}
+                  >
                     <Edit size={16} />
                   </Button>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-red-500 hover:text-red-600">
+                    variant="destructive"
+                    size="icon-sm"
+                    className="h-8 w-8"
+                    onClick={() => onDelete(product)}
+                  >
                     <Trash2 size={16} />
                   </Button>
                 </div>

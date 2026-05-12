@@ -23,6 +23,8 @@ export type ProductSummary = {
   ginsengAge?: string | null;
   isBestSeller?: boolean;
   category?: CategorySummary | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type ProductListResponse = {
@@ -130,6 +132,8 @@ function sanitizeProduct(value: unknown): ProductSummary | null {
     ginsengAge: typeof item.ginsengAge === "string" ? item.ginsengAge : null,
     isBestSeller: typeof item.isBestSeller === "boolean" ? item.isBestSeller : false,
     category: sanitizeCategorySummary(item.category),
+    createdAt: typeof item.createdAt === "string" ? item.createdAt : undefined,
+    updatedAt: typeof item.updatedAt === "string" ? item.updatedAt : undefined,
   };
 }
 
