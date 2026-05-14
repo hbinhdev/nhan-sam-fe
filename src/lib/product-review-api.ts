@@ -1,4 +1,6 @@
-﻿export type ProductReview = {
+﻿import { getAuthSession } from "@/lib/auth-api";
+
+export type ProductReview = {
   id: string;
   rating: number;
   comment: string;
@@ -35,7 +37,6 @@ export type GetProductReviewsParams = {
 export type CreateProductReviewPayload = {
   rating: number;
   comment: string;
-  reviewerName: string;
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001/api";
@@ -200,7 +201,7 @@ export async function getProductReviews(
 
   return {
     data,
-    total: typeof raw.total === "number" ? raw.total : 0,
+    total: typeof raw.total === "number" ? raw.total : data.length,
     page: typeof raw.page === "number" ? raw.page : params?.page ?? 1,
     limit: typeof raw.limit === "number" ? raw.limit : params?.limit ?? 10,
   };
@@ -228,9 +229,16 @@ export async function getProductReviewSummary(productId: string): Promise<Produc
 export async function createProductReview(
   productId: string,
   payload: CreateProductReviewPayload,
+  accessToken?: string | null,
 ): Promise<boolean> {
   if (!productId) {
     throw new Error("Thiếu mã sản phẩm");
+  }
+
+  const session = getAuthSession();
+  const token = accessToken || session?.access_token || "";
+  if (!token) {
+    throw new Error("Vui lòng đăng nhập để đánh giá sản phẩm.");
   }
 
   let response: Response;
@@ -240,6 +248,7 @@ export async function createProductReview(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });
@@ -248,6 +257,28 @@ export async function createProductReview(
   }
 
   if (!response.ok) {
+    let apiMessage = "";
+    try {
+      const data = (await response.json()) as { message?: string | string[] };
+      const rawMessage = data?.message;
+      const message = Array.isArray(rawMessage) ? rawMessage[0] : rawMessage;
+      if (typeof message === "string" && message.trim()) {
+        apiMessage = message.trim();
+      }
+    } catch {
+      // Fallback to status-based errors below.
+    }
+
+    if (response.status === 401) {
+      throw new Error("Vui lòng đăng nhập để đánh giá sản phẩm.");
+    }
+    if (response.status === 409) {
+      throw new Error(apiMessage || "Bạn đã đánh giá sản phẩm này rồi.");
+    }
+    if (apiMessage) {
+      throw new Error(apiMessage);
+    }
+
     throw new Error("Gửi đánh giá thất bại. Vui lòng thử lại.");
   }
 

@@ -126,6 +126,9 @@ export default async function ProductDetailPage({
           price={formatCurrencyVND(product.price)}
           origin={product.origin || undefined}
           brand={product.brand || undefined}
+          sku={product.sku}
+          averageRating={reviewSummary?.averageRating ?? 0}
+          totalReviews={reviewSummary?.totalReviews ?? 0}
         />
       </section>
 

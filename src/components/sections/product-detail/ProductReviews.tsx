@@ -1,11 +1,17 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   createProductReview,
+  getProductReviewSummary,
+  getProductReviews,
   type ProductReview,
   type ProductReviewSummary,
 } from "@/lib/product-review-api";
+import { useToast } from "@/components/shared/toast/ToastProvider";
+import { useRouteLoading } from "@/components/shared/routing/RouteLoadingProvider";
+import { useAuth } from "@/components/shared/auth/AuthProvider";
 
 type ProductReviewsProps = {
   productId?: string;
@@ -15,28 +21,69 @@ type ProductReviewsProps = {
 
 type ReviewFormState = {
   rating: number;
-  reviewerName: string;
   comment: string;
 };
 
 const DEFAULT_FORM: ReviewFormState = {
   rating: 5,
-  reviewerName: "",
   comment: "",
 };
 
+const EMPTY_SUMMARY: ProductReviewSummary = {
+  averageRating: 0,
+  totalReviews: 0,
+  ratingCounts: {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+  },
+};
+
 export function ProductReviews({ productId, reviews, summary }: ProductReviewsProps) {
-  const safeReviews = Array.isArray(reviews) ? reviews : [];
-  const visibleReviews = safeReviews.slice(0, 3);
-  const totalReviews = summary?.totalReviews ?? safeReviews.length;
-  const averageRating = summary?.averageRating ?? 0;
+  const router = useRouter();
+  const { showToast } = useToast();
+  const { startRouteLoading } = useRouteLoading();
+  const { session, user, isAuthenticated, isAuthLoading } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [form, setForm] = useState<ReviewFormState>(DEFAULT_FORM);
 
+  const [reviewsState, setReviewsState] = useState<ProductReview[]>(
+    Array.isArray(reviews) ? reviews : [],
+  );
+  const [summaryState, setSummaryState] = useState<ProductReviewSummary>(
+    summary ?? EMPTY_SUMMARY,
+  );
+
+  const totalReviews = summaryState.totalReviews;
+  const averageRating = summaryState.averageRating;
+  const displayAverageRating = totalReviews === 0 ? 5 : averageRating;
+  const isAdmin = user?.role === "ADMIN";
+
+  const visibleReviews = useMemo(() => {
+    return reviewsState.slice(0, 3);
+  }, [reviewsState]);
+
   const openModal = () => {
+    if (isAuthLoading) {
+      return;
+    }
+
+    if (isAdmin) {
+      return;
+    }
+
+    if (!isAuthenticated || !session?.access_token) {
+      showToast("Vui lòng đăng nhập để đánh giá sản phẩm.", "error");
+      startRouteLoading();
+      router.push("/login");
+      return;
+    }
+
     setMessage(null);
     setIsOpen(true);
   };
@@ -48,11 +95,24 @@ export function ProductReviews({ productId, reviews, summary }: ProductReviewsPr
     setIsOpen(false);
   };
 
+  const refreshReviews = async () => {
+    if (!productId) {
+      return;
+    }
+
+    const [reviewsResponse, summaryResponse] = await Promise.all([
+      getProductReviews(productId),
+      getProductReviewSummary(productId),
+    ]);
+
+    setReviewsState(reviewsResponse.data);
+    setSummaryState(summaryResponse);
+  };
+
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage(null);
 
-    const reviewerName = form.reviewerName.trim();
     const comment = form.comment.trim();
     const rating = Number(form.rating);
 
@@ -66,11 +126,6 @@ export function ProductReviews({ productId, reviews, summary }: ProductReviewsPr
       return;
     }
 
-    if (!reviewerName) {
-      setMessage({ type: "error", text: "Vui lòng nhập họ tên." });
-      return;
-    }
-
     if (!comment) {
       setMessage({ type: "error", text: "Vui lòng nhập nội dung đánh giá." });
       return;
@@ -80,21 +135,30 @@ export function ProductReviews({ productId, reviews, summary }: ProductReviewsPr
     try {
       await createProductReview(productId, {
         rating,
-        reviewerName,
         comment,
-      });
+      }, session?.access_token);
+
+      await refreshReviews();
 
       setMessage({
         type: "success",
-        text: "Đánh giá của bạn đã được gửi và đang chờ duyệt.",
+        text: "Đánh giá của bạn đã được gửi thành công.",
       });
+      showToast("Đánh giá của bạn đã được gửi thành công.", "success");
       setForm(DEFAULT_FORM);
+
       setTimeout(() => {
         setIsOpen(false);
       }, 800);
     } catch (error) {
       const text = error instanceof Error ? error.message : "Không thể gửi đánh giá. Vui lòng thử lại.";
-      setMessage({ type: "error", text });
+      if (text.toLowerCase().includes("đã đánh giá")) {
+        showToast("Bạn đã đánh giá sản phẩm này rồi.", "error");
+        setMessage({ type: "error", text: "Bạn đã đánh giá sản phẩm này rồi." });
+      } else {
+        showToast(text, "error");
+        setMessage({ type: "error", text });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -107,18 +171,18 @@ export function ProductReviews({ productId, reviews, summary }: ProductReviewsPr
           <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">Đánh giá thực tế</span>
           <h2 className="text-4xl font-serif text-primary">Tiếng Nói Từ Khách Hàng</h2>
           <p className="text-on-surface-variant">Được tin dùng qua nhiều thế hệ.</p>
-          {totalReviews > 0 ? (
-            <p className="text-sm text-on-surface-variant">
-              {averageRating.toFixed(1)} / 5 • {totalReviews} đánh giá
-            </p>
-          ) : null}
+          <p className="text-sm text-on-surface-variant">
+            {displayAverageRating.toFixed(1)} / 5 • {totalReviews} đánh giá
+          </p>
         </div>
-        <button
-          onClick={openModal}
-          className="h-14 px-10 border-2 border-primary text-primary font-bold text-xs tracking-widest uppercase rounded-xl hover:bg-primary hover:text-on-primary transition-all"
-        >
-          VIẾT ĐÁNH GIÁ
-        </button>
+        {!isAdmin ? (
+          <button
+            onClick={openModal}
+            className="h-14 px-10 border-2 border-primary text-primary font-bold text-xs tracking-widest uppercase rounded-xl hover:bg-primary hover:text-on-primary transition-all"
+          >
+            VIẾT ĐÁNH GIÁ
+          </button>
+        ) : null}
       </div>
 
       {visibleReviews.length > 0 ? (
@@ -145,7 +209,7 @@ export function ProductReviews({ productId, reviews, summary }: ProductReviewsPr
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-2xl font-serif text-primary">Gửi đánh giá</h3>
-                <p className="text-sm text-on-surface-variant mt-1">Đánh giá sẽ hiển thị sau khi được duyệt.</p>
+                <p className="text-sm text-on-surface-variant mt-1">Đánh giá sẽ hiển thị ngay sau khi gửi.</p>
               </div>
               <button
                 onClick={closeModal}
@@ -178,17 +242,6 @@ export function ProductReviews({ productId, reviews, summary }: ProductReviewsPr
                     );
                   })}
                 </div>
-              </label>
-
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-semibold text-primary">Họ tên</span>
-                <input
-                  type="text"
-                  required
-                  value={form.reviewerName}
-                  onChange={(e) => setForm((prev) => ({ ...prev, reviewerName: e.target.value }))}
-                  className="h-12 px-4 border border-outline-variant/40 rounded-xl focus:outline-none focus:border-primary"
-                />
               </label>
 
               <label className="flex flex-col gap-2">
