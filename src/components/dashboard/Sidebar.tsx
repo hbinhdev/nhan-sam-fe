@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
+  FolderTree,
   ShoppingCart,
   Users,
   CreditCard,
@@ -36,6 +37,11 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
       to: '/dashboard/products',
       icon: Package,
       label: 'Products'
+    },
+    {
+      to: '/dashboard/categories',
+      icon: FolderTree,
+      label: 'Categories'
     },
     {
       to: '/dashboard/orders',
