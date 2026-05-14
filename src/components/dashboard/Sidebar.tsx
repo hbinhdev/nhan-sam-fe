@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { LoadingLink } from '@/components/shared/routing/RouteLoadingProvider';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -133,7 +133,7 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
           {links.map((link) => {
             const isActive = pathname === link.to;
             return (
-              <Link
+              <LoadingLink
                 key={link.to}
                 href={link.to}
                 className={cn(
@@ -157,7 +157,7 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
                     {link.label}
                   </div>
                 )}
-              </Link>
+              </LoadingLink>
             );
           })}
         </nav>

@@ -1,4 +1,4 @@
-import { ProductCard } from "@/components/shared/ProductCard";
+﻿import { ProductCard } from "@/components/shared/ProductCard";
 import Link from "next/link";
 import {
   FilterSidebar,
@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type ProductsSearchParams = {
+  search?: string;
   page?: string;
   categoryId?: string;
   minPrice?: string;
@@ -65,8 +66,10 @@ export default async function ProductsPage({
   const rawPage = Number(resolvedSearchParams?.page ?? "1");
   const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
   const activeCategoryId = resolvedSearchParams?.categoryId;
+  const activeSearch = resolvedSearchParams?.search?.trim() || undefined;
 
   const activeFilters = {
+    search: activeSearch,
     minPrice: resolvedSearchParams?.minPrice,
     maxPrice: resolvedSearchParams?.maxPrice,
     usagePurpose: resolvedSearchParams?.usagePurpose,
@@ -100,6 +103,7 @@ export default async function ProductsPage({
   try {
     const [filteredResponse, optionsResponse] = await Promise.all([
       getProducts({
+        search: activeSearch,
         page: currentPage,
         limit: PRODUCTS_PER_PAGE,
         categoryId: activeCategoryId,
@@ -111,6 +115,7 @@ export default async function ProductsPage({
         origin: activeFilters.origin,
       }),
       getProducts({
+        search: activeSearch,
         page: 1,
         limit: 200,
       }),
@@ -131,6 +136,7 @@ export default async function ProductsPage({
   const canGoNext = apiPage < totalPages;
 
   const paginationBaseQuery: Record<string, string | undefined> = {
+    search: activeSearch,
     categoryId: activeCategoryId,
     minPrice: activeFilters.minPrice,
     maxPrice: activeFilters.maxPrice,
@@ -178,6 +184,7 @@ export default async function ProductsPage({
         categories={categories}
         activeCategoryId={activeCategoryId}
         currentQuery={{
+          search: activeSearch,
           categoryId: activeCategoryId,
           minPrice: activeFilters.minPrice,
           maxPrice: activeFilters.maxPrice,
@@ -314,3 +321,4 @@ function PaginationButton({
     </Link>
   );
 }
+

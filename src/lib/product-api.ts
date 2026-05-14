@@ -35,6 +35,7 @@ export type ProductListResponse = {
 };
 
 export type ProductFilterParams = {
+  search?: string;
   page?: number;
   limit?: number;
   categoryId?: string;
@@ -154,6 +155,7 @@ async function safeFetch(url: string) {
 export async function getProducts(params?: ProductFilterParams) {
   const response = await safeFetch(
     `${API_BASE_URL}/products${buildQuery({
+      search: params?.search,
       page: params?.page,
       limit: params?.limit,
       categoryId: params?.categoryId,

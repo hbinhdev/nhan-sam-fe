@@ -26,7 +26,8 @@ export type RegisterPayload = {
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001/api";
-const AUTH_STORAGE_KEY = "customer_auth_session";
+export const AUTH_STORAGE_KEY = "customer_auth_session";
+export const AUTH_SESSION_CHANGED_EVENT = "customer-auth-session-changed";
 
 function resolveApiBaseUrl() {
   const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -176,12 +177,25 @@ export async function register(payload: RegisterPayload): Promise<AuthResponse> 
   return parseAuthResponse(response, "Đăng ký thất bại. Vui lòng thử lại.");
 }
 
+function notifyAuthSessionChanged(session: AuthResponse | null) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent<AuthResponse | null>(AUTH_SESSION_CHANGED_EVENT, {
+      detail: session,
+    }),
+  );
+}
+
 export function storeAuthSession(data: AuthResponse) {
   if (typeof window === "undefined") {
     return;
   }
 
   window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
+  notifyAuthSessionChanged(data);
 }
 
 export function getAuthSession(): AuthResponse | null {
@@ -217,4 +231,5 @@ export function clearAuthSession() {
   }
 
   window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  notifyAuthSessionChanged(null);
 }

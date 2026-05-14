@@ -165,3 +165,12 @@
   background-size: 24px 24px;
   opacity: 0.03;
 }
+
+@keyframes route-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(420%);
+  }
+}

@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { useToast } from "@/components/shared/toast/ToastProvider";
 import { cn } from "@/lib/utils";
-import { getAuthSession, login, register, storeAuthSession } from "@/lib/auth-api";
+import { login, register, storeAuthSession } from "@/lib/auth-api";
+import { useAuth } from "@/components/shared/auth/AuthProvider";
+import { PageLoading } from "@/components/shared/loading/PageLoading";
+import { useRouteLoading } from "@/components/shared/routing/RouteLoadingProvider";
 
 type AuthMode = "login" | "register";
 
@@ -15,10 +18,12 @@ const VIETNAMESE_PHONE_REGEX = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
+  const { isAuthenticated, isAuthLoading, user } = useAuth();
+  const { startRouteLoading } = useRouteLoading();
 
   const [mode, setMode] = useState<AuthMode>("login");
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -33,15 +38,21 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const session = getAuthSession();
-
-    if (session?.access_token && session.user) {
-      router.replace("/");
+    if (isAuthLoading || !isAuthenticated) {
       return;
     }
 
-    setIsAuthChecked(true);
-  }, [router]);
+    const requestedRedirect = searchParams.get("redirect");
+    if (requestedRedirect && requestedRedirect.startsWith("/") && !requestedRedirect.startsWith("//")) {
+      startRouteLoading();
+      router.replace(requestedRedirect);
+      return;
+    }
+
+    const isAdmin = user?.role === "ADMIN";
+    startRouteLoading();
+    router.replace(isAdmin ? "/dashboard" : "/");
+  }, [isAuthLoading, isAuthenticated, router, searchParams, startRouteLoading, user?.role]);
 
   function switchMode(nextMode: AuthMode) {
     setMode(nextMode);
@@ -122,8 +133,16 @@ export default function LoginPage() {
 
       storeAuthSession(authData);
       showToast("Đăng nhập thành công.", "success");
-      router.push("/");
-      router.refresh();
+      const redirectPath = searchParams.get("redirect");
+      if (redirectPath && redirectPath.startsWith("/") && !redirectPath.startsWith("//")) {
+        startRouteLoading();
+        router.push(redirectPath);
+        return;
+      }
+
+      const isAdmin = authData.user.role === "ADMIN";
+      startRouteLoading();
+      router.push(isAdmin ? "/dashboard" : "/");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Đăng nhập thất bại. Vui lòng thử lại.";
       setErrorMessage(message);
@@ -165,8 +184,8 @@ export default function LoginPage() {
       setConfirmPassword("");
 
       showToast("Đăng ký thành công.", "success");
+      startRouteLoading();
       router.push("/");
-      router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Đăng ký thất bại. Vui lòng thử lại.";
       setErrorMessage(message);
@@ -176,8 +195,16 @@ export default function LoginPage() {
     }
   }
 
-  if (!isAuthChecked) {
-    return null;
+  if (isAuthLoading || isAuthenticated) {
+    return (
+      <main className="py-24 px-6">
+        <section className="max-w-[1280px] mx-auto">
+          <div className="mx-auto max-w-[620px] rounded-2xl border border-outline-variant/30 bg-white p-6 shadow-xl">
+            <PageLoading message="Đang tải..." className="min-h-[180px]" />
+          </div>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -278,7 +305,7 @@ export default function LoginPage() {
                   isSubmitting && "opacity-70 cursor-not-allowed"
                 )}
               >
-                {isSubmitting ? "ĐANG XỬ LÝ..." : "Đăng nhập"}
+                {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
               </button>
             </form>
           ) : (
@@ -370,7 +397,7 @@ export default function LoginPage() {
                   isSubmitting && "opacity-70 cursor-not-allowed"
                 )}
               >
-                {isSubmitting ? "ĐANG XỬ LÝ..." : "Tạo tài khoản"}
+                {isSubmitting ? "Đang đăng ký..." : "Tạo tài khoản"}
               </button>
             </form>
           )}

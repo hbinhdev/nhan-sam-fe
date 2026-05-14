@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { AuthHeaderActions } from "@/components/shared/auth/AuthHeaderActions";
+import { AuthHeaderMenu } from "@/components/shared/auth/AuthHeaderMenu";
+import { LoadingLink } from "@/components/shared/routing/RouteLoadingProvider";
 
 export default function MarketingLayout({
   children,
@@ -12,12 +12,12 @@ export default function MarketingLayout({
       {/* TopAppBar */}
       <header className="bg-white dark:bg-stone-950 border-b border-yellow-600/20 dark:border-yellow-900/30 sticky top-0 z-50">
         <div className="flex justify-between items-center w-full px-12 h-20 max-w-screen-2xl mx-auto">
-          <Link
+          <LoadingLink
             href="/"
             className="text-2xl font-serif font-bold text-primary dark:text-red-500 uppercase tracking-widest"
           >
             Heritage Ginseng
-          </Link>
+          </LoadingLink>
 
           <nav className="hidden md:flex items-center space-x-8">
             <NavLink href="/">Trang Chủ</NavLink>
@@ -36,7 +36,7 @@ export default function MarketingLayout({
               MUA NGAY
             </Link> */}
             <AuthHeaderActions />
-            <Link
+            <LoadingLink
               href="/cart"
               className="flex items-center focus:outline-none hover:text-primary/70 transition-all duration-300 relative"
             >
@@ -46,10 +46,8 @@ export default function MarketingLayout({
               >
                 shopping_cart
               </span>
-            </Link>
-            <button className="flex items-center focus:outline-none hover:text-primary/70 transition-all duration-300">
-              <span className="material-symbols-outlined">person</span>
-            </button>
+            </LoadingLink>
+            <AuthHeaderMenu />
           </div>
         </div>
       </header>
@@ -87,12 +85,12 @@ function NavLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link
+    <LoadingLink
       href={href}
       className="font-serif text-sm tracking-wide uppercase text-stone-600 dark:text-stone-400 hover:text-primary transition-colors"
     >
       {children}
-    </Link>
+    </LoadingLink>
   );
 }
 
@@ -104,11 +102,11 @@ function FooterLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link
+    <LoadingLink
       href={href}
       className="font-serif text-xs tracking-tighter text-stone-500 dark:text-stone-400 hover:text-yellow-700 underline transition-all"
     >
       {children}
-    </Link>
+    </LoadingLink>
   );
 }
