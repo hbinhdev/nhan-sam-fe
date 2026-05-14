@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
+  FileText,
   ShoppingCart,
   Users,
   CreditCard,
@@ -42,6 +43,11 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
       to: '/dashboard/categories',
       icon: FolderTree,
       label: 'Categories'
+    },
+    {
+      to: '/dashboard/policies',
+      icon: FileText,
+      label: 'Policies'
     },
     {
       to: '/dashboard/orders',

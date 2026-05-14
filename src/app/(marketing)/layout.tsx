@@ -1,4 +1,4 @@
-import { AuthHeaderActions } from "@/components/shared/auth/AuthHeaderActions";
+﻿import { AuthHeaderActions } from "@/components/shared/auth/AuthHeaderActions";
 import { AuthHeaderMenu } from "@/components/shared/auth/AuthHeaderMenu";
 import { LoadingLink } from "@/components/shared/routing/RouteLoadingProvider";
 
@@ -8,37 +8,30 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-surface selection:bg-primary-fixed selection:text-primary">
-      {/* TopAppBar */}
-      <header className="bg-white dark:bg-stone-950 border-b border-yellow-600/20 dark:border-yellow-900/30 sticky top-0 z-50">
-        <div className="flex justify-between items-center w-full px-12 h-20 max-w-screen-2xl mx-auto">
+    <div className="flex min-h-screen flex-col bg-surface selection:bg-primary-fixed selection:text-primary">
+      <header className="sticky top-0 z-50 border-b border-yellow-600/20 bg-white dark:border-yellow-900/30 dark:bg-stone-950">
+        <div className="mx-auto flex h-20 w-full max-w-screen-2xl items-center justify-between px-12">
           <LoadingLink
             href="/"
-            className="text-2xl font-serif font-bold text-primary dark:text-red-500 uppercase tracking-widest"
+            className="text-2xl font-serif font-bold uppercase tracking-widest text-primary dark:text-red-500"
           >
             Heritage Ginseng
           </LoadingLink>
 
-          <nav className="hidden md:flex items-center space-x-8">
-            <NavLink href="/">Trang Chủ</NavLink>
-            <NavLink href="/products">Sản Phẩm</NavLink>
-            <NavLink href="#">Câu Chuyện Thương Hiệu</NavLink>
-            <NavLink href="#">Kiến Thức</NavLink>
-            <NavLink href="#">Chứng Nhận</NavLink>
-            <NavLink href="/contact">Liên Hệ</NavLink>
+          <nav className="hidden items-center space-x-8 md:flex">
+            <NavLink href="/">Trang chủ</NavLink>
+            <NavLink href="/products">Sản phẩm</NavLink>
+            <NavLink href="#">Câu chuyện thương hiệu</NavLink>
+            <NavLink href="#">Kiến thức</NavLink>
+            <NavLink href="#">Chứng nhận</NavLink>
+            <NavLink href="/contact">Liên hệ</NavLink>
           </nav>
 
           <div className="flex items-center space-x-6 text-primary dark:text-red-500">
-            {/* <Link 
-              href="/cart" 
-              className="hidden lg:flex bg-primary text-on-primary px-6 h-11 items-center rounded-xl text-label-caps text-xs tracking-widest hover:bg-primary-container transition-all"
-            >
-              MUA NGAY
-            </Link> */}
             <AuthHeaderActions />
             <LoadingLink
               href="/cart"
-              className="flex items-center focus:outline-none hover:text-primary/70 transition-all duration-300 relative"
+              className="relative flex items-center transition-all duration-300 hover:text-primary/70 focus:outline-none"
             >
               <span
                 className="material-symbols-outlined"
@@ -54,22 +47,23 @@ export default function MarketingLayout({
 
       <main className="flex-1">{children}</main>
 
-      {/* Footer */}
-      <footer className="bg-stone-100 dark:bg-stone-900 border-t border-yellow-600/10">
-        <div className="flex flex-col md:flex-row justify-between items-center w-full px-12 py-12 max-w-screen-2xl mx-auto">
+      <footer className="border-t border-yellow-600/10 bg-stone-100 dark:bg-stone-900">
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-between px-12 py-12 md:flex-row">
           <div className="mb-8 md:mb-0">
-            <div className="text-lg font-serif font-bold text-primary dark:text-red-500 uppercase tracking-widest mb-4">
+            <div className="mb-4 text-lg font-serif font-bold uppercase tracking-widest text-primary dark:text-red-500">
               Heritage Ginseng
             </div>
             <p className="font-serif text-xs tracking-tighter text-stone-500 dark:text-stone-400">
               © 2024 Heritage Ginseng. Gìn giữ tinh hoa, nâng tầm sức khỏe.
             </p>
           </div>
+
           <div className="flex flex-wrap justify-center gap-8">
-            <FooterLink href="#">Chính sách bảo mật</FooterLink>
-            <FooterLink href="#">Điều khoản dịch vụ</FooterLink>
-            <FooterLink href="#">Hệ thống cửa hàng</FooterLink>
-            <FooterLink href="#">Chứng nhận chất lượng</FooterLink>
+            <FooterLink href="/policies/privacy">Chính sách bảo mật</FooterLink>
+            <FooterLink href="/policies/return">Chính sách đổi trả</FooterLink>
+            <FooterLink href="/policies/shipping">Chính sách vận chuyển</FooterLink>
+            <FooterLink href="/policies/payment">Chính sách thanh toán</FooterLink>
+            <FooterLink href="/policies/terms">Điều khoản và điều kiện</FooterLink>
           </div>
         </div>
       </footer>
@@ -87,7 +81,7 @@ function NavLink({
   return (
     <LoadingLink
       href={href}
-      className="font-serif text-sm tracking-wide uppercase text-stone-600 dark:text-stone-400 hover:text-primary transition-colors"
+      className="font-serif text-sm uppercase tracking-wide text-stone-600 transition-colors hover:text-primary dark:text-stone-400"
     >
       {children}
     </LoadingLink>
@@ -104,7 +98,7 @@ function FooterLink({
   return (
     <LoadingLink
       href={href}
-      className="font-serif text-xs tracking-tighter text-stone-500 dark:text-stone-400 hover:text-yellow-700 underline transition-all"
+      className="font-serif text-xs tracking-tighter text-stone-500 underline transition-all hover:text-yellow-700 dark:text-stone-400"
     >
       {children}
     </LoadingLink>
