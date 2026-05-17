@@ -7,6 +7,7 @@ type RichTextEditorProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  onUploadImage?: (file: File) => Promise<string>;
 };
 
 type EditorCommand = "bold" | "italic" | "underline" | "insertUnorderedList" | "insertOrderedList";
@@ -15,8 +16,9 @@ function runCommand(command: EditorCommand) {
   document.execCommand(command, false);
 }
 
-export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, onUploadImage }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -25,6 +27,36 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       editor.innerHTML = value;
     }
   }, [value]);
+
+  const handleInsertImageByUrl = () => {
+    const url = window.prompt("Enter image URL");
+    if (!url) return;
+    if (!editorRef.current) return;
+
+    editorRef.current.focus();
+    document.execCommand("insertImage", false, url.trim());
+    onChange(editorRef.current.innerHTML);
+  };
+
+  const handlePickImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleUploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file || !onUploadImage || !editorRef.current) return;
+
+    try {
+      const url = await onUploadImage(file);
+      editorRef.current.focus();
+      document.execCommand("insertImage", false, url);
+      onChange(editorRef.current.innerHTML);
+    } catch {
+      // Keep editor usable even if image upload fails.
+    }
+  };
 
   return (
     <div className="rounded-lg border border-slate-300 bg-white">
@@ -54,6 +86,19 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
         >
           Number List
         </Button>
+        <Button type="button" variant="outline" className="h-8 px-3 text-xs" onClick={handleInsertImageByUrl}>
+          Insert Image URL
+        </Button>
+        <Button type="button" variant="outline" className="h-8 px-3 text-xs" onClick={handlePickImage}>
+          Upload Image
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/jpg,image/webp"
+          className="hidden"
+          onChange={handleUploadImage}
+        />
       </div>
       <div
         ref={editorRef}

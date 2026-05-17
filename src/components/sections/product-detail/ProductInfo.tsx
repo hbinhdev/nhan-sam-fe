@@ -1,6 +1,6 @@
-type ProductInfoProps = {
+﻿type ProductInfoProps = {
   name?: string;
-  description?: string;
+  shortDescription?: string;
   price?: string;
   origin?: string;
   brand?: string;
@@ -10,9 +10,10 @@ type ProductInfoProps = {
 };
 
 export function ProductInfo({
-  name = "Imperial Heritage Red Ginseng",
-  description = "A masterfully aged concentrate derived from the heart of the Geumsan mountains. Preserved through ancient steaming techniques to maximize ginsenoside potency.",
-  price = "4.250.000đ",
+  name = 'Imperial Heritage Red Ginseng',
+  shortDescription =
+    'A masterfully aged concentrate derived from the heart of the Geumsan mountains. Preserved through ancient steaming techniques to maximize ginsenoside potency.',
+  price = '4.250.000đ',
   origin,
   brand,
   sku,
@@ -30,9 +31,9 @@ export function ProductInfo({
     <div className="md:col-span-7 flex flex-col gap-8 sticky top-32">
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3 text-secondary text-[11px] font-bold tracking-[0.2em] uppercase">
-          <span>{origin || "6-Year Old"}</span>
+          <span>{origin || '6-Year Old'}</span>
           <span className="w-1 h-1 bg-secondary rounded-full"></span>
-          <span>{brand || "Premium Extract"}</span>
+          <span>{brand || 'Premium Extract'}</span>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-serif text-primary leading-tight">{name}</h1>
@@ -42,7 +43,7 @@ export function ProductInfo({
             {stars.map((active, i) => (
               <span
                 key={i}
-                className={`material-symbols-outlined text-[20px] ${active ? "fill-1" : "fill-0 opacity-40"}`}
+                className={`material-symbols-outlined text-[20px] ${active ? 'fill-1' : 'fill-0 opacity-40'}`}
               >
                 star
               </span>
@@ -53,10 +54,10 @@ export function ProductInfo({
           </span>
         </div>
 
-        <p className="text-lg text-on-surface-variant leading-relaxed">{description}</p>
+        <p className="text-lg text-on-surface-variant leading-relaxed">{shortDescription}</p>
 
         <div className="text-sm text-on-surface-variant">
-          SKU: <span className="font-semibold text-primary">{sku?.trim() || "Đang cập nhật"}</span>
+          SKU: <span className="font-semibold text-primary">{sku?.trim() || 'Đang cập nhật'}</span>
         </div>
 
         <div className="text-3xl md:text-4xl font-serif text-primary border-y border-outline-variant/30 py-8 my-2">{price}</div>

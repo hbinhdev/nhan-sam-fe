@@ -13,6 +13,7 @@ import {
 import { useToast } from "@/components/shared/toast/ToastProvider";
 import { BLOG_CATEGORY_OPTIONS, normalizeBlogContentToHtml, slugifyVietnamese } from "@/lib/blog-helpers";
 import { RichTextEditor } from "@/components/dashboard/blogs/RichTextEditor";
+import { uploadImage } from "@/lib/admin-upload-api";
 
 type FormMode = "create" | "edit";
 
@@ -230,6 +231,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
                 value={form.content}
                 onChange={(nextValue) => setForm((prev) => ({ ...prev, content: nextValue }))}
                 placeholder="Nhập nội dung bài viết..."
+                onUploadImage={uploadImage}
               />
             </div>
 

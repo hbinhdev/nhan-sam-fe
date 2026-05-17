@@ -13,12 +13,15 @@ import {
   type AdminProductPayload,
 } from "@/lib/admin-product-api";
 import { uploadImage, uploadVideo } from "@/lib/admin-upload-api";
+import { RichTextEditor } from "@/components/dashboard/blogs/RichTextEditor";
+import { normalizeBlogContentToHtml } from "@/lib/blog-helpers";
 
 type FormMode = "create" | "edit";
 
 type ProductFormState = {
   sku: string;
   name: string;
+  shortDescription: string;
   description: string;
   price: string;
   stock: string;
@@ -43,6 +46,7 @@ interface ProductFormProps {
 const EMPTY_FORM: ProductFormState = {
   sku: "",
   name: "",
+  shortDescription: "",
   description: "",
   price: "",
   stock: "",
@@ -77,7 +81,8 @@ function mapProductToForm(product: ProductSummary): ProductFormState {
   return {
     sku: product.sku ?? "",
     name: product.name,
-    description: product.description ?? "",
+    shortDescription: product.shortDescription ?? "",
+    description: normalizeBlogContentToHtml(product.description ?? ""),
     price: String(product.price ?? ""),
     stock: String(product.stock ?? 0),
     categoryId: product.category?.id ?? "",
@@ -109,6 +114,7 @@ function buildPayload(form: ProductFormState): AdminProductPayload {
   return {
     sku: form.sku.trim() || undefined,
     name: form.name.trim(),
+    shortDescription: form.shortDescription.trim() || undefined,
     description: form.description.trim() || undefined,
     price: Number(form.price),
     stock: form.stock.trim() ? Number(form.stock) : undefined,
@@ -374,11 +380,21 @@ export function ProductForm({ mode, initialData, categories }: ProductFormProps)
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold text-slate-700">Description</label>
+              <label className="text-sm font-semibold text-slate-700">Short Description</label>
               <textarea
-                className="min-h-28 w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                className="min-h-20 w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                value={form.shortDescription}
+                onChange={(e) => setForm((prev) => ({ ...prev, shortDescription: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold text-slate-700">Description</label>
+              <RichTextEditor
                 value={form.description}
-                onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                onChange={(nextValue) => setForm((prev) => ({ ...prev, description: nextValue }))}
+                onUploadImage={uploadImage}
+                placeholder="Enter detailed product description..."
               />
             </div>
 

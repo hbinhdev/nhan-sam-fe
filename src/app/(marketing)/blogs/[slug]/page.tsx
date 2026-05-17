@@ -121,7 +121,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           <div className="h-px w-full bg-outline-variant/30" />
 
           <div
-            className="text-[15px] leading-8 text-on-surface-variant [&_a]:text-primary [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
+            className="text-[15px] leading-8 text-on-surface-variant [&_a]:text-primary [&_a]:underline [&_img]:my-4 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-xl [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
             dangerouslySetInnerHTML={{ __html: normalizeBlogContentToHtml(blog.content) }}
           />
         </div>
