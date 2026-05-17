@@ -12,6 +12,7 @@ import {
   Users,
   CreditCard,
   PhoneCall,
+  House,
   Settings,
   LogOut,
   ChevronLeft,
@@ -70,6 +71,11 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
       to: '/dashboard/consultations',
       icon: PhoneCall,
       label: 'Consultations'
+    },
+    {
+      to: '/dashboard/home-sections',
+      icon: House,
+      label: 'Quản lý trang chủ'
     },
     {
       to: '/dashboard/payments',

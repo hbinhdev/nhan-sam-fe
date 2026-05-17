@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,13 +32,6 @@ function formatDate(date?: string) {
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return "-";
   return parsed.toLocaleString();
-}
-
-function truncateText(value: string, maxLength = 80) {
-  if (value.length <= maxLength) {
-    return value;
-  }
-  return `${value.slice(0, maxLength - 1)}â€¦`;
 }
 
 export default function CategoriesPage() {
@@ -163,8 +156,8 @@ export default function CategoriesPage() {
             Manage product categories.
           </p>
         </div>
-        <Button 
-          onClick={() => router.push("/dashboard/categories/add")} 
+        <Button
+          onClick={() => router.push("/dashboard/categories/add")}
           className="bg-slate-900 text-white hover:bg-slate-800"
         >
           <Plus className="mr-2 h-4 w-4" />
@@ -193,32 +186,33 @@ export default function CategoriesPage() {
           No categories found.
         </div>
       ) : (
-        <div className="rounded-md border border-slate-200 dark:border-slate-800">
-          <Table>
+        <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
+          <Table className="table-fixed min-w-[980px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Created At</TableHead>
-                <TableHead>Updated At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-[16%]">Name</TableHead>
+                <TableHead className="w-[16%]">Slug</TableHead>
+                <TableHead className="w-[34%]">Description</TableHead>
+                <TableHead className="w-[14%] whitespace-nowrap">Created At</TableHead>
+                <TableHead className="w-[14%] whitespace-nowrap">Updated At</TableHead>
+                <TableHead className="w-[120px] text-right whitespace-nowrap">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categories.map((category) => (
                 <TableRow key={category.id}>
-                  <TableCell className="font-medium">{category.name}</TableCell>
-                  <TableCell>{category.slug}</TableCell>
+                  <TableCell className="font-medium break-words">{category.name}</TableCell>
+                  <TableCell className="break-words">{category.slug}</TableCell>
                   <TableCell>
-                    <p className="max-w-xs text-slate-600" title={category.description ?? ""}>
-                      {category.description?.trim()
-                        ? truncateText(category.description.trim(), 100)
-                        : "No description"}
+                    <p
+                      className="text-slate-600 break-words line-clamp-2 leading-5"
+                      title={category.description ?? ""}
+                    >
+                      {category.description?.trim() ? category.description.trim() : "No description"}
                     </p>
                   </TableCell>
-                  <TableCell>{formatDate(category.createdAt)}</TableCell>
-                  <TableCell>{formatDate(category.updatedAt)}</TableCell>
+                  <TableCell className="whitespace-nowrap">{formatDate(category.createdAt)}</TableCell>
+                  <TableCell className="whitespace-nowrap">{formatDate(category.updatedAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button

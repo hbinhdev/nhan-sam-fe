@@ -46,7 +46,11 @@ export function CategoryTabs({
     );
   }
 
-  const baseQueryWithoutCategory = { ...currentQuery, categoryId: undefined };
+  const baseQueryWithoutCategory = {
+    ...currentQuery,
+    categoryId: undefined,
+    categorySlug: undefined,
+  };
 
   return (
     <section className="flex flex-wrap justify-center gap-4">
@@ -56,7 +60,11 @@ export function CategoryTabs({
       {categories.map((category) => (
         <TabLink
           key={category.id}
-          href={buildProductsLink({ ...currentQuery, categoryId: category.id })}
+          href={buildProductsLink({
+            ...currentQuery,
+            categoryId: category.id,
+            categorySlug: undefined,
+          })}
           active={activeCategoryId === category.id}
         >
           {category.name}

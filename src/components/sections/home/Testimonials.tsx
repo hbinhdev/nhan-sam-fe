@@ -1,27 +1,31 @@
-export function Testimonials() {
+﻿type TestimonialsProps = {
+  title?: string | null;
+  subtitle?: string | null;
+  data?: Record<string, unknown> | null;
+};
+
+export function Testimonials({ title, subtitle, data }: TestimonialsProps) {
+  const items = Array.isArray(data?.items)
+    ? data.items.filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    : [];
+
   return (
     <section className="w-full py-24 bg-surface-container-low" id="testimonials">
       <div className="max-w-[1280px] mx-auto px-6">
         <div className="text-center flex flex-col gap-3 mb-16">
-          <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">Chia sẻ từ khách hàng</span>
-          <h2 className="text-3xl md:text-4xl font-serif text-primary">Niềm Tin Qua Thế Hệ</h2>
+          {subtitle ? <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{subtitle}</span> : null}
+          {title ? <h2 className="text-3xl md:text-4xl font-serif text-primary">{title}</h2> : null}
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <TestimonialCard 
-            name="Bác Nguyễn Văn An" 
-            loc="Hà Nội" 
-            quote="Tôi đã sử dụng Cao Hồng Sâm Heritage trong 3 năm qua. Sức khỏe và tinh thần của tôi cải thiện rõ rệt, đặc biệt là giấc ngủ sâu hơn. Một món quà tuyệt vời cho tuổi già." 
-          />
-          <TestimonialCard 
-            name="Chị Mai Phương" 
-            loc="TP. Hồ Chí Minh" 
-            quote="Lịch trình làm việc dày đặc khiến tôi luôn mệt mỏi. Kể từ khi biết đến các dòng sâm năng lượng của Heritage, tôi luôn giữ được sự tỉnh táo và bền bỉ suốt cả ngày." 
-          />
-          <TestimonialCard 
-            name="Anh Quốc Bảo" 
-            loc="Đà Nẵng" 
-            quote="Dịch vụ tư vấn rất chuyên nghiệp và tận tâm. Sản phẩm đóng gói sang trọng, rất phù hợp để làm quà tặng đối tác trong những dịp quan trọng." 
-          />
+          {items.map((item, idx) => (
+            <TestimonialCard
+              key={idx}
+              name={typeof item.name === "string" ? item.name : ""}
+              loc={typeof item.loc === "string" ? item.loc : ""}
+              quote={typeof item.quote === "string" ? item.quote : ""}
+            />
+          ))}
         </div>
       </div>
     </section>

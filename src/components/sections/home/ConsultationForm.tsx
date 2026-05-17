@@ -20,7 +20,17 @@ const HOME_INTEREST_OPTIONS = [
   "Phục hồi sau bệnh",
 ];
 
-export function ConsultationForm() {
+export function ConsultationForm({
+  cms,
+}: {
+  cms?: {
+    ctaTitle?: string | null;
+    ctaSubtitle?: string | null;
+    ctaButtonText?: string | null;
+    formTitle?: string | null;
+    formSubtitle?: string | null;
+  };
+}) {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [interest, setInterest] = useState(HOME_INTEREST_OPTIONS[0]);
@@ -112,8 +122,8 @@ export function ConsultationForm() {
     <>
       <section className="w-full py-24 bg-primary text-on-primary text-center" id="consultation-cta">
         <div className="max-w-[800px] mx-auto px-6 flex flex-col gap-8 items-center">
-          <h2 className="text-3xl md:text-5xl font-serif leading-tight">Bạn cần hỗ trợ chọn sản phẩm phù hợp?</h2>
-          <p className="text-lg opacity-80 leading-relaxed">Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và tư vấn giải pháp sức khỏe tối ưu cho bạn.</p>
+          <h2 className="text-3xl md:text-5xl font-serif leading-tight">{cms?.ctaTitle || "Bạn cần hỗ trợ chọn sản phẩm phù hợp?"}</h2>
+          <p className="text-lg opacity-80 leading-relaxed">{cms?.ctaSubtitle || "Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và tư vấn giải pháp sức khỏe tối ưu cho bạn."}</p>
           <Link
             href="#consultation"
             className={cn(
@@ -121,7 +131,7 @@ export function ConsultationForm() {
               "bg-white text-primary h-14 px-12 rounded-lg text-sm font-bold tracking-widest uppercase hover:bg-surface-variant flex items-center",
             )}
           >
-            NHẬN TƯ VẤN NGAY
+            {cms?.ctaButtonText || "NHẬN TƯ VẤN NGAY"}
           </Link>
         </div>
       </section>
@@ -129,8 +139,8 @@ export function ConsultationForm() {
       <section className="w-full py-24 bg-surface" id="consultation">
         <div className="max-w-[1280px] mx-auto px-6 flex flex-col lg:flex-row gap-20 items-center">
           <div className="w-full lg:w-1/2 flex flex-col gap-6">
-            <h2 className="text-3xl md:text-4xl font-serif text-primary leading-tight">Nhận Tư Vấn Từ Chuyên Gia Sâm</h2>
-            <p className="text-lg text-on-surface-variant leading-relaxed">Để lại thông tin để chúng tôi có thể hỗ trợ bạn chọn lựa sản phẩm phù hợp nhất với thể trạng và nhu cầu sức khỏe của bạn.</p>
+            <h2 className="text-3xl md:text-4xl font-serif text-primary leading-tight">{cms?.formTitle || "Nhận Tư Vấn Từ Chuyên Gia Sâm"}</h2>
+            <p className="text-lg text-on-surface-variant leading-relaxed">{cms?.formSubtitle || "Để lại thông tin để chúng tôi có thể hỗ trợ bạn chọn lựa sản phẩm phù hợp nhất với thể trạng và nhu cầu sức khỏe của bạn."}</p>
             <div className="flex flex-row items-center gap-4 mt-4">
               <div className="w-14 h-14 rounded-full border border-outline text-secondary flex items-center justify-center">
                 <span className="material-symbols-outlined text-2xl">support_agent</span>
