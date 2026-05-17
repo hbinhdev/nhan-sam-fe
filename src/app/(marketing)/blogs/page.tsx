@@ -12,7 +12,7 @@ type BlogsPageProps = {
   searchParams?: Promise<BlogsSearchParams>;
 };
 
-const BLOGS_PER_PAGE = 9;
+const BLOGS_PER_PAGE = 6;
 
 function parsePage(value?: string) {
   const parsed = Number(value ?? "1");
@@ -189,7 +189,26 @@ export default async function BlogsPage({ searchParams }: BlogsPageProps) {
           </section>
 
           {totalPages > 1 ? (
-            <section className="mt-6 flex justify-center gap-2">
+            <section className="mt-12 flex items-center justify-center gap-1 sm:gap-2 border-t border-outline-variant/20 pt-8">
+              {currentPage > 1 ? (
+                <Link
+                  href={buildListLink({
+                    page: currentPage - 1,
+                    search: activeSearch,
+                    category: activeCategory,
+                  })}
+                  className="inline-flex h-10 items-center justify-center rounded-xl border border-outline-variant/40 px-4 text-sm font-semibold text-on-surface-variant transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary active:scale-95 gap-1"
+                >
+                  <span className="text-base">←</span>
+                  <span className="hidden sm:inline">Trước</span>
+                </Link>
+              ) : (
+                <span className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-variant/10 px-4 text-sm font-semibold text-on-surface-variant/40 gap-1">
+                  <span className="text-base">←</span>
+                  <span className="hidden sm:inline">Trước</span>
+                </span>
+              )}
+
               {Array.from({ length: totalPages }, (_, index) => index + 1).map((itemPage) => {
                 const isActive = itemPage === response.page;
                 return (
@@ -202,14 +221,33 @@ export default async function BlogsPage({ searchParams }: BlogsPageProps) {
                     })}
                     className={
                       isActive
-                        ? "inline-flex h-10 min-w-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-semibold text-on-primary"
-                        : "inline-flex h-10 min-w-10 items-center justify-center rounded-lg border border-outline-variant/40 px-3 text-sm font-semibold text-on-surface-variant hover:border-primary hover:text-primary"
+                        ? "inline-flex h-10 min-w-10 scale-105 items-center justify-center rounded-xl bg-primary px-3 text-sm font-bold text-on-primary shadow-md shadow-primary/20 transition-all duration-300"
+                        : "inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-outline-variant/40 px-3 text-sm font-semibold text-on-surface-variant transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary active:scale-95"
                     }
                   >
                     {itemPage}
                   </Link>
                 );
               })}
+
+              {currentPage < totalPages ? (
+                <Link
+                  href={buildListLink({
+                    page: currentPage + 1,
+                    search: activeSearch,
+                    category: activeCategory,
+                  })}
+                  className="inline-flex h-10 items-center justify-center rounded-xl border border-outline-variant/40 px-4 text-sm font-semibold text-on-surface-variant transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary active:scale-95 gap-1"
+                >
+                  <span className="hidden sm:inline">Sau</span>
+                  <span className="text-base">→</span>
+                </Link>
+              ) : (
+                <span className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-variant/10 px-4 text-sm font-semibold text-on-surface-variant/40 gap-1">
+                  <span className="hidden sm:inline">Sau</span>
+                  <span className="text-base">→</span>
+                </span>
+              )}
             </section>
           ) : null}
         </>
