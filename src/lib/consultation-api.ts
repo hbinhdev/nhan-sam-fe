@@ -1,4 +1,4 @@
-﻿export type CreateConsultationPayload = {
+export type CreateConsultationPayload = {
   fullName: string;
   phone: string;
   interest: string;

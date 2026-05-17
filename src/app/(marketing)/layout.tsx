@@ -1,4 +1,4 @@
-﻿import { AuthHeaderActions } from "@/components/shared/auth/AuthHeaderActions";
+import { AuthHeaderActions } from "@/components/shared/auth/AuthHeaderActions";
 import { AuthHeaderMenu } from "@/components/shared/auth/AuthHeaderMenu";
 import { LoadingLink } from "@/components/shared/routing/RouteLoadingProvider";
 
@@ -22,8 +22,7 @@ export default function MarketingLayout({
             <NavLink href="/">Trang chủ</NavLink>
             <NavLink href="/products">Sản phẩm</NavLink>
             <NavLink href="#">Câu chuyện thương hiệu</NavLink>
-            <NavLink href="#">Kiến thức</NavLink>
-            <NavLink href="#">Chứng nhận</NavLink>
+            <NavLink href="/blogs">Kiến thức</NavLink>
             <NavLink href="/contact">Liên hệ</NavLink>
           </nav>
 
@@ -61,9 +60,15 @@ export default function MarketingLayout({
           <div className="flex flex-wrap justify-center gap-8">
             <FooterLink href="/policies/privacy">Chính sách bảo mật</FooterLink>
             <FooterLink href="/policies/return">Chính sách đổi trả</FooterLink>
-            <FooterLink href="/policies/shipping">Chính sách vận chuyển</FooterLink>
-            <FooterLink href="/policies/payment">Chính sách thanh toán</FooterLink>
-            <FooterLink href="/policies/terms">Điều khoản và điều kiện</FooterLink>
+            <FooterLink href="/policies/shipping">
+              Chính sách vận chuyển
+            </FooterLink>
+            <FooterLink href="/policies/payment">
+              Chính sách thanh toán
+            </FooterLink>
+            <FooterLink href="/policies/terms">
+              Điều khoản và điều kiện
+            </FooterLink>
           </div>
         </div>
       </footer>

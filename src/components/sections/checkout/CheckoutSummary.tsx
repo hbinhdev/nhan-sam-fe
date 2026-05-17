@@ -5,74 +5,70 @@ export function CheckoutSummary() {
     <div className="lg:col-span-5">
       <div className="sticky top-32 space-y-8 bg-surface-container-low p-8 border border-yellow-600/10 rounded-xl">
         <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-          <h3 className="text-headline-sm text-primary">Giỏ hàng của bạn</h3>
-          <span className="text-label-caps text-primary">2 SẢN PHẨM</span>
+          <h3 className="text-headline-sm text-primary">Gi? h�ng c?a b?n</h3>
+          <span className="text-label-caps text-primary">2 S?N PH?M</span>
         </div>
 
         <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
-          <SummaryItem 
+          <SummaryItem
             image="https://lh3.googleusercontent.com/aida-public/AB6AXuBzxuY6LmvsmF_IV2_0hso_lQMYSc904HMVErE_gslQiVlyYqyV-UVQSU-YG3gEu2Vbvu1JTXrAAceefpaOaRjvr8wUn7IIeem-29l-tkHYcB3VBKaKucl0witVAQWU43RiBu9l71Gtv_EshkbSieFyns5G3NcpwBw2D_KFmlr9T46DxBsiWS0t_qb0nRzFbgbbGOb1Rm33Vo65e7aYX0miz0I8HhUDV2tieoO2nx0n8FMrK8QUna9Jjt7MMoWn0nsLRFG4Uqusdlz0"
-            name="SÂM TRẮNG NGUYÊN CỦ 6 NĂM TUỔI"
-            subtitle="Hộp Premium 500g"
+            name="S�M TR?NG NGUY�N C? 6 NAM TU?I"
+            subtitle="H?p Premium 500g"
             quantity={1}
-            price="4.250.000đ"
+            price="4.250.000d"
           />
-          <SummaryItem 
+          <SummaryItem
             image="https://lh3.googleusercontent.com/aida-public/AB6AXuDG_XzAb7eZ4dlSHpKxqpdAL17hc0Ya04U0e--iWWVa1qkVrpF7se7Ir7iCaXhxqwGf9Z5uqijPWu2gMEm6eBIHON3W5y5ntoueQaIZtMviHrMnGasazQa5_pcGkMTSrECJ4pC_rrepS4wx6K9JpzuEe4XqGkvLODvksgKHd7EQWOCcqwzExtyqzTa3-HJxw8BjAhII7iiw7PVWNM9wlEg4OTbDRuK3XX33W1HhEwj3bRrCVulZ8aVAbXlKGdW4hGN-oefXjxTYbdks"
-            name="TINH CHẤT SÂM NÚI CÔ ĐẶC"
+            name="TINH CH?T S�M N�I C� �?C"
             subtitle="Chai 30ml"
             quantity={2}
-            price="2.400.000đ"
+            price="2.400.000d"
           />
         </div>
 
-        {/* Voucher */}
         <div className="flex gap-2 pt-4">
-          <input 
-            className="flex-grow bg-transparent border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 text-xs text-label-caps placeholder:text-stone-300" 
-            placeholder="Mã giảm giá" 
+          <input
+            className="flex-grow bg-transparent border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 text-xs text-label-caps placeholder:text-stone-300"
+            placeholder="M� gi?m gi�"
             type="text"
           />
           <button className="px-6 py-2 border border-secondary text-secondary text-label-caps text-[10px] hover:bg-secondary hover:text-white transition-all uppercase rounded-lg">
-            Áp dụng
+            �p d?ng
           </button>
         </div>
 
-        {/* Totals */}
         <div className="space-y-3 pt-6 border-t border-outline-variant">
           <div className="flex justify-between text-xs">
-            <span className="text-on-surface-variant">Tạm tính</span>
-            <span className="font-bold">6.650.000đ</span>
+            <span className="text-on-surface-variant">T?m t�nh</span>
+            <span className="font-bold">6.650.000d</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-on-surface-variant">Phí vận chuyển</span>
-            <span className="text-secondary font-bold">Miễn phí</span>
+            <span className="text-on-surface-variant">Ph� v?n chuy?n</span>
+            <span className="text-secondary font-bold">Mi?n ph�</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-on-surface-variant">Giảm giá</span>
-            <span className="text-error font-bold">-250.000đ</span>
+            <span className="text-on-surface-variant">Gi?m gi�</span>
+            <span className="text-error font-bold">-250.000d</span>
           </div>
           <div className="flex justify-between items-center pt-4 border-t border-primary/20">
-            <span className="text-headline-sm text-primary">Tổng cộng</span>
-            <span className="text-headline-md text-primary font-bold">6.400.000đ</span>
+            <span className="text-headline-sm text-primary">T?ng c?ng</span>
+            <span className="text-headline-md text-primary font-bold">6.400.000d</span>
           </div>
         </div>
 
-        {/* CTA */}
         <button className="w-full py-5 bg-primary text-white text-label-caps text-sm tracking-widest hover:bg-primary-container transition-all flex items-center justify-center gap-3 rounded-xl shadow-lg active:scale-[0.98]">
-          XÁC NHẬN ĐẶT HÀNG
+          X�C NH?N �?T H�NG
           <span className="material-symbols-outlined text-sm">arrow_forward</span>
         </button>
 
-        {/* Trust Signals */}
         <div className="flex flex-col gap-4 pt-4">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-secondary text-base">verified_user</span>
-            <span className="text-[10px] text-label-caps text-on-surface-variant">CAM KẾT CHÍNH HÃNG 100%</span>
+            <span className="text-[10px] text-label-caps text-on-surface-variant">CAM K?T CH�NH H�NG 100%</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-secondary text-base">security</span>
-            <span className="text-[10px] text-label-caps text-on-surface-variant">BẢO MẬT THANH TOÁN SSL</span>
+            <span className="text-[10px] text-label-caps text-on-surface-variant">B?O M?T THANH TO�N SSL</span>
           </div>
         </div>
       </div>

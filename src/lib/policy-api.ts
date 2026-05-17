@@ -1,4 +1,4 @@
-﻿import { getAuthSession } from "@/lib/auth-api";
+import { getAuthSession } from "@/lib/auth-api";
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001/api";
 

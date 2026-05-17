@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getPolicyBySlug } from "@/lib/policy-api";
 
 type PolicySlug = "privacy" | "return" | "shipping" | "payment" | "terms";

@@ -1,4 +1,4 @@
-﻿type ProductInfoProps = {
+type ProductInfoProps = {
   name?: string;
   description?: string;
   price?: string;

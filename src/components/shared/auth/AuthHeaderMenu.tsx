@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -104,7 +104,9 @@ export function AuthHeaderMenu() {
         aria-label="Tài khoản"
       >
         {isAuthLoading ? (
-          <span className="inline-flex h-8 w-8 animate-spin items-center justify-center rounded-full border-2 border-primary/30 border-t-primary dark:border-red-500/40 dark:border-t-red-500" />
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-red-500/20 dark:text-red-400" aria-hidden="true">
+            <span className="material-symbols-outlined text-base leading-none">person</span>
+          </span>
         ) : isAuthenticated ? (
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary dark:bg-red-500/20 dark:text-red-400">
             {getInitial(session)}

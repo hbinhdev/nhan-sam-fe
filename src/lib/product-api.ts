@@ -225,5 +225,5 @@ export async function getProductById(id: string): Promise<ProductSummary | null>
 
 export function formatCurrencyVND(value: number | string | null | undefined) {
   const amount = Number(value ?? 0);
-  return new Intl.NumberFormat("vi-VN").format(Number.isFinite(amount) ? amount : 0) + "đ";
+  return new Intl.NumberFormat("vi-VN").format(Number.isFinite(amount) ? amount : 0) + "Ä‘";
 }

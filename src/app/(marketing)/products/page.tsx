@@ -1,4 +1,4 @@
-﻿import { ProductCard } from "@/components/shared/ProductCard";
+import { ProductCard } from "@/components/shared/ProductCard";
 import Link from "next/link";
 import {
   FilterSidebar,

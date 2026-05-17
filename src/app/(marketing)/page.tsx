@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Hero } from "@/components/sections/home/Hero";
 import { Certifications } from "@/components/sections/home/Certifications";
