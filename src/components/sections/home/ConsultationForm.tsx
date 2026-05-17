@@ -1,13 +1,16 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  ACTIVE_CONSULTATION_MESSAGE,
   CONSULTATION_ERROR_MESSAGE,
   CONSULTATION_SUCCESS_MESSAGE,
+  checkConsultationAvailability,
   createConsultation,
+  isValidVietnamesePhone,
 } from "@/lib/consultation-api";
 
 const HOME_INTEREST_OPTIONS = [
@@ -22,11 +25,56 @@ export function ConsultationForm() {
   const [phone, setPhone] = useState("");
   const [interest, setInterest] = useState(HOME_INTEREST_OPTIONS[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingActive, setIsCheckingActive] = useState(false);
+  const [hasActiveRequest, setHasActiveRequest] = useState(false);
+  const [activeMessage, setActiveMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const normalizedPhone = phone.trim();
+  const canCheckAvailability = useMemo(
+    () => isValidVietnamesePhone(normalizedPhone),
+    [normalizedPhone],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!canCheckAvailability) {
+      setHasActiveRequest(false);
+      setActiveMessage(null);
+      return;
+    }
+
+    setIsCheckingActive(true);
+    void checkConsultationAvailability(normalizedPhone)
+      .then((result) => {
+        if (cancelled) return;
+        setHasActiveRequest(!result.canSubmit);
+        setActiveMessage(result.message);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setHasActiveRequest(false);
+        setActiveMessage(null);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsCheckingActive(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canCheckAvailability, normalizedPhone]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (hasActiveRequest) {
+      setErrorMessage(activeMessage || ACTIVE_CONSULTATION_MESSAGE);
+      return;
+    }
 
     setIsSubmitting(true);
     setSuccessMessage(null);
@@ -42,14 +90,23 @@ export function ConsultationForm() {
       setFullName("");
       setPhone("");
       setInterest(HOME_INTEREST_OPTIONS[0]);
+      setHasActiveRequest(true);
+      setActiveMessage(ACTIVE_CONSULTATION_MESSAGE);
       setSuccessMessage(CONSULTATION_SUCCESS_MESSAGE);
     } catch (error) {
-      const message = error instanceof Error ? error.message : CONSULTATION_ERROR_MESSAGE;
+      const message =
+        error instanceof Error ? error.message : CONSULTATION_ERROR_MESSAGE;
       setErrorMessage(message);
+      if (message.toLowerCase().includes("đang chờ xử lý")) {
+        setHasActiveRequest(true);
+        setActiveMessage(message);
+      }
     } finally {
       setIsSubmitting(false);
     }
   }
+
+  const submitDisabled = isSubmitting || isCheckingActive || hasActiveRequest;
 
   return (
     <>
@@ -61,7 +118,7 @@ export function ConsultationForm() {
             href="#consultation"
             className={cn(
               buttonVariants({ variant: "default" }),
-              "bg-white text-primary h-14 px-12 rounded-lg text-sm font-bold tracking-widest uppercase hover:bg-surface-variant flex items-center"
+              "bg-white text-primary h-14 px-12 rounded-lg text-sm font-bold tracking-widest uppercase hover:bg-surface-variant flex items-center",
             )}
           >
             NHẬN TƯ VẤN NGAY
@@ -94,7 +151,7 @@ export function ConsultationForm() {
                   type="text"
                   value={fullName}
                   onChange={(event) => setFullName(event.target.value)}
-                  disabled={isSubmitting}
+                  disabled={submitDisabled}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -105,7 +162,7 @@ export function ConsultationForm() {
                   type="tel"
                   value={phone}
                   onChange={(event) => setPhone(event.target.value)}
-                  disabled={isSubmitting}
+                  disabled={submitDisabled}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -114,7 +171,7 @@ export function ConsultationForm() {
                   className="w-full border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 bg-transparent"
                   value={interest}
                   onChange={(event) => setInterest(event.target.value)}
-                  disabled={isSubmitting}
+                  disabled={submitDisabled}
                 >
                   {HOME_INTEREST_OPTIONS.map((item) => (
                     <option key={item} value={item}>
@@ -124,28 +181,32 @@ export function ConsultationForm() {
                 </select>
               </div>
 
-              {successMessage && (
-                <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
-                  {successMessage}
-                </p>
-              )}
+              {isCheckingActive && canCheckAvailability ? (
+                <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">Đang kiểm tra trạng thái yêu cầu tư vấn...</p>
+              ) : null}
 
-              {errorMessage && (
-                <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                  {errorMessage}
-                </p>
-              )}
+              {hasActiveRequest && activeMessage ? (
+                <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">{activeMessage}</p>
+              ) : null}
+
+              {successMessage ? (
+                <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">{successMessage}</p>
+              ) : null}
+
+              {errorMessage ? (
+                <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{errorMessage}</p>
+              ) : null}
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={submitDisabled}
                 className={cn(
                   buttonVariants({ variant: "default" }),
                   "w-full bg-primary text-on-primary h-14 rounded-lg text-sm font-bold tracking-widest uppercase flex items-center justify-center",
-                  isSubmitting && "opacity-70 cursor-not-allowed"
+                  submitDisabled && "opacity-70 cursor-not-allowed",
                 )}
               >
-                {isSubmitting ? "ĐANG GỬI..." : "ĐĂNG KÝ TƯ VẤN"}
+                {isSubmitting ? "ĐANG GỬI..." : hasActiveRequest ? "ĐANG CHỜ XỬ LÝ" : "ĐĂNG KÝ TƯ VẤN"}
               </button>
             </form>
           </div>

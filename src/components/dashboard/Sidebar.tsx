@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Users,
   CreditCard,
+  PhoneCall,
   Settings,
   LogOut,
   ChevronLeft,
@@ -64,6 +65,11 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
       to: '/dashboard/customers',
       icon: Users,
       label: 'Customers'
+    },
+    {
+      to: '/dashboard/consultations',
+      icon: PhoneCall,
+      label: 'Consultations'
     },
     {
       to: '/dashboard/payments',
