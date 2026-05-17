@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Noto_Serif, Manrope } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/shared/QueryProvider";
@@ -23,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className="h-full" suppressHydrationWarning>
       <head>
+        <meta charSet="utf-8" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1"

@@ -49,7 +49,7 @@ export function OrderTable() {
               <TableCell>{order.customer}</TableCell>
               <TableCell>{order.date}</TableCell>
               <TableCell>{order.items} items</TableCell>
-              <TableCell>{order.total.toLocaleString()}đ</TableCell>
+              <TableCell>{order.total.toLocaleString()}Ä‘</TableCell>
               <TableCell>
                 <Badge variant={getStatusVariant(order.status) as any}>
                   {order.status}
