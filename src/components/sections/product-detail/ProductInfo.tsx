@@ -1,7 +1,12 @@
-﻿type ProductInfoProps = {
+"use client";
+
+type ProductInfoProps = {
+  id?: string;
   name?: string;
   description?: string;
   price?: string;
+  priceValue?: number;
+  image?: string;
   origin?: string;
   brand?: string;
   sku?: string | null;
@@ -9,22 +14,54 @@
   totalReviews?: number;
 };
 
+import { useState } from "react";
+import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
+
 export function ProductInfo({
+  id,
   name = "Imperial Heritage Red Ginseng",
   description = "A masterfully aged concentrate derived from the heart of the Geumsan mountains. Preserved through ancient steaming techniques to maximize ginsenoside potency.",
   price = "4.250.000đ",
+  priceValue = 4250000,
+  image = "",
   origin,
   brand,
   sku,
   averageRating = 0,
   totalReviews = 0,
 }: ProductInfoProps) {
+  const { addItem } = useCart();
+  const router = useRouter();
+  const [quantity, setQuantity] = useState(1);
+
   const safeAverage = Number.isFinite(averageRating)
     ? Math.max(0, Math.min(5, averageRating))
     : 0;
   const displayAverage = totalReviews === 0 ? 5 : safeAverage;
   const filledStars = Math.round(displayAverage);
   const stars = [1, 2, 3, 4, 5].map((index) => index <= filledStars);
+
+  const handleAddToCart = () => {
+    if (!id) return;
+    addItem({
+      id,
+      name,
+      price: priceValue,
+      image,
+      quantity,
+      sku: sku || undefined,
+      brand: brand || undefined,
+    });
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+    router.push("/cart");
+  };
+
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
 
   return (
     <div className="md:col-span-7 flex flex-col gap-8 sticky top-32">
@@ -64,17 +101,41 @@ export function ProductInfo({
         <div className="flex flex-col gap-4">
           <span className="text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">Số lượng</span>
           <div className="flex items-center border border-outline-variant/50 w-fit rounded-lg overflow-hidden h-14">
-            <button className="px-6 hover:bg-surface-container transition-colors text-xl">-</button>
-            <input className="w-16 text-center border-none focus:ring-0 bg-transparent font-bold text-lg" type="text" defaultValue="1" />
-            <button className="px-6 hover:bg-surface-container transition-colors text-xl">+</button>
+            <button
+              onClick={decrementQuantity}
+              className="px-6 hover:bg-surface-container transition-colors text-xl"
+            >
+              -
+            </button>
+            <input
+              className="w-16 text-center border-none focus:ring-0 bg-transparent font-bold text-lg"
+              type="text"
+              value={quantity}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                if (!isNaN(val) && val > 0) setQuantity(val);
+              }}
+            />
+            <button
+              onClick={incrementQuantity}
+              className="px-6 hover:bg-surface-container transition-colors text-xl"
+            >
+              +
+            </button>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 pt-4">
-          <button className="w-full h-16 bg-primary text-on-primary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-primary-container transition-all shadow-lg active:scale-[0.98]">
+          <button
+            onClick={handleAddToCart}
+            className="w-full h-16 bg-primary text-on-primary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-primary-container transition-all shadow-lg active:scale-[0.98]"
+          >
             THÊM VÀO GIỎ HÀNG
           </button>
-          <button className="w-full h-16 border-2 border-secondary text-secondary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-secondary/5 transition-all">
+          <button
+            onClick={handleBuyNow}
+            className="w-full h-16 border-2 border-secondary text-secondary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-secondary/5 transition-all"
+          >
             MUA NGAY
           </button>
         </div>

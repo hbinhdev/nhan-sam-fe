@@ -1,25 +1,46 @@
+"use client";
+
 import Image from "next/image";
+import { useCart } from "@/context/CartContext";
+import { formatCurrencyVND } from "@/lib/product-api";
+import Link from "next/link";
 
 export function CartItems() {
+  const { items, updateQuantity, removeItem } = useCart();
+
+  if (items.length === 0) {
+    return (
+      <div className="lg:col-span-8 flex flex-col items-center justify-center py-24 bg-surface-container-lowest rounded-xl border border-outline-variant/30">
+        <span className="material-symbols-outlined text-[80px] text-outline-variant mb-6">shopping_basket</span>
+        <h3 className="text-headline-sm text-on-surface mb-4">Giỏ hàng của bạn đang trống</h3>
+        <p className="text-on-surface-variant mb-8 text-center max-w-md px-6">Hãy khám phá bộ sưu tập tinh hoa nhân sâm để bồi bổ sức khỏe cho bạn và gia đình.</p>
+        <Link 
+          href="/products" 
+          className="bg-primary text-on-primary px-8 py-3 rounded-lg text-label-caps hover:bg-primary-container transition-all"
+        >
+          TIẾP TỤC MUA SẮM
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="lg:col-span-8">
       <div className="flex flex-col gap-0">
-        <CartItem 
-          image="https://lh3.googleusercontent.com/aida-public/AB6AXuBwGzPdcsR5_eHFiV-m_V7XALIg8Qaic_6HGfsesRneedBCBd4YMU_BNOF8kOtAgzNjLyUGOhHErfFKjuRVooc1bstTR0vHwFDbKejGayJfA1nIlleeOj06zSj77HxuBCz9CEf-JZCmqPhCDShoxxsA-e_4FnDYqjnK64yAVvnpxIs__2Fqf6IiZZMyTnnJUSnVoQ5CJi-9-_d5dxak9ioioAhRmE5gLqrmgo9GHarbDUFZ5fkcK5xSadPeZZlmGwdUHkoNA8K_mDw7"
-          tag="LIMITED EDITION"
-          name="Nhân Sâm Nguyên Củ 6 Năm"
-          subtitle="Hộp Gỗ Sang Trọng - 300g"
-          price="2.450.000đ"
-          quantity={1}
-        />
-        <CartItem 
-          image="https://lh3.googleusercontent.com/aida-public/AB6AXuDR5jLpGo3Uhc0Es6VgGJrE7sMcrqXz2SKMpgC4Q54PBIuI5LHV85VHka0-KPFGpB8A8xOZgMJzUDa2akrzsf1P9a5maMAbGYTtZWjLNzM6ZTHN2OuQ5Pz3C5gvbhb8s8ww_rFy6nBEmCm01A5iuWZqo4UsuOcaqzkHMkocHjvlUeoIOSzl4M2HvdgSDILQwrbNFvJK-vcnUTpN3uQ68xC45kUzG65b5pSb0854q3gH-BFBOh-OBqYEfQ_ZiacR7Z8IG5f3x1ugufIC"
-          tag="BEST SELLER"
-          name="Cao Hồng Sâm Linh Chi"
-          subtitle="Lọ Thủy Tinh Cao Cấp - 240g"
-          price="1.850.000đ"
-          quantity={2}
-        />
+        {items.map((item) => (
+          <CartItem
+            key={item.id}
+            id={item.id}
+            image={item.image}
+            tag={item.brand || "Heritage"}
+            name={item.name}
+            subtitle={item.sku ? `SKU: ${item.sku}` : ""}
+            price={formatCurrencyVND(item.price)}
+            quantity={item.quantity}
+            onUpdateQuantity={(q) => updateQuantity(item.id, q)}
+            onRemove={() => removeItem(item.id)}
+          />
+        ))}
       </div>
 
       {/* Heritage Experience Section */}
@@ -40,12 +61,28 @@ export function CartItems() {
   );
 }
 
-function CartItem({ image, tag, name, subtitle, price, quantity }: any) {
+function CartItem({ 
+  id, 
+  image, 
+  tag, 
+  name, 
+  subtitle, 
+  price, 
+  quantity,
+  onUpdateQuantity,
+  onRemove
+}: any) {
   return (
     <div className="flex flex-col md:flex-row items-center gap-8 py-8 border-b border-outline-variant/30 group">
       <div className="w-32 h-32 bg-surface-container-low rounded-xl flex-shrink-0 flex items-center justify-center p-4">
         <div className="relative w-full h-full mix-blend-multiply">
-          <Image alt={name} src={image} fill className="object-contain" />
+          {image ? (
+            <Image alt={name} src={image} fill className="object-contain" />
+          ) : (
+            <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+               <span className="material-symbols-outlined text-outline-variant">image</span>
+            </div>
+          )}
         </div>
       </div>
       <div className="flex-grow flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
@@ -56,18 +93,27 @@ function CartItem({ image, tag, name, subtitle, price, quantity }: any) {
         </div>
         
         <div className="flex items-center space-x-4 border border-outline-variant rounded-lg px-3 py-2">
-          <button className="p-1 text-on-surface-variant hover:text-primary transition-colors">
+          <button 
+            onClick={() => onUpdateQuantity(quantity - 1)}
+            className="p-1 text-on-surface-variant hover:text-primary transition-colors"
+          >
             <span className="material-symbols-outlined text-sm">remove</span>
           </button>
           <span className="w-8 text-center font-bold">{quantity}</span>
-          <button className="p-1 text-on-surface-variant hover:text-primary transition-colors">
+          <button 
+            onClick={() => onUpdateQuantity(quantity + 1)}
+            className="p-1 text-on-surface-variant hover:text-primary transition-colors"
+          >
             <span className="material-symbols-outlined text-sm">add</span>
           </button>
         </div>
 
         <div className="text-right">
           <p className="text-xl font-bold text-primary">{price}</p>
-          <button className="text-label-caps text-on-surface-variant hover:text-error transition-colors mt-2 flex items-center gap-1">
+          <button 
+            onClick={onRemove}
+            className="text-label-caps text-on-surface-variant hover:text-error transition-colors mt-2 flex items-center gap-1"
+          >
             <span className="material-symbols-outlined text-xs">delete</span> LOẠI BỎ
           </button>
         </div>
@@ -84,3 +130,4 @@ function CommitmentItem({ icon, text }: { icon: string; text: string }) {
     </div>
   );
 }
+

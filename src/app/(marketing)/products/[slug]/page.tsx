@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/sections/product-detail/ProductGallery";
 import { ProductInfo } from "@/components/sections/product-detail/ProductInfo";
 import { CertificationSection } from "@/components/sections/product-detail/CertificationSection";
@@ -121,9 +121,12 @@ export default async function ProductDetailPage({
           videoUrl={product.videoUrl}
         />
         <ProductInfo
+          id={product.id}
           name={product.name}
           description={product.description || undefined}
           price={formatCurrencyVND(product.price)}
+          priceValue={product.price}
+          image={product.imageUrl || product.thumbnail || ""}
           origin={product.origin || undefined}
           brand={product.brand || undefined}
           sku={product.sku}

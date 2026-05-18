@@ -1,10 +1,11 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Noto_Serif, Manrope } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/shared/QueryProvider";
 import { ToastProvider } from "@/components/shared/toast/ToastProvider";
 import { AuthProvider } from "@/components/shared/auth/AuthProvider";
 import { RouteLoadingProvider } from "@/components/shared/routing/RouteLoadingProvider";
+import { CartProvider } from "@/context/CartContext";
 
 const notoSerif = Noto_Serif({ subsets: ["latin", "vietnamese"], variable: "--font-serif" });
 const manrope = Manrope({ subsets: ["latin", "vietnamese"], variable: "--font-manrope" });
@@ -30,11 +31,14 @@ export default function RootLayout({
       </head>
       <body
         className={`${notoSerif.variable} ${manrope.variable} font-manrope min-h-full flex flex-col antialiased`}
+        suppressHydrationWarning
       >
         <QueryProvider>
           <ToastProvider>
             <RouteLoadingProvider>
-              <AuthProvider>{children}</AuthProvider>
+              <AuthProvider>
+                <CartProvider>{children}</CartProvider>
+              </AuthProvider>
             </RouteLoadingProvider>
           </ToastProvider>
         </QueryProvider>

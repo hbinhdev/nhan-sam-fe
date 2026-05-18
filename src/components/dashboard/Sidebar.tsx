@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Users,
   CreditCard,
+  QrCode,
   Settings,
   LogOut,
   ChevronLeft,
@@ -57,8 +58,14 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
       to: '/dashboard/payments',
       icon: CreditCard,
       label: 'Payments'
+    },
+    {
+      to: '/dashboard/qr-management',
+      icon: QrCode,
+      label: 'Quản lý mã QR'
     }
   ];
+
 
   const sidebarVariants = {
     open: {
