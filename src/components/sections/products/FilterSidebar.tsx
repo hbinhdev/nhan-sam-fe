@@ -76,7 +76,7 @@ export function FilterSidebar({ filters, filterOptions }: FilterSidebarProps) {
 
   return (
     <aside className="lg:col-span-3 flex flex-col gap-10">
-      <FilterSection title="Muc Gia">
+      <FilterSection title="Mức Giá">
         {PRICE_OPTIONS.map((item) => (
           <FilterItem
             key={item.label}

@@ -1,13 +1,16 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import {
+  ACTIVE_CONSULTATION_MESSAGE,
   CONSULTATION_ERROR_MESSAGE,
   CONSULTATION_SUCCESS_MESSAGE,
+  checkConsultationAvailability,
   createConsultation,
+  isValidVietnamesePhone,
 } from "@/lib/consultation-api";
 
 const CONTACT_INTEREST_OPTIONS = [
@@ -23,11 +26,56 @@ export function ContactBento() {
   const [interest, setInterest] = useState(CONTACT_INTEREST_OPTIONS[0]);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingActive, setIsCheckingActive] = useState(false);
+  const [hasActiveRequest, setHasActiveRequest] = useState(false);
+  const [activeMessage, setActiveMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const normalizedPhone = phone.trim();
+  const canCheckAvailability = useMemo(
+    () => isValidVietnamesePhone(normalizedPhone),
+    [normalizedPhone],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!canCheckAvailability) {
+      setHasActiveRequest(false);
+      setActiveMessage(null);
+      return;
+    }
+
+    setIsCheckingActive(true);
+    void checkConsultationAvailability(normalizedPhone)
+      .then((result) => {
+        if (cancelled) return;
+        setHasActiveRequest(!result.canSubmit);
+        setActiveMessage(result.message);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setHasActiveRequest(false);
+        setActiveMessage(null);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsCheckingActive(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canCheckAvailability, normalizedPhone]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (hasActiveRequest) {
+      setErrorMessage(activeMessage || ACTIVE_CONSULTATION_MESSAGE);
+      return;
+    }
 
     setIsSubmitting(true);
     setSuccessMessage(null);
@@ -45,14 +93,23 @@ export function ContactBento() {
       setPhone("");
       setInterest(CONTACT_INTEREST_OPTIONS[0]);
       setMessage("");
+      setHasActiveRequest(true);
+      setActiveMessage(ACTIVE_CONSULTATION_MESSAGE);
       setSuccessMessage(CONSULTATION_SUCCESS_MESSAGE);
     } catch (error) {
-      const messageText = error instanceof Error ? error.message : CONSULTATION_ERROR_MESSAGE;
+      const messageText =
+        error instanceof Error ? error.message : CONSULTATION_ERROR_MESSAGE;
       setErrorMessage(messageText);
+      if (messageText.toLowerCase().includes("đang chờ xử lý")) {
+        setHasActiveRequest(true);
+        setActiveMessage(messageText);
+      }
     } finally {
       setIsSubmitting(false);
     }
   }
+
+  const submitDisabled = isSubmitting || isCheckingActive || hasActiveRequest;
 
   return (
     <section className="py-32 max-w-[1280px] mx-auto px-6">
@@ -97,22 +154,8 @@ export function ContactBento() {
 
           <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <FormInput
-                label="Họ và tên"
-                placeholder="Nguyễn Văn A"
-                type="text"
-                value={fullName}
-                onChange={setFullName}
-                disabled={isSubmitting}
-              />
-              <FormInput
-                label="Số điện thoại"
-                placeholder="090 123 4567"
-                type="tel"
-                value={phone}
-                onChange={setPhone}
-                disabled={isSubmitting}
-              />
+              <FormInput label="Họ và tên" placeholder="Nguyễn Văn A" type="text" value={fullName} onChange={setFullName} disabled={submitDisabled} />
+              <FormInput label="Số điện thoại" placeholder="090 123 4567" type="tel" value={phone} onChange={setPhone} disabled={submitDisabled} />
             </div>
 
             <div className="flex flex-col gap-2">
@@ -121,7 +164,7 @@ export function ContactBento() {
                 className="w-full bg-transparent border-b border-outline-variant focus:border-primary focus:ring-0 px-0 py-2 transition-colors cursor-pointer outline-none"
                 value={interest}
                 onChange={(event) => setInterest(event.target.value)}
-                disabled={isSubmitting}
+                disabled={submitDisabled}
               >
                 {CONTACT_INTEREST_OPTIONS.map((item) => (
                   <option key={item} value={item}>
@@ -138,32 +181,36 @@ export function ContactBento() {
                 placeholder="Tôi muốn tìm hiểu về nhân sâm 6 năm tuổi..."
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
-                disabled={isSubmitting}
+                disabled={submitDisabled}
               />
             </div>
 
-            {successMessage && (
-              <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
-                {successMessage}
-              </p>
-            )}
+            {isCheckingActive && canCheckAvailability ? (
+              <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">Đang kiểm tra trạng thái yêu cầu tư vấn...</p>
+            ) : null}
 
-            {errorMessage && (
-              <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                {errorMessage}
-              </p>
-            )}
+            {hasActiveRequest && activeMessage ? (
+              <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">{activeMessage}</p>
+            ) : null}
+
+            {successMessage ? (
+              <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">{successMessage}</p>
+            ) : null}
+
+            {errorMessage ? (
+              <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{errorMessage}</p>
+            ) : null}
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={submitDisabled}
               className={cn(
                 buttonVariants({ variant: "default" }),
                 "w-full md:w-auto h-14 px-12 bg-primary text-on-primary font-bold text-xs tracking-widest uppercase rounded-xl hover:bg-primary-container transition-all active:scale-95",
-                isSubmitting && "opacity-70 cursor-not-allowed"
+                submitDisabled && "opacity-70 cursor-not-allowed",
               )}
             >
-              {isSubmitting ? "ĐANG GỬI..." : "Gửi yêu cầu tư vấn"}
+              {isSubmitting ? "ĐANG GỬI..." : hasActiveRequest ? "ĐANG CHỜ XỬ LÝ" : "Gửi yêu cầu tư vấn"}
             </button>
           </form>
         </div>
@@ -174,10 +221,7 @@ export function ContactBento() {
 
 function SocialLink({ icon, label }: { icon: string; label: string }) {
   return (
-    <Link
-      href="#"
-      className="flex flex-col items-center justify-center p-10 bg-white border border-outline-variant/30 rounded-2xl hover:border-primary hover:shadow-lg transition-all group"
-    >
+    <Link href="#" className="flex flex-col items-center justify-center p-10 bg-white border border-outline-variant/30 rounded-2xl hover:border-primary hover:shadow-lg transition-all group">
       <span className="material-symbols-outlined text-4xl text-primary mb-4">{icon}</span>
       <span className="text-[11px] font-bold tracking-widest uppercase text-on-surface-variant group-hover:text-primary">{label}</span>
     </Link>

@@ -2,6 +2,7 @@ export type Category = {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001/api";
@@ -63,9 +64,13 @@ export async function getCategories(): Promise<Category[]> {
         typeof value.slug === "string"
       );
     })
-    .map((item) => ({
-      id: item.id,
-      name: item.name,
-      slug: item.slug,
-    }));
+    .map((item) => {
+      const value = item as unknown as Record<string, unknown>;
+      return {
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+        description: typeof value.description === "string" ? value.description : null,
+      };
+    });
 }

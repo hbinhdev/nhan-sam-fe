@@ -1,4 +1,4 @@
-﻿import { getAuthSession } from "@/lib/auth-api";
+import { getAuthSession } from "@/lib/auth-api";
 
 export type ProductReview = {
   id: string;

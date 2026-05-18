@@ -44,7 +44,7 @@ export function PaymentTable() {
                   {payment.method}
                 </div>
               </TableCell>
-              <TableCell>{payment.amount.toLocaleString()}đ</TableCell>
+              <TableCell>{payment.amount.toLocaleString()}Ä‘</TableCell>
               <TableCell>
                 <Badge
                   variant={payment.status === 'Success' ? 'success' : 'warning'}>

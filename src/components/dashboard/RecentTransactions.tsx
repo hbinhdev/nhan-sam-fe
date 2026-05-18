@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import type { VariantProps } from 'class-variance-authority';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge, badgeVariants } from '@/components/ui/badge';

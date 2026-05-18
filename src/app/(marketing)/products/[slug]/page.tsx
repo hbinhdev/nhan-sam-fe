@@ -19,6 +19,27 @@ import {
 } from "@/lib/product-review-api";
 
 const RELATED_PRODUCTS_LIMIT = 4;
+const SHORT_DESCRIPTION_MAX_LENGTH = 220;
+
+function toPlainTextPreview(htmlOrText?: string | null, maxLength = SHORT_DESCRIPTION_MAX_LENGTH) {
+  const source = (htmlOrText ?? "").trim();
+  if (!source) return "";
+
+  const plain = source
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (plain.length <= maxLength) {
+    return plain;
+  }
+
+  return `${plain.slice(0, maxLength).trimEnd()}...`;
+}
 
 function mergeUniqueProducts(
   primary: ProductSummary[],
@@ -123,7 +144,11 @@ export default async function ProductDetailPage({
         <ProductInfo
           id={product.id}
           name={product.name}
-          description={product.description || undefined}
+          shortDescription={
+            product.shortDescription?.trim()
+              ? product.shortDescription.trim()
+              : toPlainTextPreview(product.description)
+          }
           price={formatCurrencyVND(product.price)}
           priceValue={product.price}
           image={product.imageUrl || product.thumbnail || ""}
@@ -187,3 +212,4 @@ export default async function ProductDetailPage({
     </main>
   );
 }
+

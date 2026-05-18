@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import type { ProductSummary } from "@/lib/product-api";
 import { cn } from "@/lib/utils";
+import { normalizeBlogContentToHtml } from "@/lib/blog-helpers";
 
 type ProductTabsProps = {
   product?: ProductSummary | null;
@@ -79,19 +80,11 @@ export function ProductTabs({ product }: ProductTabsProps) {
       </div>
 
       {activeTab === "description" && (
-        <div className="flex flex-col gap-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
-            <InfoItem
-              icon="description"
-              title="Mô tả sản phẩm"
-              desc={description}
-            />
-            <InfoItem
-              icon="category"
-              title="Danh mục"
-              desc={product?.category?.name?.trim() || "Chưa có thông tin"}
-            />
-          </div>
+        <div className="rounded-2xl bg-surface-container-low p-8 md:p-10">
+          <div
+            className="text-on-surface-variant leading-relaxed [&_a]:text-primary [&_a]:underline [&_img]:my-4 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-xl [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
+            dangerouslySetInnerHTML={{ __html: normalizeBlogContentToHtml(description) }}
+          />
         </div>
       )}
 

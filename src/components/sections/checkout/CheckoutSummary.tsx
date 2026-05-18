@@ -29,7 +29,7 @@ export function CheckoutSummary() {
 
         <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
           {items.map((item) => (
-            <SummaryItem 
+            <SummaryItem
               key={item.id}
               image={item.image}
               name={item.name}
@@ -43,27 +43,25 @@ export function CheckoutSummary() {
           )}
         </div>
 
-        {/* Voucher */}
         <div className="flex gap-2 pt-4">
-          <input 
-            className="flex-grow bg-transparent border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 text-xs text-label-caps placeholder:text-stone-300" 
-            placeholder="Mã giảm giá" 
+          <input
+            className="flex-grow bg-transparent border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 text-xs text-label-caps placeholder:text-stone-300"
+            placeholder="M� gi?m gi�"
             type="text"
           />
           <button className="px-6 py-2 border border-secondary text-secondary text-label-caps text-[10px] hover:bg-secondary hover:text-white transition-all uppercase rounded-lg">
-            Áp dụng
+            �p d?ng
           </button>
         </div>
 
-        {/* Totals */}
         <div className="space-y-3 pt-6 border-t border-outline-variant">
           <div className="flex justify-between text-xs">
             <span className="text-on-surface-variant">Tạm tính</span>
             <span className="font-bold">{formatCurrencyVND(totalPrice)}</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-on-surface-variant">Phí vận chuyển</span>
-            <span className="text-secondary font-bold">Miễn phí</span>
+            <span className="text-on-surface-variant">Ph� v?n chuy?n</span>
+            <span className="text-secondary font-bold">Mi?n ph�</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between text-xs">
@@ -78,7 +76,7 @@ export function CheckoutSummary() {
         </div>
 
         {/* CTA */}
-        <button 
+        <button
           onClick={handleConfirmOrder}
           disabled={items.length === 0}
           className="w-full py-5 bg-primary text-white text-label-caps text-sm tracking-widest hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 rounded-xl shadow-lg active:scale-[0.98]"
@@ -87,15 +85,14 @@ export function CheckoutSummary() {
           <span className="material-symbols-outlined text-sm">arrow_forward</span>
         </button>
 
-        {/* Trust Signals */}
         <div className="flex flex-col gap-4 pt-4">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-secondary text-base">verified_user</span>
-            <span className="text-[10px] text-label-caps text-on-surface-variant">CAM KẾT CHÍNH HÃNG 100%</span>
+            <span className="text-[10px] text-label-caps text-on-surface-variant">CAM K?T CH�NH H�NG 100%</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-secondary text-base">security</span>
-            <span className="text-[10px] text-label-caps text-on-surface-variant">BẢO MẬT THANH TOÁN SSL</span>
+            <span className="text-[10px] text-label-caps text-on-surface-variant">B?O M?T THANH TO�N SSL</span>
           </div>
         </div>
       </div>
@@ -108,11 +105,11 @@ function SummaryItem({ image, name, subtitle, quantity, price }: any) {
     <div className="flex gap-4 group">
       <div className="w-20 h-24 bg-surface-container-highest shrink-0 overflow-hidden rounded-lg relative">
         {image ? (
-           <Image src={image} alt={name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+          <Image src={image} alt={name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
         ) : (
-           <div className="w-full h-full bg-slate-200 flex items-center justify-center">
-              <span className="material-symbols-outlined text-outline-variant">image</span>
-           </div>
+          <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+            <span className="material-symbols-outlined text-outline-variant">image</span>
+          </div>
         )}
       </div>
       <div className="flex-grow flex flex-col justify-between py-1">

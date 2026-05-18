@@ -9,6 +9,7 @@ export type ProductSummary = {
   slug: string;
   sku?: string | null;
   name: string;
+  shortDescription?: string | null;
   description?: string | null;
   price: number;
   stock?: number | null;
@@ -39,6 +40,7 @@ export type ProductFilterParams = {
   page?: number;
   limit?: number;
   categoryId?: string;
+  categorySlug?: string;
   minPrice?: number;
   maxPrice?: number;
   usagePurpose?: string;
@@ -46,6 +48,8 @@ export type ProductFilterParams = {
   brand?: string;
   origin?: string;
   isBestSeller?: boolean;
+  sortBy?: "createdAt" | "price" | "name";
+  sortOrder?: "asc" | "desc";
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001/api";
@@ -116,6 +120,8 @@ function sanitizeProduct(value: unknown): ProductSummary | null {
     slug: typeof item.slug === "string" && item.slug ? item.slug : item.id,
     sku: typeof item.sku === "string" ? item.sku : null,
     name: item.name,
+    shortDescription:
+      typeof item.shortDescription === "string" ? item.shortDescription : null,
     description: typeof item.description === "string" ? item.description : null,
     price: Number.isFinite(price) ? price : 0,
     stock: typeof item.stock === "number" ? item.stock : null,
@@ -159,6 +165,7 @@ export async function getProducts(params?: ProductFilterParams) {
       page: params?.page,
       limit: params?.limit,
       categoryId: params?.categoryId,
+      categorySlug: params?.categorySlug,
       minPrice: params?.minPrice,
       maxPrice: params?.maxPrice,
       usagePurpose: params?.usagePurpose,
@@ -166,6 +173,8 @@ export async function getProducts(params?: ProductFilterParams) {
       brand: params?.brand,
       origin: params?.origin,
       isBestSeller: params?.isBestSeller,
+      sortBy: params?.sortBy,
+      sortOrder: params?.sortOrder,
     })}`,
   );
 
@@ -225,5 +234,5 @@ export async function getProductById(id: string): Promise<ProductSummary | null>
 
 export function formatCurrencyVND(value: number | string | null | undefined) {
   const amount = Number(value ?? 0);
-  return new Intl.NumberFormat("vi-VN").format(Number.isFinite(amount) ? amount : 0) + "đ";
+  return `${new Intl.NumberFormat("vi-VN").format(Number.isFinite(amount) ? amount : 0)}\u0111`;
 }

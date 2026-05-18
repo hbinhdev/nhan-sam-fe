@@ -5,6 +5,7 @@ import {
   type FilterOptions,
 } from "@/components/sections/products/FilterSidebar";
 import { CategoryTabs } from "@/components/sections/products/CategoryTabs";
+import { ProductSortSelect } from "@/components/sections/products/ProductSortSelect";
 import { getCategories, type Category } from "@/lib/category-api";
 import {
   formatCurrencyVND,
@@ -17,12 +18,15 @@ type ProductsSearchParams = {
   search?: string;
   page?: string;
   categoryId?: string;
+  categorySlug?: string;
   minPrice?: string;
   maxPrice?: string;
   usagePurpose?: string;
   ginsengAge?: string;
   brand?: string;
   origin?: string;
+  sortBy?: "createdAt" | "price" | "name";
+  sortOrder?: "asc" | "desc";
 };
 
 type ProductsPageProps = {
@@ -66,7 +70,10 @@ export default async function ProductsPage({
   const rawPage = Number(resolvedSearchParams?.page ?? "1");
   const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
   const activeCategoryId = resolvedSearchParams?.categoryId;
+  const activeCategorySlug = resolvedSearchParams?.categorySlug;
   const activeSearch = resolvedSearchParams?.search?.trim() || undefined;
+  const activeSortBy = resolvedSearchParams?.sortBy ?? "createdAt";
+  const activeSortOrder = resolvedSearchParams?.sortOrder ?? "desc";
 
   const activeFilters = {
     search: activeSearch,
@@ -107,12 +114,15 @@ export default async function ProductsPage({
         page: currentPage,
         limit: PRODUCTS_PER_PAGE,
         categoryId: activeCategoryId,
+        categorySlug: activeCategorySlug,
         minPrice: parseNumber(activeFilters.minPrice),
         maxPrice: parseNumber(activeFilters.maxPrice),
         usagePurpose: activeFilters.usagePurpose,
         ginsengAge: activeFilters.ginsengAge,
         brand: activeFilters.brand,
         origin: activeFilters.origin,
+        sortBy: activeSortBy,
+        sortOrder: activeSortOrder,
       }),
       getProducts({
         search: activeSearch,
@@ -138,12 +148,15 @@ export default async function ProductsPage({
   const paginationBaseQuery: Record<string, string | undefined> = {
     search: activeSearch,
     categoryId: activeCategoryId,
+    categorySlug: activeCategorySlug,
     minPrice: activeFilters.minPrice,
     maxPrice: activeFilters.maxPrice,
     usagePurpose: activeFilters.usagePurpose,
     ginsengAge: activeFilters.ginsengAge,
     brand: activeFilters.brand,
     origin: activeFilters.origin,
+    sortBy: activeSortBy,
+    sortOrder: activeSortOrder,
   };
 
   const buildProductsLink = (page: number) => {
@@ -165,7 +178,6 @@ export default async function ProductsPage({
 
   return (
     <main className="max-w-[1280px] mx-auto px-6 py-16 flex flex-col gap-12">
-      {/* HEADER & TITLE */}
       <section className="text-center flex flex-col gap-6 mb-8">
         <span className="font-bold text-[12px] tracking-[0.2em] uppercase text-secondary">
           Danh mục tuyển chọn
@@ -179,30 +191,29 @@ export default async function ProductsPage({
         </p>
       </section>
 
-      {/* CATEGORY TABS */}
       <CategoryTabs
         categories={categories}
         activeCategoryId={activeCategoryId}
         currentQuery={{
           search: activeSearch,
           categoryId: activeCategoryId,
+          categorySlug: activeCategorySlug,
           minPrice: activeFilters.minPrice,
           maxPrice: activeFilters.maxPrice,
           usagePurpose: activeFilters.usagePurpose,
           ginsengAge: activeFilters.ginsengAge,
           brand: activeFilters.brand,
           origin: activeFilters.origin,
+          sortBy: activeSortBy,
+          sortOrder: activeSortOrder,
         }}
         errorMessage={categoryError}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-8">
-        {/* SIDEBAR FILTERS */}
         <FilterSidebar filters={activeFilters} filterOptions={filterOptions} />
 
-        {/* PRODUCT LISTING */}
         <div className="lg:col-span-9 flex flex-col gap-12">
-          {/* Toolbar */}
           <div className="flex justify-between items-center pb-6 border-b border-outline-variant/30">
             <span className="text-sm text-on-surface-variant">
               Hiển thị {products.length}/{totalProducts} sản phẩm
@@ -211,11 +222,7 @@ export default async function ProductsPage({
               <span className="text-[11px] font-bold tracking-widest text-on-surface-variant/60 uppercase">
                 Sắp xếp:
               </span>
-              <select className="bg-transparent border-none text-sm font-bold text-primary focus:ring-0 cursor-pointer p-0 pr-8">
-                <option>Phổ biến nhất</option>
-                <option>Giá cao đến thấp</option>
-                <option>Giá thấp đến cao</option>
-              </select>
+              <ProductSortSelect sortBy={activeSortBy} sortOrder={activeSortOrder} />
             </div>
           </div>
 
@@ -248,7 +255,6 @@ export default async function ProductsPage({
             </div>
           )}
 
-          {/* PAGINATION */}
           {totalPages > 1 && (
             <div className="mt-12 flex justify-center gap-2">
               <PaginationButton
@@ -321,4 +327,3 @@ function PaginationButton({
     </Link>
   );
 }
-

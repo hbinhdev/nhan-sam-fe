@@ -30,6 +30,7 @@ export type AdminProductQueryParams = {
 export type AdminProductPayload = {
   sku?: string;
   name: string;
+  shortDescription?: string;
   description?: string;
   price: number;
   origin?: string;
@@ -109,6 +110,8 @@ function sanitizeProduct(value: unknown): ProductSummary | null {
     slug: typeof item.slug === "string" && item.slug ? item.slug : item.id,
     sku: typeof item.sku === "string" ? item.sku : null,
     name: item.name,
+    shortDescription:
+      typeof item.shortDescription === "string" ? item.shortDescription : null,
     description: typeof item.description === "string" ? item.description : null,
     price: Number.isFinite(price) ? price : 0,
     stock: Number.isFinite(stock) ? stock : 0,
