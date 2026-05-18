@@ -80,6 +80,14 @@ export function AuthHeaderMenu() {
     router.push("/dashboard");
   };
 
+  const handleGoMyOrders = () => {
+    setIsOpen(false);
+    if (pathname !== "/account/orders") {
+      startRouteLoading();
+    }
+    router.push("/account/orders");
+  };
+
   const handleLogout = () => {
     signOut();
     setIsOpen(false);
@@ -136,6 +144,16 @@ export function AuthHeaderMenu() {
               Dashboard
             </button>
           ) : null}
+
+          <button
+            type="button"
+            onClick={handleGoMyOrders}
+            className="mb-2 w-full rounded-lg border border-outline-variant/40 bg-white px-3 py-2 text-sm font-medium text-primary hover:bg-surface transition-colors flex items-center justify-between"
+            role="menuitem"
+          >
+            <span>Đơn hàng của tôi</span>
+            <span className="material-symbols-outlined text-sm">local_mall</span>
+          </button>
 
           <button
             type="button"

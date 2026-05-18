@@ -1,17 +1,29 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
+import { formatCurrencyVND } from "@/lib/product-api";
 
 export function CartSummary() {
+  const { totalPrice, items } = useCart();
+
+  if (items.length === 0) return null;
+
+  const shipping = 0;
+  const tax = 0;
+  const total = totalPrice + shipping + tax;
+
   return (
     <div className="lg:col-span-4">
       <div className="bg-white p-8 border border-outline-variant/30 rounded-xl sticky top-32">
-        <h2 className="text-headline-sm text-on-surface mb-8">T?ng �on H�ng</h2>
+        <h2 className="text-headline-sm text-on-surface mb-8">Tổng Đơn Hàng</h2>
 
         <div className="space-y-4 pb-8 border-b border-outline-variant/30">
-          <SummaryRow label="T?m t�nh" value="6.150.000d" />
+          <SummaryRow label="Tạm tính" value={formatCurrencyVND(totalPrice)} />
           <SummaryRow
-            label="Ph� v?n chuy?n u?c t�nh"
-            value="Mi?n ph�"
+            label="Phí vận chuyển ước tính"
+            value="Miễn phí"
             valueClassName="text-secondary"
             hasInfo
           />
@@ -23,7 +35,7 @@ export function CartSummary() {
           <div className="flex gap-2">
             <input
               className="flex-grow bg-surface-container-low rounded-lg border-none px-4 py-3 focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-              placeholder="Nh?p m� uu d�i..."
+              placeholder="Nhập mã ưu đãi..."
               type="text"
             />
             <button className="bg-tertiary text-on-tertiary px-6 py-3 rounded-lg text-label-caps hover:bg-on-tertiary-fixed transition-colors">
@@ -36,7 +48,7 @@ export function CartSummary() {
           <div className="flex justify-between items-end mb-8">
             <span className="text-headline-sm text-on-surface">T?ng c?ng</span>
             <div className="text-right">
-              <span className="text-headline-md text-primary">6.150.000d</span>
+              <span className="text-headline-md text-primary">{formatCurrencyVND(total)}</span>
               <p className="text-[10px] text-on-surface-variant uppercase mt-2 tracking-widest italic">
                 Bao g?m c�c uu d�i hi?n h�nh
               </p>
@@ -44,6 +56,7 @@ export function CartSummary() {
           </div>
 
           <Link
+            <Link
             href="/checkout"
             className="w-full bg-primary text-on-primary py-5 rounded-xl text-label-caps tracking-widest hover:bg-primary-container transition-all flex items-center justify-center gap-3"
           >
@@ -65,7 +78,7 @@ function SummaryRow({
   label,
   value,
   valueClassName,
-  hasInfo,
+  hasInfo
 }: {
   label: string;
   value: string;
