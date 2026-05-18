@@ -1,23 +1,14 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { formatCurrencyVND } from "@/lib/product-api";
 
-import { useRouter } from "next/navigation";
-
 export function CheckoutSummary() {
   const { items, totalPrice, totalItems } = useCart();
-  const router = useRouter();
-
   const shipping = 0; // Free shipping
   const discount = 0; // No discount for now
   const total = totalPrice + shipping - discount;
-
-  const handleConfirmOrder = () => {
-    // In a real app, you would create the order in the database here
-    router.push("/checkout/payment");
-  };
 
   return (
     <div className="lg:col-span-5">
@@ -85,7 +76,8 @@ export function CheckoutSummary() {
 
         {/* CTA */}
         <button
-          onClick={handleConfirmOrder}
+          type="submit"
+          form="checkout-form"
           disabled={items.length === 0}
           className="w-full py-5 bg-primary text-white text-label-caps text-sm tracking-widest hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 rounded-xl shadow-lg active:scale-[0.98]"
         >
