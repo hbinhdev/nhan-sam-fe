@@ -72,6 +72,16 @@ export type DashboardSummary = {
   }>;
 };
 
+export type DashboardNotification = {
+  id: string;
+  type: "ORDER" | "CONSULTATION";
+  title: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+  targetUrl: string;
+};
+
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   const session = getAuthSession();
   const token = session?.access_token;
@@ -107,4 +117,41 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   }
 
   return (await response.json()) as DashboardSummary;
+}
+
+export async function getDashboardNotifications(): Promise<DashboardNotification[]> {
+  const session = getAuthSession();
+  const token = session?.access_token;
+
+  if (!token) {
+    throw new Error("Session expired. Please sign in again.");
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/dashboard/notifications`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error("Cannot connect to server.");
+  }
+
+  if (response.status === 401) {
+    throw new Error("Unauthorized. Please sign in again.");
+  }
+
+  if (response.status === 403) {
+    throw new Error("Forbidden. Admin access is required.");
+  }
+
+  if (!response.ok) {
+    throw new Error("Failed to load dashboard notifications.");
+  }
+
+  return (await response.json()) as DashboardNotification[];
 }
