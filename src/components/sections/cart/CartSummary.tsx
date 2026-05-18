@@ -27,11 +27,13 @@ export function CartSummary() {
             valueClassName="text-secondary"
             hasInfo
           />
-          <SummaryRow label="Thu? (VAT)" value="0d" />
+          <SummaryRow label="Thuế (VAT)" value="0d" />
         </div>
 
         <div className="py-8">
-          <label className="text-label-caps text-on-surface-variant mb-4 block">M� GI?M GI�</label>
+          <label className="text-label-caps text-on-surface-variant mb-4 block">
+            Mã Giảm Giá
+          </label>
           <div className="flex gap-2">
             <input
               className="flex-grow bg-surface-container-low rounded-lg border-none px-4 py-3 focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
@@ -39,34 +41,40 @@ export function CartSummary() {
               type="text"
             />
             <button className="bg-tertiary text-on-tertiary px-6 py-3 rounded-lg text-label-caps hover:bg-on-tertiary-fixed transition-colors">
-              �P D?NG
+              ÁP DỤNG
             </button>
           </div>
         </div>
 
         <div className="pt-4 pb-8">
           <div className="flex justify-between items-end mb-8">
-            <span className="text-headline-sm text-on-surface">T?ng c?ng</span>
+            <span className="text-headline-sm text-on-surface">Tổng Cộng</span>
             <div className="text-right">
-              <span className="text-headline-md text-primary">{formatCurrencyVND(total)}</span>
+              <span className="text-headline-md text-primary">
+                {formatCurrencyVND(total)}
+              </span>
               <p className="text-[10px] text-on-surface-variant uppercase mt-2 tracking-widest italic">
-                Bao g?m c�c uu d�i hi?n h�nh
+                Bao gồm các ưu đãi hiện hành
               </p>
             </div>
           </div>
 
           <Link
-            <Link
             href="/checkout"
             className="w-full bg-primary text-on-primary py-5 rounded-xl text-label-caps tracking-widest hover:bg-primary-container transition-all flex items-center justify-center gap-3"
           >
-            TI?N H�NH THANH TO�N <span className="material-symbols-outlined">arrow_forward</span>
+            TIẾN HÀNH THANH TOÁN{" "}
+            <span className="material-symbols-outlined">arrow_forward</span>
           </Link>
 
           <div className="mt-8 flex justify-center items-center gap-6 text-on-surface-variant">
             <span className="material-symbols-outlined text-2xl">payments</span>
-            <span className="material-symbols-outlined text-2xl">credit_card</span>
-            <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+            <span className="material-symbols-outlined text-2xl">
+              credit_card
+            </span>
+            <span className="material-symbols-outlined text-2xl">
+              account_balance_wallet
+            </span>
           </div>
         </div>
       </div>
@@ -78,7 +86,7 @@ function SummaryRow({
   label,
   value,
   valueClassName,
-  hasInfo
+  hasInfo,
 }: {
   label: string;
   value: string;
@@ -88,7 +96,10 @@ function SummaryRow({
   return (
     <div className="flex justify-between">
       <span className="text-on-surface-variant flex items-center gap-1">
-        {label} {hasInfo && <span className="material-symbols-outlined text-xs">info</span>}
+        {label}{" "}
+        {hasInfo && (
+          <span className="material-symbols-outlined text-xs">info</span>
+        )}
       </span>
       <span className={cn("font-bold", valueClassName)}>{value}</span>
     </div>
