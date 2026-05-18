@@ -5,8 +5,8 @@ import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 interface KPICardProps {
   title: string;
   value: string;
-  change: string;
-  trend: 'up' | 'down';
+  change?: string;
+  trend?: 'up' | 'down';
   icon: React.ReactNode;
   description?: string;
 }
@@ -25,13 +25,18 @@ export function KPICard({
         <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
           {icon}
         </div>
-        <div
-          className={`flex items-center gap-1 text-sm font-medium ${
-            trend === 'up' ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-          }`}>
-          {trend === 'up' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-          {change}
-        </div>
+        {change && trend ? (
+          <div
+            className={`flex items-center gap-1 text-sm font-medium ${
+              trend === 'up'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-red-600 dark:text-red-400'
+            }`}
+          >
+            {trend === 'up' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+            {change}
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-4">

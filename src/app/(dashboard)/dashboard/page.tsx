@@ -1,18 +1,21 @@
-"use client";
+﻿"use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { KPICard } from '@/components/dashboard/KPICard';
-import { RevenueChart } from '@/components/dashboard/RevenueChart';
-import { CategoryChart } from '@/components/dashboard/CategoryChart';
-import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
+import React, { useEffect, useMemo, useState } from "react";
+import { KPICard } from "@/components/dashboard/KPICard";
+import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { CategoryChart } from "@/components/dashboard/CategoryChart";
+import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import {
   Boxes,
   MessageSquare,
-  Star,
+  ShoppingCart,
   Phone,
   TrendingDown,
-} from 'lucide-react';
-import { getDashboardSummary, type DashboardSummary } from '@/lib/dashboard-api';
+} from "lucide-react";
+import {
+  getDashboardSummary,
+  type DashboardSummary,
+} from "@/lib/dashboard-api";
 
 type RequestState = {
   loading: boolean;
@@ -38,7 +41,7 @@ export default function DashboardPage() {
       } catch (error) {
         if (!mounted) return;
         const message =
-          error instanceof Error ? error.message : 'Failed to load dashboard.';
+          error instanceof Error ? error.message : "Failed to load dashboard.";
         setState({ loading: false, error: message, summary: null });
       }
     };
@@ -65,14 +68,16 @@ export default function DashboardPage() {
     if (!overview) return [];
 
     return [
-      { name: 'Pending', value: overview.pendingConsultations },
-      { name: 'Contacted', value: overview.contactedConsultations },
-      { name: 'Cancelled', value: overview.cancelledConsultations },
+      { name: "Pending", value: overview.pendingConsultations },
+      { name: "Contacted", value: overview.contactedConsultations },
+      { name: "Cancelled", value: overview.cancelledConsultations },
     ];
   }, [state.summary]);
 
   if (state.loading) {
-    return <div className="text-sm text-slate-500">Loading dashboard data...</div>;
+    return (
+      <div className="text-sm text-slate-500">Loading dashboard data...</div>
+    );
   }
 
   if (state.error) {
@@ -116,25 +121,23 @@ export default function DashboardPage() {
           title="Total Reviews"
           value={summary.overview.totalReviews.toLocaleString()}
           change={`${summary.overview.pendingReviews} pending`}
-          trend={summary.overview.pendingReviews > 0 ? 'down' : 'up'}
+          trend={summary.overview.pendingReviews > 0 ? "down" : "up"}
           icon={<MessageSquare size={20} />}
         />
 
         <KPICard
-          title="Average Rating"
-          value={summary.reviews.averageRating.toFixed(2)}
-          change={`${summary.overview.approvedReviews} approved`}
-          trend="up"
-          icon={<Star size={20} />}
+          title="Total Orders"
+          value={summary.overview.totalOrders.toLocaleString()}
+          icon={<ShoppingCart size={20} />}
         />
 
         <KPICard
           title="Consultations"
           value={summary.overview.totalConsultations.toLocaleString()}
           change={`${summary.overview.cancelledConsultations} cancelled`}
-          trend={summary.overview.cancelledConsultations > 0 ? 'down' : 'up'}
+          trend={summary.overview.cancelledConsultations > 0 ? "down" : "up"}
           icon={<Phone size={20} />}
-          description="Revenue/Orders: Coming soon"
+          description=""
         />
       </div>
 

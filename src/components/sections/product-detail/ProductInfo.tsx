@@ -1,9 +1,5 @@
 ﻿"use client";
 
-import { useState } from "react";
-import { useCart } from "@/context/CartContext";
-import { useRouter } from "next/navigation";
-
 type ProductInfoProps = {
   id?: string;
   name?: string;
@@ -19,12 +15,15 @@ type ProductInfoProps = {
   totalReviews?: number;
 };
 
+import { useState } from "react";
+import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
+
 export function ProductInfo({
   id,
   name = "Imperial Heritage Red Ginseng",
   shortDescription,
-  description =
-    "A masterfully aged concentrate derived from the heart of the Geumsan mountains. Preserved through ancient steaming techniques to maximize ginsenoside potency.",
+  description = "A masterfully aged concentrate derived from the heart of the Geumsan mountains. Preserved through ancient steaming techniques to maximize ginsenoside potency.",
   price = "4.250.000đ",
   priceValue = 4250000,
   image = "",
@@ -44,7 +43,6 @@ export function ProductInfo({
   const displayAverage = totalReviews === 0 ? 5 : safeAverage;
   const filledStars = Math.round(displayAverage);
   const stars = [1, 2, 3, 4, 5].map((index) => index <= filledStars);
-
   const safeShortDescription =
     shortDescription?.trim() ||
     description?.trim() ||
@@ -80,7 +78,9 @@ export function ProductInfo({
           <span>{brand || "Premium Extract"}</span>
         </div>
 
-        <h1 className="text-4xl md:text-5xl font-serif text-primary leading-tight">{name}</h1>
+        <h1 className="text-4xl md:text-5xl font-serif text-primary leading-tight">
+          {name}
+        </h1>
 
         <div className="flex items-center gap-4">
           <div className="flex text-secondary">
@@ -98,16 +98,25 @@ export function ProductInfo({
           </span>
         </div>
 
-        <p className="text-lg text-on-surface-variant leading-relaxed">{safeShortDescription}</p>
+        <p className="text-lg text-on-surface-variant leading-relaxed">
+          {safeShortDescription}
+        </p>
 
         <div className="text-sm text-on-surface-variant">
-          SKU: <span className="font-semibold text-primary">{sku?.trim() || "Đang cập nhật"}</span>
+          SKU:{" "}
+          <span className="font-semibold text-primary">
+            {sku?.trim() || "Đang cập nhật"}
+          </span>
         </div>
 
-        <div className="text-3xl md:text-4xl font-serif text-primary border-y border-outline-variant/30 py-8 my-2">{price}</div>
+        <div className="text-3xl md:text-4xl font-serif text-primary border-y border-outline-variant/30 py-8 my-2">
+          {price}
+        </div>
 
         <div className="flex flex-col gap-4">
-          <span className="text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">Số lượng</span>
+          <span className="text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">
+            Số lượng
+          </span>
           <div className="flex items-center border border-outline-variant/50 w-fit rounded-lg overflow-hidden h-14">
             <button
               onClick={decrementQuantity}
@@ -136,13 +145,13 @@ export function ProductInfo({
         <div className="flex flex-col gap-4 pt-4">
           <button
             onClick={handleAddToCart}
-            className="w-full h-16 bg-primary text-on-primary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-primary-container transition-all shadow-lg active:scale-[0.98]"
+            className="w-full h-16 border-2 border-secondary text-secondary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-secondary/5 transition-all"
           >
             THÊM VÀO GIỎ HÀNG
           </button>
           <button
             onClick={handleBuyNow}
-            className="w-full h-16 border-2 border-secondary text-secondary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-secondary/5 transition-all"
+            className="w-full h-16 bg-primary text-on-primary font-bold text-sm tracking-widest uppercase rounded-xl hover:bg-primary-container transition-all shadow-lg active:scale-[0.98]"
           >
             MUA NGAY
           </button>
@@ -150,12 +159,20 @@ export function ProductInfo({
 
         <div className="grid grid-cols-2 gap-6 pt-6 border-t border-outline-variant/30 mt-0">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-secondary text-2xl">verified</span>
-            <span className="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">Certified Organic</span>
+            <span className="material-symbols-outlined text-secondary text-2xl">
+              verified
+            </span>
+            <span className="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">
+              Certified Organic
+            </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-secondary text-2xl">local_shipping</span>
-            <span className="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">Free Express Shipping</span>
+            <span className="material-symbols-outlined text-secondary text-2xl">
+              local_shipping
+            </span>
+            <span className="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">
+              Free Express Shipping
+            </span>
           </div>
         </div>
       </div>

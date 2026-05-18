@@ -19,6 +19,7 @@ const API_BASE_URL = resolveApiBaseUrl();
 
 export type DashboardSummary = {
   overview: {
+    totalOrders: number;
     totalProducts: number;
     totalCategories: number;
     totalReviews: number;
