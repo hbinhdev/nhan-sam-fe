@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/sections/product-detail/ProductGallery";
 import { ProductInfo } from "@/components/sections/product-detail/ProductInfo";
 import { CertificationSection } from "@/components/sections/product-detail/CertificationSection";
@@ -72,7 +72,7 @@ export default async function ProductDetailPage({
     return (
       <main className="max-w-[1280px] mx-auto px-6 py-12">
         <div className="py-24 text-center text-on-surface-variant">
-          Không tìm thấy sản phẩm.
+          KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.
         </div>
       </main>
     );
@@ -177,7 +177,7 @@ export default async function ProductDetailPage({
       <section className="py-24 border-t border-outline-variant/30">
         <div className="flex items-center gap-6 mb-16">
           <h2 className="text-3xl font-serif text-primary shrink-0">
-            Khám Phá Thêm
+            KhÃ¡m PhÃ¡ ThÃªm
           </h2>
           <div className="h-px w-full bg-outline-variant/30"></div>
         </div>
@@ -187,11 +187,13 @@ export default async function ProductDetailPage({
             {relatedProducts.map((item) => (
               <ProductCard
                 key={item.id}
+                  id={item.id}
                 name={item.name}
                 price={formatCurrencyVND(item.price)}
+                  priceValue={item.price}
                 subtitle={
                   item.brand && item.origin
-                    ? `${item.origin} • ${item.brand}`
+                    ? `${item.origin} â€¢ ${item.brand}`
                     : item.brand || item.origin || "Heritage Selection"
                 }
                 tag={item.category?.name || undefined}
@@ -205,11 +207,12 @@ export default async function ProductDetailPage({
           </div>
         ) : (
           <div className="py-8 text-center text-on-surface-variant">
-            Chưa có sản phẩm liên quan.
+            ChÆ°a cÃ³ sáº£n pháº©m liÃªn quan.
           </div>
         )}
       </section>
     </main>
   );
 }
+
 

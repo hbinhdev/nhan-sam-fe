@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/shared/toast/ToastProvider";
 import { AuthProvider } from "@/components/shared/auth/AuthProvider";
 import { RouteLoadingProvider } from "@/components/shared/routing/RouteLoadingProvider";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 const notoSerif = Noto_Serif({ subsets: ["latin", "vietnamese"], variable: "--font-serif" });
 const manrope = Manrope({ subsets: ["latin", "vietnamese"], variable: "--font-manrope" });
@@ -38,7 +39,9 @@ export default function RootLayout({
           <ToastProvider>
             <RouteLoadingProvider>
               <AuthProvider>
-                <CartProvider>{children}</CartProvider>
+                <CartProvider>
+                  <WishlistProvider>{children}</WishlistProvider>
+                </CartProvider>
               </AuthProvider>
             </RouteLoadingProvider>
           </ToastProvider>

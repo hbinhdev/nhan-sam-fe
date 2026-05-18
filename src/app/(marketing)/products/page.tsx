@@ -239,8 +239,10 @@ export default async function ProductsPage({
               {products.map((product) => (
                 <ProductCard
                   key={product.id}
+                  id={product.id}
                   name={product.name}
                   price={formatCurrencyVND(product.price)}
+                  priceValue={product.price}
                   subtitle={
                     product.origin && product.brand
                       ? `${product.origin} • ${product.brand}`
@@ -327,3 +329,4 @@ function PaginationButton({
     </Link>
   );
 }
+

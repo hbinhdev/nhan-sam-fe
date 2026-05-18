@@ -270,8 +270,10 @@ export default async function Home() {
               {bestSellerProducts.map((product) => (
                 <ProductCard
                   key={product.id}
+                  id={product.id}
                   name={product.name}
                   price={formatCurrencyVND(product.price)}
+                  priceValue={product.price}
                   tag={product.ginsengAge ?? product.category?.name ?? undefined}
                   image={product.imageUrl || product.thumbnail || "/images/product-root.png"}
                   href={`/products/${product.slug || product.id}`}
@@ -333,3 +335,4 @@ export default async function Home() {
     </>
   );
 }
+

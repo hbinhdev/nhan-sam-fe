@@ -1,10 +1,16 @@
+﻿"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import type { MouseEvent } from "react";
 import { cn } from "@/lib/utils";
+import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductCardProps {
+  id?: string;
   name?: string;
   price?: string;
+  priceValue?: number;
   tag?: string;
   image?: string;
   subtitle?: string;
@@ -14,8 +20,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({
+  id,
   name,
   price,
+  priceValue,
   tag,
   image,
   subtitle,
@@ -23,9 +31,25 @@ export function ProductCard({
   className,
   href = "#",
 }: ProductCardProps) {
-  const safeName = name?.trim() || "Sản phẩm ...";
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const safeName = name?.trim() || "Sản phẩm";
   const safePrice = price?.trim() || "1.234.567đ";
   const safeImage = image?.trim() || "/images/product-root.png";
+  const safeId = id?.trim() || href || safeName;
+  const inWishlist = isInWishlist(safeId);
+
+  const handleWishlistClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    toggleWishlist({
+      id: safeId,
+      name: safeName,
+      price: Number.isFinite(priceValue) ? Number(priceValue) : 0,
+      image: safeImage,
+      href,
+    });
+  };
 
   return (
     <Link
@@ -52,6 +76,21 @@ export function ProductCard({
             {tag}
           </div>
         )}
+        <button
+          type="button"
+          onClick={handleWishlistClick}
+          aria-label={inWishlist ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích"}
+          className={cn(
+            "absolute top-4 right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-colors",
+            inWishlist
+              ? "bg-primary text-on-primary"
+              : "bg-white/90 text-primary hover:bg-primary hover:text-on-primary",
+          )}
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {inWishlist ? "favorite" : "favorite_border"}
+          </span>
+        </button>
       </div>
       <div className="p-6 flex flex-col gap-4 bg-surface/30 flex-1">
         <div className="flex flex-col gap-2 flex-1">
@@ -67,9 +106,7 @@ export function ProductCard({
         <div className="flex flex-row justify-between items-center mt-2 border-t border-outline-variant/20 pt-4">
           <span className="text-primary font-bold text-lg">{safePrice}</span>
           <div className="bg-primary text-on-primary w-11 h-11 rounded-full flex items-center justify-center hover:bg-primary-container transition-colors shadow-md">
-            <span className="material-symbols-outlined text-xl">
-              add_shopping_cart
-            </span>
+            <span className="material-symbols-outlined text-xl">add_shopping_cart</span>
           </div>
         </div>
       </div>
