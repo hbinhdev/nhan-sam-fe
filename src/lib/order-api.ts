@@ -33,6 +33,9 @@ export type Order = {
   customerEmail?: string;
   shippingAddress: string;
   totalAmount: number;
+  couponId?: string | null;
+  couponCode?: string | null;
+  couponDiscountAmount?: number;
   paymentMethod: string;
   paymentNote?: string;
   status: "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
@@ -50,6 +53,9 @@ export type CreateOrderPayload = {
   customerEmail?: string;
   shippingAddress: string;
   totalAmount: number;
+  couponId?: string;
+  couponCode?: string;
+  couponDiscountAmount?: number;
   paymentMethod?: string;
   paymentNote?: string;
   items: OrderItem[];

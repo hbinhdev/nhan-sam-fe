@@ -13,6 +13,7 @@ import {
   QrCode,
   PhoneCall,
   House,
+  TicketPercent,
   Settings,
   LogOut,
   ChevronLeft,
@@ -61,6 +62,11 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
       to: '/dashboard/orders',
       icon: ShoppingCart,
       label: 'Orders'
+    },
+    {
+      to: '/dashboard/coupons',
+      icon: TicketPercent,
+      label: 'Coupons'
     },
     {
       to: '/dashboard/customers',

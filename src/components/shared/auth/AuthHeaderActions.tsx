@@ -12,12 +12,14 @@ import { useWishlist } from "@/context/WishlistContext";
 export function AuthHeaderActions() {
   const { isAuthenticated } = useAuth();
   const { totalItems } = useCart();
+  const { totalItems: wishlistTotalItems } = useWishlist();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-  const { totalItems: wishlistTotalItems } = useWishlist();
+  const showWishlistBadge = mounted && wishlistTotalItems > 0;
+  const showCartBadge = mounted && totalItems > 0;
 
   return (
     <div className="flex items-center gap-4">
@@ -27,22 +29,30 @@ export function AuthHeaderActions() {
         className="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 relative"
       >
         favorite
-        {wishlistTotalItems > 0 && (
-          <span className="absolute top-0 right-0 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-            {wishlistTotalItems}
-          </span>
-        )}
+        <span
+          className={cn(
+            "absolute top-0 right-0 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold transition-opacity",
+            showWishlistBadge ? "opacity-100" : "opacity-0 pointer-events-none",
+          )}
+          aria-hidden={!showWishlistBadge}
+        >
+          {showWishlistBadge ? wishlistTotalItems : ""}
+        </span>
       </LoadingLink>
       <LoadingLink
         href="/cart"
         className="material-symbols-outlined text-on-surface-variant hover:text-primary p-2 relative"
       >
         shopping_bag
-        {mounted && totalItems > 0 && (
-          <span className="absolute top-0 right-0 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-            {totalItems}
-          </span>
-        )}
+        <span
+          className={cn(
+            "absolute top-0 right-0 bg-primary text-on-primary text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold transition-opacity",
+            showCartBadge ? "opacity-100" : "opacity-0 pointer-events-none",
+          )}
+          aria-hidden={!showCartBadge}
+        >
+          {showCartBadge ? totalItems : ""}
+        </span>
       </LoadingLink>
       <LoadingLink
         href={isAuthenticated ? "/products" : "/login"}

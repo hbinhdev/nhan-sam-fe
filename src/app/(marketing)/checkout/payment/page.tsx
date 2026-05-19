@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -10,9 +10,19 @@ import { formatCurrencyVND } from "@/lib/product-api";
 import { getDefaultPaymentQrConfig, type PaymentQrConfig } from "@/lib/payment-qr-api";
 import { createOrder } from "@/lib/order-api";
 import { motion } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+
+const CHECKOUT_COUPON_KEY = "checkout_coupon";
+
+type AppliedCouponState = {
+  couponId: string;
+  code: string;
+  discountAmount: number;
+  finalTotal: number;
+  cartTotal: number;
+};
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -23,6 +33,30 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [appliedCoupon] = useState<AppliedCouponState | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    try {
+      const saved = window.localStorage.getItem(CHECKOUT_COUPON_KEY);
+      if (!saved) return null;
+      const parsed = JSON.parse(saved) as AppliedCouponState;
+      if (!parsed?.code) return null;
+      if (Number(parsed.cartTotal) !== Number(totalPrice || 0)) {
+        window.localStorage.removeItem(CHECKOUT_COUPON_KEY);
+        return null;
+      }
+      return parsed;
+    } catch {
+      window.localStorage.removeItem(CHECKOUT_COUPON_KEY);
+      return null;
+    }
+  });
+
+  const orderSubtotal = totalPrice || 0;
+  const orderDiscount = appliedCoupon?.discountAmount ?? 0;
+  const orderTotal = Math.max(0, orderSubtotal - orderDiscount);
 
   useEffect(() => {
     async function loadConfig() {
@@ -46,7 +80,7 @@ export default function PaymentPage() {
   const qrUrl =
     config?.customQrImage ||
     (bankCode && accountNumber
-      ? `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.png?amount=${totalPrice}&addInfo=${orderId}&accountName=${encodeURIComponent(accountName)}`
+      ? `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.png?amount=${orderTotal}&addInfo=${orderId}&accountName=${encodeURIComponent(accountName)}`
       : "");
 
   const handleConfirmPayment = async () => {
@@ -78,13 +112,17 @@ export default function PaymentPage() {
         customerPhone: buyerInfo.phone,
         customerEmail: buyerInfo.email || session?.user?.email || undefined,
         shippingAddress: buyerInfo.fullAddress,
-        totalAmount: totalPrice || 0,
+        totalAmount: orderTotal,
+        couponId: appliedCoupon?.couponId || undefined,
+        couponCode: appliedCoupon?.code || undefined,
+        couponDiscountAmount: appliedCoupon?.discountAmount || undefined,
         paymentMethod: "VIETQR",
-        paymentNote: orderId, // Customer note matching order code
-        items: orderItems.length > 0 ? orderItems : [{ productId: "default", name: "Đơn hàng Heritage", price: totalPrice, quantity: 1 }],
+        paymentNote: orderId,
+        items: orderItems.length > 0 ? orderItems : [{ productId: "default", name: "Đơn hàng Heritage", price: orderTotal, quantity: 1 }],
       });
 
       void clearCart();
+      localStorage.removeItem(CHECKOUT_COUPON_KEY);
       setShowSuccessModal(true);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Có lỗi xảy ra khi tạo đơn hàng.");
@@ -119,7 +157,6 @@ export default function PaymentPage() {
 
   return (
     <main className="min-h-screen bg-surface-container-lowest py-16 px-6 lg:px-12 relative overflow-hidden">
-      {/* Background Decor */}
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-secondary/5 blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
@@ -137,7 +174,6 @@ export default function PaymentPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* QR Code Section */}
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -175,7 +211,6 @@ export default function PaymentPage() {
             </div>
           </motion.div>
 
-          {/* Instructions Section */}
           <motion.div
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -189,7 +224,7 @@ export default function PaymentPage() {
                 <InfoRow label="Ngân hàng" value={bankName} />
                 <InfoRow label="Số tài khoản" value={accountNumber} isCopyable={Boolean(accountNumber)} />
                 <InfoRow label="Chủ tài khoản" value={accountName} />
-                <InfoRow label="Số tiền" value={formatCurrencyVND(totalPrice)} highlight />
+                <InfoRow label="Số tiền" value={formatCurrencyVND(orderTotal)} highlight />
                 <InfoRow label="Nội dung" value={orderId} isCopyable />
               </div>
             </div>
@@ -232,7 +267,6 @@ export default function PaymentPage() {
         </div>
       </div>
 
-      {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={() => {}}>
         <DialogContent showCloseButton={false} className="w-[95vw] max-w-md overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center shadow-2xl">
           <div className="flex flex-col items-center space-y-4">
@@ -245,7 +279,7 @@ export default function PaymentPage() {
             <DialogDescription className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
               Đơn hàng của bạn với mã <strong className="text-primary font-bold">{orderId}</strong> đã được ghi nhận thành công và đang ở trạng thái <strong className="text-amber-600 font-bold">Đang chờ xác nhận</strong>.
             </DialogDescription>
-            
+
             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl w-full text-xs text-slate-500 leading-normal text-left space-y-1 my-4 border border-slate-200 dark:border-slate-800">
               <p>📌 Quản trị viên sẽ tiến hành kiểm tra đối soát giao dịch chuyển khoản với nội dung <strong className="text-slate-700 dark:text-slate-300">{orderId}</strong>.</p>
               <p>📌 Khi đối soát thành công, trạng thái đơn hàng sẽ được chuyển sang <strong className="text-emerald-600 font-semibold">Thành công / Đã xác nhận</strong>.</p>

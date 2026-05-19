@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -104,7 +104,6 @@ export default function MyOrdersPage() {
 
   return (
     <main className="min-h-screen bg-surface-container-lowest py-16 px-6 lg:px-12 relative overflow-hidden">
-      {/* Background Decor */}
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
       <div className="max-w-5xl mx-auto relative z-10 space-y-12">
@@ -156,7 +155,6 @@ export default function MyOrdersPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-white rounded-3xl border border-outline-variant/30 shadow-xs overflow-hidden hover:shadow-md transition-shadow duration-300"
                 >
-                  {/* Order Header */}
                   <div className="bg-slate-50 dark:bg-slate-800/40 p-6 border-b border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-3 mb-1">
@@ -177,7 +175,6 @@ export default function MyOrdersPage() {
                     </button>
                   </div>
 
-                  {/* Order Items Snapshot */}
                   <div className="p-6 divide-y divide-outline-variant/10 max-h-[320px] overflow-y-auto pr-2">
                     {order.items.map((it, idx) => (
                       <div key={idx} className="flex items-center justify-between py-4 first:pt-0 last:pb-0 gap-4">
@@ -199,7 +196,6 @@ export default function MyOrdersPage() {
                     ))}
                   </div>
 
-                  {/* Order Summary Footer */}
                   <div className="bg-surface-container-low p-6 border-t border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="text-xs text-on-surface-variant font-medium">
                       <span>Địa chỉ nhận: <strong className="text-on-surface">{order.shippingAddress}</strong></span>
@@ -207,9 +203,16 @@ export default function MyOrdersPage() {
                       <span>Thanh toán: <strong className="text-on-surface">{order.paymentMethod === "VIETQR" ? "Thanh toán qua mã QR" : order.paymentMethod}</strong></span>
                     </div>
 
-                    <div className="flex items-center gap-3 self-end sm:self-center font-bold">
-                      <span className="text-xs text-on-surface-variant uppercase tracking-wider">Tổng số tiền:</span>
-                      <span className="text-xl font-extrabold text-primary font-mono">{formatCurrencyVND(order.totalAmount)}</span>
+                    <div className="self-end sm:self-center text-right space-y-1">
+                      {Number(order.couponDiscountAmount ?? 0) > 0 ? (
+                        <div className="text-xs font-semibold text-red-600">
+                          Giảm giá{order.couponCode ? ` (${order.couponCode})` : ""}: -{formatCurrencyVND(Number(order.couponDiscountAmount))}
+                        </div>
+                      ) : null}
+                      <div className="flex items-center justify-end gap-3 font-bold">
+                        <span className="text-xs text-on-surface-variant uppercase tracking-wider">Tổng số tiền:</span>
+                        <span className="text-xl font-extrabold text-primary font-mono">{formatCurrencyVND(order.totalAmount)}</span>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

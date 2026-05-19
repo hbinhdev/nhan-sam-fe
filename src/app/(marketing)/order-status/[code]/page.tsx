@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState, use } from "react";
 import Image from "next/image";
@@ -27,7 +27,7 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
       } else {
         setOrder(data);
       }
-    } catch (err) {
+    } catch {
       setError("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
@@ -81,11 +81,11 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
 
   const currentStepIndex = steps.findIndex((s) => s.key === order.status);
   const isCancelled = order.status === "CANCELLED";
+  const couponDiscount = Number(order.couponDiscountAmount ?? 0);
 
   return (
     <main className="min-h-screen bg-surface-container-lowest py-16 px-6 lg:px-12 relative overflow-hidden">
       <div className="max-w-4xl mx-auto relative z-10 space-y-8">
-        {/* Navigation & Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-outline-variant/20 pb-6">
           <div>
             <Link href="/" className="inline-flex items-center gap-2 text-sm text-primary hover:underline mb-2 font-semibold">
@@ -107,10 +107,9 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
           </button>
         </div>
 
-        {/* Progress Tracker */}
         <div className="bg-white p-8 rounded-3xl border border-outline-variant/30 shadow-xs">
           <h2 className="text-label-caps text-on-surface-variant mb-8 font-bold">TIẾN TRÌNH ĐƠN HÀNG</h2>
-          
+
           {isCancelled ? (
             <div className="flex items-center justify-center gap-3 p-6 bg-red-50 text-red-700 rounded-2xl border border-red-200 font-semibold">
               <XCircle size={24} className="text-red-600 shrink-0" />
@@ -130,8 +129,8 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
                         isCurrent
                           ? "bg-primary text-white scale-110 ring-4 ring-primary/20"
                           : isPast
-                          ? "bg-emerald-600 text-white"
-                          : "bg-surface-container text-on-surface-variant/40"
+                            ? "bg-emerald-600 text-white"
+                            : "bg-surface-container text-on-surface-variant/40"
                       }`}
                     >
                       <StepIcon size={24} />
@@ -139,9 +138,7 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
                     <h3 className={`mt-4 font-bold text-sm ${isCurrent ? "text-primary font-extrabold" : isPast ? "text-on-surface font-bold" : "text-on-surface-variant/50"}`}>
                       {step.label}
                     </h3>
-                    <p className="text-[11px] text-on-surface-variant/70 mt-1 max-w-[150px] leading-tight">
-                      {step.desc}
-                    </p>
+                    <p className="text-[11px] text-on-surface-variant/70 mt-1 max-w-[150px] leading-tight">{step.desc}</p>
                   </div>
                 );
               })}
@@ -159,9 +156,7 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
           )}
         </div>
 
-        {/* Order Details & Customer Info Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Customer Info */}
           <div className="lg:col-span-1 bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-xs space-y-4">
             <h2 className="text-label-caps text-on-surface-variant font-bold border-b border-outline-variant/20 pb-3">THÔNG TIN KHÁCH HÀNG</h2>
             <div className="space-y-3 text-xs">
@@ -192,7 +187,6 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
             </div>
           </div>
 
-          {/* Items Breakdown */}
           <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-xs flex flex-col justify-between">
             <div>
               <h2 className="text-label-caps text-on-surface-variant font-bold border-b border-outline-variant/20 pb-3 mb-4">SẢN PHẨM ĐÃ ĐẶT</h2>
@@ -203,9 +197,7 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
                       {item.image ? (
                         <Image src={item.image} alt={item.name} fill className="object-cover" />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-xs text-on-surface-variant font-bold">
-                          IMG
-                        </div>
+                        <div className="h-full w-full flex items-center justify-center text-xs text-on-surface-variant font-bold">IMG</div>
                       )}
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-0.5">
@@ -224,6 +216,15 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
             </div>
 
             <div className="border-t border-outline-variant/20 pt-4 mt-6 space-y-2">
+              {couponDiscount > 0 ? (
+                <div className="flex justify-between text-xs text-on-surface-variant">
+                  <span>
+                    Giảm giá
+                    {order.couponCode ? ` (${order.couponCode})` : ""}:
+                  </span>
+                  <span className="font-bold text-red-600">-{formatCurrencyVND(couponDiscount)}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between text-xs text-on-surface-variant">
                 <span>Phí vận chuyển:</span>
                 <span className="font-bold text-emerald-600">Miễn phí</span>
@@ -236,7 +237,6 @@ export default function OrderStatusPage({ params }: { params: Promise<{ code: st
           </div>
         </div>
 
-        {/* Need Help CTA */}
         <div className="bg-surface-container-low p-6 rounded-2xl border border-outline-variant/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm text-on-surface-variant font-medium">
           <div>
             <p className="font-bold text-on-surface mb-0.5">Bạn cần hỗ trợ về đơn hàng?</p>
