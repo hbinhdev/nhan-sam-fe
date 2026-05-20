@@ -42,7 +42,6 @@ export type AdminProductPayload = {
   imageUrl?: string;
   images?: string[];
   videoUrl?: string | null;
-  isBestSeller?: boolean;
   categoryId: string;
 };
 

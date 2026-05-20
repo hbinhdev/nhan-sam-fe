@@ -29,7 +29,10 @@ import {
   PackageCheck,
   XCircle,
   AlertCircle,
+  Download,
 } from "lucide-react";
+import { exportOrdersReport } from "@/lib/report-api";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 
 export function OrderTable() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -37,6 +40,8 @@ export function OrderTable() {
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const { showToast } = useToast();
 
   const loadOrders = async () => {
     setLoading(true);
@@ -130,6 +135,20 @@ export function OrderTable() {
     }
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportOrdersReport();
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "Export orders failed.",
+        "error",
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-12 text-center text-slate-500">
@@ -166,6 +185,12 @@ export function OrderTable() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>
+          <Download className="mr-2 h-4 w-4" />
+          {exporting ? "Exporting..." : "Export Excel"}
+        </Button>
+      </div>
       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
         <Table>
           <TableHeader className="bg-slate-50 dark:bg-slate-800/50">

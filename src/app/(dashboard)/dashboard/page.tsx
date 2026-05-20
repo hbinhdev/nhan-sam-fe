@@ -53,13 +53,13 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const ratingChartData = useMemo(() => {
-    const distribution = state.summary?.reviews.ratingDistribution;
-    if (!distribution) return [];
+  const ordersChartData = useMemo(() => {
+    const overview = state.summary?.ordersOverview;
+    if (!overview) return [];
 
-    return [1, 2, 3, 4, 5].map((rating) => ({
-      name: `${rating} stars`,
-      revenue: distribution[rating as 1 | 2 | 3 | 4 | 5] ?? 0,
+    return overview.map((item) => ({
+      date: item.date,
+      orders: Number(item.orders) || 0,
     }));
   }, [state.summary]);
 
@@ -112,8 +112,6 @@ export default function DashboardPage() {
         <KPICard
           title="Total Products"
           value={summary.overview.totalProducts.toLocaleString()}
-          change={`${summary.overview.bestSellerProducts} best-sellers`}
-          trend="up"
           icon={<Boxes size={20} />}
         />
 
@@ -142,7 +140,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <RevenueChart data={ratingChartData} />
+        <RevenueChart data={ordersChartData} />
         <CategoryChart data={consultationStatusData} />
       </div>
 

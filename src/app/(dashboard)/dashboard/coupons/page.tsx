@@ -8,6 +8,8 @@ import {
   getAdminCoupons,
   type Coupon,
 } from '@/lib/coupon-api';
+import { exportCouponsReport } from '@/lib/report-api';
+import { useToast } from '@/components/shared/toast/ToastProvider';
 import {
   Table,
   TableBody,
@@ -16,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Download, Edit, Plus, Trash2 } from 'lucide-react';
 
 function formatDateRange(startDate: string, endDate: string) {
   const start = new Date(startDate).toLocaleDateString('vi-VN');
@@ -35,7 +37,9 @@ export default function CouponsPage() {
   const router = useRouter();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const loadCoupons = async () => {
     setLoading(true);
@@ -69,6 +73,17 @@ export default function CouponsPage() {
     }
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportCouponsReport();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Failed to export coupons.', 'error');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -76,10 +91,16 @@ export default function CouponsPage() {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Coupons</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">Manage discount codes.</p>
         </div>
-        <Button onClick={() => router.push('/dashboard/coupons/add')} className="bg-slate-900 text-white hover:bg-slate-800">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Coupon
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>
+            <Download className="mr-2 h-4 w-4" />
+            {exporting ? 'Exporting...' : 'Export Excel'}
+          </Button>
+          <Button onClick={() => router.push('/dashboard/coupons/add')} className="bg-slate-900 text-white hover:bg-slate-800">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Coupon
+          </Button>
+        </div>
       </div>
 
       {error ? <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/components/shared/auth/AuthProvider";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 import { formatCurrencyVND } from "@/lib/product-api";
 import { getDefaultPaymentQrConfig, type PaymentQrConfig } from "@/lib/payment-qr-api";
 import { createOrder } from "@/lib/order-api";
@@ -28,6 +29,7 @@ export default function PaymentPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { session } = useAuth();
+  const { showToast } = useToast();
   const [orderId] = useState(() => "HRT-" + Math.random().toString(36).substring(2, 9).toUpperCase());
   const [config, setConfig] = useState<PaymentQrConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,13 +99,48 @@ export default function PaymentPage() {
         buyerInfo = { ...buyerInfo, ...JSON.parse(saved) };
       }
 
-      const orderItems = items.map((it) => ({
-        productId: it.id,
-        name: it.name,
-        price: it.price,
-        quantity: it.quantity,
-        image: it.image,
-      }));
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+      const toNumberPrice = (value: unknown) => {
+        if (typeof value === "number") {
+          return Number.isFinite(value) ? value : NaN;
+        }
+        if (typeof value === "string") {
+          const normalized = value.replace(/[^\d.-]/g, "");
+          const parsed = Number(normalized);
+          return Number.isFinite(parsed) ? parsed : NaN;
+        }
+        return NaN;
+      };
+
+      const orderItems = items.map((it) => {
+        const normalizedPrice = toNumberPrice(it.price);
+        const normalizedQuantity = Number(it.quantity);
+        return {
+          productId: it.id,
+          name: it.name,
+          price: normalizedPrice,
+          quantity: normalizedQuantity,
+          image: it.image,
+        };
+      });
+
+      if (orderItems.length === 0) {
+        throw new Error("Giỏ hàng đang trống. Vui lòng thêm sản phẩm trước khi đặt hàng.");
+      }
+
+      for (const item of orderItems) {
+        if (!uuidRegex.test(item.productId)) {
+          throw new Error("Sản phẩm trong giỏ hàng không hợp lệ. Vui lòng tải lại trang.");
+        }
+        if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+          throw new Error(`Số lượng sản phẩm "${item.name}" không hợp lệ.`);
+        }
+        if (!Number.isFinite(item.price) || item.price < 0) {
+          throw new Error(`Giá sản phẩm "${item.name}" không hợp lệ. Vui lòng cập nhật lại giỏ hàng.`);
+        }
+      }
 
       await createOrder({
         orderCode: orderId,
@@ -118,14 +155,17 @@ export default function PaymentPage() {
         couponDiscountAmount: appliedCoupon?.discountAmount || undefined,
         paymentMethod: "VIETQR",
         paymentNote: orderId,
-        items: orderItems.length > 0 ? orderItems : [{ productId: "default", name: "Đơn hàng Heritage", price: orderTotal, quantity: 1 }],
+        items: orderItems,
       });
 
       void clearCart();
       localStorage.removeItem(CHECKOUT_COUPON_KEY);
       setShowSuccessModal(true);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Có lỗi xảy ra khi tạo đơn hàng.");
+      showToast(
+        err instanceof Error ? err.message : "Có lỗi xảy ra khi tạo đơn hàng.",
+        "error",
+      );
     } finally {
       setSubmitting(false);
     }

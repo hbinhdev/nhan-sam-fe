@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ProductTable } from "@/components/dashboard/products/ProductTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, SearchIcon } from "lucide-react";
+import { Download, Plus, Search, SearchIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,8 @@ import {
   getAdminProducts,
   getCategoriesForProductForm,
 } from "@/lib/admin-product-api";
+import { exportProductsReport } from "@/lib/report-api";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 
 const PAGE_LIMIT = 10;
 
@@ -38,8 +40,10 @@ export default function ProductsPage() {
   const [total, setTotal] = useState(0);
 
   const [viewProduct, setViewProduct] = useState<ProductSummary | null>(null);
+  const [exporting, setExporting] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { showToast } = useToast();
 
   const totalPages = useMemo(() => {
     if (total <= 0) return 1;
@@ -137,6 +141,23 @@ export default function ProductsPage() {
     void loadProducts(1, search, nextCategoryId);
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportProductsReport({
+        search: search || undefined,
+        categoryId: categoryId || undefined,
+      });
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "Export products failed.",
+        "error",
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (!authChecked) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
@@ -164,10 +185,20 @@ export default function ProductsPage() {
             Manage your product inventory and catalog.
           </p>
         </div>
-        <Button onClick={() => router.push("/dashboard/products/add")} className="bg-slate-900 text-white hover:bg-slate-800">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Product
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => void handleExport()}
+            disabled={exporting}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            {exporting ? "Exporting..." : "Export Excel"}
+          </Button>
+          <Button onClick={() => router.push("/dashboard/products/add")} className="bg-slate-900 text-white hover:bg-slate-800">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {flashMessage ? (
@@ -271,7 +302,6 @@ export default function ProductsPage() {
                   <p><strong>Origin:</strong> {viewProduct.origin || "-"}</p>
                   <p><strong>Ginseng Age:</strong> {viewProduct.ginsengAge || "-"}</p>
                   <p><strong>Usage Purpose:</strong> {viewProduct.usagePurpose || "-"}</p>
-                  <p><strong>Best Seller:</strong> {viewProduct.isBestSeller ? "Yes" : "No"}</p>
                   <p><strong>Video URL:</strong> {viewProduct.videoUrl || "-"}</p>
                 </div>
               </div>

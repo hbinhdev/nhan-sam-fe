@@ -34,7 +34,6 @@ type ProductFormState = {
   ginsengAge: string;
   brand: string;
   origin: string;
-  isBestSeller: boolean;
 };
 
 interface ProductFormProps {
@@ -59,7 +58,6 @@ const EMPTY_FORM: ProductFormState = {
   ginsengAge: "",
   brand: "",
   origin: "",
-  isBestSeller: false,
 };
 
 function isValidUrl(value: string) {
@@ -94,7 +92,6 @@ function mapProductToForm(product: ProductSummary): ProductFormState {
     ginsengAge: product.ginsengAge ?? "",
     brand: product.brand ?? "",
     origin: product.origin ?? "",
-    isBestSeller: Boolean(product.isBestSeller),
   };
 }
 
@@ -127,7 +124,6 @@ function buildPayload(form: ProductFormState): AdminProductPayload {
     ginsengAge: form.ginsengAge.trim() || undefined,
     brand: form.brand.trim() || undefined,
     origin: form.origin.trim() || undefined,
-    isBestSeller: form.isBestSeller,
   };
 }
 
@@ -618,15 +614,6 @@ export function ProductForm({ mode, initialData, categories }: ProductFormProps)
               </div>
             </div>
 
-            <label className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-300"
-                checked={form.isBestSeller}
-                onChange={(e) => setForm((prev) => ({ ...prev, isBestSeller: e.target.checked }))}
-              />
-              Best Seller
-            </label>
           </div>
         </div>
 

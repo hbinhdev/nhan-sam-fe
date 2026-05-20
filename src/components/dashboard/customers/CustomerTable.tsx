@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2 } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import { getAuthSession } from "@/lib/auth-api";
 import {
   deleteAdminUser,
@@ -21,6 +21,8 @@ import {
   type AdminUser,
   type AdminUserRole,
 } from "@/lib/user-api";
+import { exportCustomersReport } from "@/lib/report-api";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 
 const PAGE_LIMIT = 10;
 
@@ -54,6 +56,8 @@ export function CustomerTable() {
   const [total, setTotal] = useState(0);
 
   const [processingUserId, setProcessingUserId] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const { showToast } = useToast();
 
   const currentUserId = getAuthSession()?.user?.id ?? null;
 
@@ -158,6 +162,23 @@ export function CustomerTable() {
     }
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportCustomersReport({
+        search: search || undefined,
+        role: roleFilter || undefined,
+      });
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "Export customers failed.",
+        "error",
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -178,6 +199,11 @@ export function CustomerTable() {
           <option value="ADMIN">ADMIN</option>
           <option value="USER">USER</option>
         </select>
+
+        <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>
+          <Download className="mr-2 h-4 w-4" />
+          {exporting ? "Exporting..." : "Export Excel"}
+        </Button>
       </div>
 
       {flashMessage ? (

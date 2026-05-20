@@ -20,6 +20,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Download } from "lucide-react";
+import { exportConsultationsReport } from "@/lib/report-api";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 
 const PAGE_LIMIT = 10;
 
@@ -58,7 +61,9 @@ export default function ConsultationsPage() {
 
   const [savingStatusId, setSavingStatusId] = useState<string | null>(null);
   const [savingNoteId, setSavingNoteId] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
+  const { showToast } = useToast();
 
   const [authChecked, setAuthChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -165,6 +170,23 @@ export default function ConsultationsPage() {
     }
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportConsultationsReport({
+        search: search || undefined,
+        status: statusFilter || undefined,
+      });
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : "Export consultations failed.",
+        "error",
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (!authChecked) {
     return <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">Checking admin access...</div>;
   }
@@ -175,9 +197,15 @@ export default function ConsultationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Consultations</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400">Manage customer consultation requests and follow-up status.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Consultations</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Manage customer consultation requests and follow-up status.</p>
+        </div>
+        <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>
+          <Download className="mr-2 h-4 w-4" />
+          {exporting ? "Exporting..." : "Export Excel"}
+        </Button>
       </div>
 
       {flash ? <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{flash}</div> : null}

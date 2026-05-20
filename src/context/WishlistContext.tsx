@@ -1,6 +1,13 @@
 ﻿"use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "@/components/shared/auth/AuthProvider";
+import {
+  addToWishlistApi,
+  clearWishlistApi,
+  fetchWishlist,
+  removeWishlistItemApi,
+} from "@/lib/wishlist-api";
 
 export type WishlistItem = {
   id: string;
@@ -15,64 +22,143 @@ export type WishlistItem = {
 type WishlistContextType = {
   items: WishlistItem[];
   totalItems: number;
-  addToWishlist: (item: WishlistItem) => void;
-  removeFromWishlist: (id: string) => void;
-  toggleWishlist: (item: WishlistItem) => void;
+  addToWishlist: (item: WishlistItem) => Promise<void>;
+  removeFromWishlist: (id: string) => Promise<void>;
+  toggleWishlist: (item: WishlistItem) => Promise<void>;
   isInWishlist: (id: string) => boolean;
-  clearWishlist: () => void;
+  clearWishlist: () => Promise<void>;
 };
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 const LOCAL_STORAGE_KEY = "heritage_wishlist";
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<WishlistItem[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
+  const [items, setItems] = useState<WishlistItem[]>([]);
+  const { isAuthenticated, isAuthLoading } = useAuth();
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+
+    if (isAuthenticated) {
+      const sync = async () => {
+        const saved = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved) as WishlistItem[];
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              for (const item of parsed) {
+                await addToWishlistApi(item.id);
+              }
+            }
+            window.localStorage.removeItem(LOCAL_STORAGE_KEY);
+          } catch (error) {
+            console.error("Failed to sync wishlist", error);
+          }
+        }
+
+        try {
+          const apiItems = await fetchWishlist();
+          const mappedItems = apiItems.map((item: any) => ({
+            id: item.product.id,
+            name: item.product.name,
+            price: Number(item.product.price ?? 0),
+            image: item.product.imageUrl || item.product.thumbnail || "",
+            sku: item.product.sku,
+            brand: item.product.brand,
+            href: item.product.slug ? `/products/${item.product.slug}` : undefined,
+          }));
+          setItems(mappedItems);
+        } catch (error) {
+          console.error("Failed to load wishlist from API", error);
+        }
+      };
+
+      sync();
+      return;
     }
 
     const saved = window.localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!saved) {
-      return [];
+      setItems([]);
+      return;
     }
 
     try {
       const parsed = JSON.parse(saved) as WishlistItem[];
-      return Array.isArray(parsed) ? parsed : [];
+      setItems(Array.isArray(parsed) ? parsed : []);
     } catch {
-      return [];
+      setItems([]);
     }
-  });
+  }, [isAuthenticated, isAuthLoading]);
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    if (!isAuthenticated && !isAuthLoading) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
+    }
+  }, [items, isAuthenticated, isAuthLoading]);
 
-  const addToWishlist = (item: WishlistItem) => {
+  const addToWishlist = async (item: WishlistItem) => {
+    if (isAuthenticated) {
+      await addToWishlistApi(item.id);
+      const apiItems = await fetchWishlist();
+      setItems(
+        apiItems.map((entry: any) => ({
+          id: entry.product.id,
+          name: entry.product.name,
+          price: Number(entry.product.price ?? 0),
+          image: entry.product.imageUrl || entry.product.thumbnail || "",
+          sku: entry.product.sku,
+          brand: entry.product.brand,
+          href: entry.product.slug ? `/products/${entry.product.slug}` : undefined,
+        })),
+      );
+      return;
+    }
+
     setItems((prev) => {
-      if (prev.some((existing) => existing.id === item.id)) {
-        return prev;
-      }
+      if (prev.some((existing) => existing.id === item.id)) return prev;
       return [...prev, item];
     });
   };
 
-  const removeFromWishlist = (id: string) => {
+  const removeFromWishlist = async (id: string) => {
+    if (isAuthenticated) {
+      await removeWishlistItemApi(id);
+      const apiItems = await fetchWishlist();
+      setItems(
+        apiItems.map((entry: any) => ({
+          id: entry.product.id,
+          name: entry.product.name,
+          price: Number(entry.product.price ?? 0),
+          image: entry.product.imageUrl || entry.product.thumbnail || "",
+          sku: entry.product.sku,
+          brand: entry.product.brand,
+          href: entry.product.slug ? `/products/${entry.product.slug}` : undefined,
+        })),
+      );
+      return;
+    }
+
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const toggleWishlist = (item: WishlistItem) => {
-    setItems((prev) => {
-      if (prev.some((existing) => existing.id === item.id)) {
-        return prev.filter((existing) => existing.id !== item.id);
-      }
-      return [...prev, item];
-    });
+  const toggleWishlist = async (item: WishlistItem) => {
+    if (isInWishlist(item.id)) {
+      await removeFromWishlist(item.id);
+      return;
+    }
+    await addToWishlist(item);
   };
 
   const isInWishlist = (id: string) => items.some((item) => item.id === id);
 
-  const clearWishlist = () => {
+  const clearWishlist = async () => {
+    if (isAuthenticated) {
+      await clearWishlistApi();
+      setItems([]);
+      return;
+    }
+
     setItems([]);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
   };

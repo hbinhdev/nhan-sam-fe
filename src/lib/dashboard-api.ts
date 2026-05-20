@@ -30,7 +30,6 @@ export type DashboardSummary = {
     pendingConsultations: number;
     contactedConsultations: number;
     cancelledConsultations: number;
-    bestSellerProducts: number;
   };
   reviews: {
     averageRating: number;
@@ -42,13 +41,16 @@ export type DashboardSummary = {
       5: number;
     };
   };
+  ordersOverview: Array<{
+    date: string;
+    orders: number;
+  }>;
   recentProducts: Array<{
     id: string;
     name: string;
     sku: string | null;
     price: number;
     stock: number;
-    isBestSeller: boolean;
     categoryName: string | null;
     createdAt: string;
   }>;

@@ -6,7 +6,7 @@ import { CategoryGrid } from "@/components/sections/home/CategoryGrid";
 import { BrandHeritage } from "@/components/sections/home/BrandHeritage";
 import { Testimonials } from "@/components/sections/home/Testimonials";
 import { ConsultationForm } from "@/components/sections/home/ConsultationForm";
-import { formatCurrencyVND, getProducts } from "@/lib/product-api";
+import { formatCurrencyVND, getBestSellerProducts } from "@/lib/product-api";
 import { getCategories, type Category } from "@/lib/category-api";
 import { getHomeSections, type HomeSection } from "@/lib/home-section-api";
 
@@ -198,12 +198,12 @@ function toSection(seed: HomeSectionSeed): HomeSection {
 }
 
 export default async function Home() {
-  let bestSellerProducts: Awaited<ReturnType<typeof getProducts>>["data"] = [];
+  let bestSellerProducts: Awaited<ReturnType<typeof getBestSellerProducts>>["data"] = [];
   let cmsSections: HomeSection[] = [];
   let categories: Category[] = [];
 
   try {
-    const response = await getProducts({ isBestSeller: true, limit: 4, page: 1 });
+    const response = await getBestSellerProducts(4);
     bestSellerProducts = response.data.slice(0, 4);
   } catch {
     bestSellerProducts = [];

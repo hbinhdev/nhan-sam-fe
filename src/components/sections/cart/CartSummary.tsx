@@ -43,8 +43,6 @@ export function CartSummary() {
   const [applying, setApplying] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  if (items.length === 0) return null;
-
   const shipping = 0;
   const tax = 0;
   const discount = appliedCoupon?.discountAmount ?? 0;
@@ -59,6 +57,8 @@ export function CartSummary() {
     setCouponError(null);
     localStorage.removeItem(CHECKOUT_COUPON_KEY);
   }, [appliedCoupon, totalPrice]);
+
+  if (items.length === 0) return null;
 
   const handleApplyCoupon = async () => {
     if (appliedCoupon) {

@@ -13,20 +13,20 @@ import {
 } from 'recharts';
 
 type RevenueChartProps = {
-  data: Array<{ name: string; revenue: number }>;
+  data: Array<{ date: string; orders: number }>;
 };
 
 export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card className="col-span-1 lg:col-span-2">
       <CardHeader>
-        <CardTitle>Approved Ratings Distribution</CardTitle>
+        <CardTitle>Orders Overview</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
           {data.length === 0 ? (
             <div className="h-full w-full flex items-center justify-center text-sm text-slate-500">
-              No rating data available.
+              No order data available.
             </div>
           ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -50,10 +50,16 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 stroke="#e2e8f0" 
               />
               <XAxis
-                dataKey="name"
+                dataKey="date"
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: '#64748b', fontSize: 12 }}
+                tickFormatter={(value) =>
+                  new Date(value).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })
+                }
                 dy={10} 
               />
               <YAxis
@@ -63,6 +69,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 tickFormatter={(value) => `${value}`} 
               />
               <Tooltip
+                formatter={(value: number) => [`${value}`, "Total orders"]}
+                labelFormatter={(label) =>
+                  `Date: ${new Date(label).toLocaleDateString("en-GB")}`
+                }
                 contentStyle={{
                   backgroundColor: '#fff',
                   borderRadius: '8px',
@@ -72,7 +82,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
               />
               <Area
                 type="monotone"
-                dataKey="revenue"
+                dataKey="orders"
                 stroke="#6366f1"
                 strokeWidth={2}
                 fillOpacity={1}

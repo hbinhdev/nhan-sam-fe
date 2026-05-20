@@ -23,6 +23,7 @@ export type ProductSummary = {
   usageInstructions?: string | null;
   ginsengAge?: string | null;
   isBestSeller?: boolean;
+  soldCount?: number;
   category?: CategorySummary | null;
   createdAt?: string;
   updatedAt?: string;
@@ -47,7 +48,6 @@ export type ProductFilterParams = {
   ginsengAge?: string;
   brand?: string;
   origin?: string;
-  isBestSeller?: boolean;
   sortBy?: "createdAt" | "price" | "name";
   sortOrder?: "asc" | "desc";
 };
@@ -138,6 +138,7 @@ function sanitizeProduct(value: unknown): ProductSummary | null {
       typeof item.usageInstructions === "string" ? item.usageInstructions : null,
     ginsengAge: typeof item.ginsengAge === "string" ? item.ginsengAge : null,
     isBestSeller: typeof item.isBestSeller === "boolean" ? item.isBestSeller : false,
+    soldCount: typeof item.soldCount === "number" ? item.soldCount : 0,
     category: sanitizeCategorySummary(item.category),
     createdAt: typeof item.createdAt === "string" ? item.createdAt : undefined,
     updatedAt: typeof item.updatedAt === "string" ? item.updatedAt : undefined,
@@ -172,7 +173,6 @@ export async function getProducts(params?: ProductFilterParams) {
       ginsengAge: params?.ginsengAge,
       brand: params?.brand,
       origin: params?.origin,
-      isBestSeller: params?.isBestSeller,
       sortBy: params?.sortBy,
       sortOrder: params?.sortOrder,
     })}`,
@@ -206,6 +206,42 @@ export async function getProducts(params?: ProductFilterParams) {
     total: typeof raw?.total === "number" ? raw.total : data.length,
     page: typeof raw?.page === "number" ? raw.page : params?.page ?? 1,
     limit: typeof raw?.limit === "number" ? raw.limit : params?.limit ?? 10,
+  };
+}
+
+export async function getBestSellerProducts(limit = 4) {
+  const response = await safeFetch(
+    `${API_BASE_URL}/products/best-sellers${buildQuery({ limit })}`,
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch best sellers: ${response.status}`);
+  }
+
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    return {
+      data: [],
+      total: 0,
+      page: 1,
+      limit,
+    };
+  }
+
+  const raw = payload as Partial<ProductListResponse>;
+  const data = Array.isArray(raw?.data)
+    ? raw.data
+        .map((item) => sanitizeProduct(item))
+        .filter((item): item is ProductSummary => item !== null)
+    : [];
+
+  return {
+    data,
+    total: typeof raw?.total === "number" ? raw.total : data.length,
+    page: typeof raw?.page === "number" ? raw.page : 1,
+    limit: typeof raw?.limit === "number" ? raw.limit : limit,
   };
 }
 

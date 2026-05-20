@@ -50,7 +50,6 @@ export function ProductTable({ products, onView, onEdit, onDelete }: ProductTabl
             <TableHead>Category</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Stock</TableHead>
-            <TableHead>Best Seller</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -71,11 +70,6 @@ export function ProductTable({ products, onView, onEdit, onDelete }: ProductTabl
               <TableCell>
                 <Badge variant={getStockBadge(product.stock)}>
                   {getStockLabel(product.stock)} ({product.stock ?? 0})
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant={product.isBestSeller ? 'success' : 'secondary'}>
-                  {product.isBestSeller ? 'Yes' : 'No'}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
