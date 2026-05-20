@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, Search, Menu, User, Moon, Sun, ShoppingCart, PhoneCall } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/shared/auth/AuthProvider';
 import {
   getDashboardNotifications,
   type DashboardNotification,
@@ -36,6 +37,7 @@ function formatRelativeTime(value: string) {
 export function Header({ toggleSidebar }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const { user, isAuthLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
   const [readIds, setReadIds] = useState<string[]>(() => {
@@ -100,6 +102,16 @@ export function Header({ toggleSidebar }: HeaderProps) {
     () => notifications.filter((item) => !readIds.includes(item.id)).length,
     [notifications, readIds],
   );
+  const displayName = useMemo(() => {
+    if (!user) return 'Admin';
+    const extendedUser = user as typeof user & { fullName?: string | null };
+    return user.name || extendedUser.fullName || user.email || 'Admin';
+  }, [user]);
+  const displayEmail = user?.email ?? '';
+  const avatarInitial = useMemo(() => {
+    const source = displayName || displayEmail || 'A';
+    return source.trim().charAt(0).toUpperCase() || 'A';
+  }, [displayEmail, displayName]);
 
   const markAllAsRead = () => {
     const allIds = notifications.map((item) => item.id);
@@ -218,14 +230,14 @@ export function Header({ toggleSidebar }: HeaderProps) {
         <div className="flex items-center gap-3 border-l border-slate-200 pl-4 dark:border-slate-800">
           <div className="hidden text-right sm:block">
             <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-              Admin User
+              {isAuthLoading ? 'Đang tải...' : displayName}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              admin@example.com
+              {isAuthLoading ? ' ' : displayEmail}
             </p>
           </div>
           <button className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 ring-2 ring-white dark:bg-indigo-900/30 dark:text-indigo-400 dark:ring-slate-950">
-            <User size={18} />
+            {isAuthLoading ? <User size={18} /> : <span className="text-sm font-semibold">{avatarInitial}</span>}
           </button>
         </div>
       </div>

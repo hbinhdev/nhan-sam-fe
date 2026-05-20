@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { notFound } from "next/navigation";
 import { getAuthSession } from "@/lib/auth-api";
 import {
   adminCreateHomeSection,
@@ -60,6 +61,7 @@ function toFormState(section: HomeSection | null, preset: { key: string; type: H
 }
 
 export default function HomeSectionsPage() {
+  notFound();
   const [sections, setSections] = useState<HomeSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

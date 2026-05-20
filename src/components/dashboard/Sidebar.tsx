@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import React from 'react';
-import { usePathname } from 'next/navigation';
+import React from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -17,11 +17,12 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { LoadingLink } from '@/components/shared/routing/RouteLoadingProvider';
+  ChevronRight,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { LoadingLink } from "@/components/shared/routing/RouteLoadingProvider";
+import { useAuth } from "@/components/shared/auth/AuthProvider";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -31,87 +32,94 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { signOut } = useAuth();
+
+  const handleLogout = () => {
+    signOut();
+    router.replace("/login");
+  };
 
   const links = [
     {
-      to: '/dashboard',
+      to: "/dashboard",
       icon: LayoutDashboard,
-      label: 'Dashboard'
+      label: "Dashboard",
     },
     {
-      to: '/dashboard/products',
+      to: "/dashboard/products",
       icon: Package,
-      label: 'Products'
+      label: "Products",
     },
     {
-      to: '/dashboard/categories',
+      to: "/dashboard/categories",
       icon: FolderTree,
-      label: 'Categories'
+      label: "Categories",
     },
     {
-      to: '/dashboard/policies',
+      to: "/dashboard/policies",
       icon: FileText,
-      label: 'Policies'
+      label: "Policies",
     },
     {
-      to: '/dashboard/blogs',
+      to: "/dashboard/blogs",
       icon: BookOpen,
-      label: 'Blogs'
+      label: "Blogs",
     },
     {
-      to: '/dashboard/orders',
+      to: "/dashboard/orders",
       icon: ShoppingCart,
-      label: 'Orders'
+      label: "Orders",
     },
     {
-      to: '/dashboard/coupons',
+      to: "/dashboard/coupons",
       icon: TicketPercent,
-      label: 'Coupons'
+      label: "Coupons",
     },
     {
-      to: '/dashboard/customers',
+      to: "/dashboard/customers",
       icon: Users,
-      label: 'Customers'
+      label: "Customers",
     },
     {
-      to: '/dashboard/consultations',
+      to: "/dashboard/consultations",
       icon: PhoneCall,
-      label: 'Consultations'
+      label: "Consultations",
     },
+    // {
+    //   to: '/dashboard/home-sections',
+    //   icon: House,
+    //   label: 'Quản lý trang chủ'
+    // },
     {
-      to: '/dashboard/home-sections',
-      icon: House,
-      label: 'Quản lý trang chủ'
-    },
-    {
-      to: '/dashboard/qr-management',
+      to: "/dashboard/qr-management",
       icon: QrCode,
-      label: 'Quản lý mã QR'
-    }
+      label: "Quản lý mã QR",
+    },
   ];
 
   const sidebarVariants = {
     open: {
       width: 240,
-      x: 0
+      x: 0,
     },
     closed: {
       width: 70,
-      x: 0
+      x: 0,
     },
     mobileOpen: {
       width: 240,
-      x: 0
+      x: 0,
     },
     mobileClosed: {
       width: 240,
-      x: -240
-    }
+      x: -240,
+    },
   };
 
   const getVariant = () => {
-    if (isMobile) return isOpen ? 'mobileOpen' : 'mobileClosed';
-    return isOpen ? 'open' : 'closed';
+    if (isMobile) return isOpen ? "mobileOpen" : "mobileClosed";
+    return isOpen ? "open" : "closed";
   };
 
   return (
@@ -128,20 +136,20 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
         animate={getVariant()}
         variants={sidebarVariants}
         transition={{
-          type: 'spring',
+          type: "spring",
           stiffness: 300,
-          damping: 30
+          damping: 30,
         }}
         className={cn(
-          'fixed left-0 top-0 z-30 h-screen border-r border-border bg-background transition-colors duration-300',
-          isMobile ? 'shadow-2xl' : ''
+          "fixed left-0 top-0 z-30 h-screen border-r border-border bg-background transition-colors duration-300",
+          isMobile ? "shadow-2xl" : "",
         )}
       >
         <div className="flex h-16 items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
           <div
             className={cn(
-              'flex items-center gap-2 font-bold text-xl text-indigo-600 overflow-hidden whitespace-nowrap transition-all duration-300',
-              !isOpen && !isMobile ? 'w-0 opacity-0' : 'w-auto opacity-100'
+              "flex items-center gap-2 font-bold text-xl text-indigo-600 overflow-hidden whitespace-nowrap transition-all duration-300",
+              !isOpen && !isMobile ? "w-0 opacity-0" : "w-auto opacity-100",
             )}
           >
             <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0">
@@ -170,17 +178,19 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
                     key={link.to}
                     href={link.to}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 group relative',
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 group relative",
                       isActive
-                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
-                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                        ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400"
+                        : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800",
                     )}
                   >
                     <link.icon size={22} className="shrink-0" />
                     <span
                       className={cn(
-                        'whitespace-nowrap overflow-hidden transition-all duration-300',
-                        !isOpen && !isMobile ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                        "whitespace-nowrap overflow-hidden transition-all duration-300",
+                        !isOpen && !isMobile
+                          ? "w-0 opacity-0"
+                          : "w-auto opacity-100",
                       )}
                     >
                       {link.label}
@@ -202,19 +212,22 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
               <Settings size={22} className="shrink-0" />
               <span
                 className={cn(
-                  'whitespace-nowrap overflow-hidden transition-all duration-300',
-                  !isOpen && !isMobile ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                  "whitespace-nowrap overflow-hidden transition-all duration-300",
+                  !isOpen && !isMobile ? "w-0 opacity-0" : "w-auto opacity-100",
                 )}
               >
                 Settings
               </span>
             </button>
-            <button className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors">
+            <button
+              onClick={handleLogout}
+              className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors"
+            >
               <LogOut size={22} className="shrink-0" />
               <span
                 className={cn(
-                  'whitespace-nowrap overflow-hidden transition-all duration-300',
-                  !isOpen && !isMobile ? 'w-0 opacity-0' : 'w-auto opacity-100'
+                  "whitespace-nowrap overflow-hidden transition-all duration-300",
+                  !isOpen && !isMobile ? "w-0 opacity-0" : "w-auto opacity-100",
                 )}
               >
                 Logout
