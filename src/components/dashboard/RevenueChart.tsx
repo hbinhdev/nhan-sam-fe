@@ -69,7 +69,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 tickFormatter={(value) => `${value}`} 
               />
               <Tooltip
-                formatter={(value: number) => [`${value}`, "Total orders"]}
+                formatter={(value) => [`${Number(value ?? 0)}`, "Total orders"]}
                 labelFormatter={(label) =>
                   `Date: ${new Date(label).toLocaleDateString("en-GB")}`
                 }
