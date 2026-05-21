@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { getAuthSession } from "@/lib/auth-api";
@@ -9,6 +9,7 @@ import {
   type ConsultationItem,
   type ConsultationStatus,
 } from "@/lib/consultation-api";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,8 +51,6 @@ function statusBadgeVariant(status: ConsultationStatus): "secondary" | "success"
 export default function ConsultationsPage() {
   const [items, setItems] = useState<ConsultationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [flash, setFlash] = useState<string | null>(null);
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -79,7 +78,6 @@ export default function ConsultationsPage() {
     nextStatus = statusFilter,
   ) => {
     setLoading(true);
-    setError(null);
 
     try {
       const response = await adminGetConsultations({
@@ -105,7 +103,7 @@ export default function ConsultationsPage() {
     } catch (loadError) {
       setItems([]);
       setTotal(0);
-      setError(loadError instanceof Error ? loadError.message : "Không tải được yêu cầu tư vấn.");
+      showToast(loadError instanceof Error ? loadError.message : "Không tải được yêu cầu tư vấn.", "error");
     } finally {
       setLoading(false);
     }
@@ -140,15 +138,13 @@ export default function ConsultationsPage() {
 
   const handleStatusUpdate = async (id: string, nextStatus: ConsultationStatus) => {
     setSavingStatusId(id);
-    setError(null);
-    setFlash(null);
 
     try {
       await adminUpdateConsultationStatus(id, nextStatus);
-      setFlash("Cập nhật trạng thái thành công.");
+      showToast("Cập nhật trạng thái thành công.", "success");
       await loadData(page, search, statusFilter);
     } catch (updateError) {
-      setError(updateError instanceof Error ? updateError.message : "Không thể cập nhật trạng thái.");
+      showToast(updateError instanceof Error ? updateError.message : "Không thể cập nhật trạng thái.", "error");
     } finally {
       setSavingStatusId(null);
     }
@@ -156,15 +152,13 @@ export default function ConsultationsPage() {
 
   const handleNoteSave = async (id: string) => {
     setSavingNoteId(id);
-    setError(null);
-    setFlash(null);
 
     try {
       await adminUpdateConsultationNote(id, noteDrafts[id] ?? "");
-      setFlash("Cập nhật ghi chú nội bộ thành công.");
+      showToast("Cập nhật ghi chú nội bộ thành công.", "success");
       await loadData(page, search, statusFilter);
     } catch (updateError) {
-      setError(updateError instanceof Error ? updateError.message : "Không thể cập nhật ghi chú.");
+      showToast(updateError instanceof Error ? updateError.message : "Không thể cập nhật ghi chú.", "error");
     } finally {
       setSavingNoteId(null);
     }
@@ -208,9 +202,6 @@ export default function ConsultationsPage() {
         </Button>
       </div>
 
-      {flash ? <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{flash}</div> : null}
-      {error ? <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
-
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <form className="flex-1" onSubmit={handleSearchSubmit}>
           <Input placeholder="Search by name or phone..." value={searchInput} onChange={(event) => setSearchInput(event.target.value)} />
@@ -252,19 +243,21 @@ export default function ConsultationsPage() {
                   <TableCell className="max-w-56 whitespace-pre-wrap text-slate-600">{item.message || "-"}</TableCell>
                   <TableCell>{formatDate(item.createdAt)}</TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-2">
-                      <Badge variant={statusBadgeVariant(item.status)}>{statusLabel(item.status)}</Badge>
-                      <select
-                        className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs"
-                        value={item.status}
-                        disabled={savingStatusId === item.id}
-                        onChange={(event) => void handleStatusUpdate(item.id, event.target.value as ConsultationStatus)}
-                      >
-                        <option value="PENDING">Đang chờ</option>
-                        <option value="CONTACTED">Đã tư vấn</option>
-                        <option value="CANCELLED">Đã hủy</option>
-                      </select>
-                    </div>
+                    <select
+                      className={cn(
+                        "h-8 rounded-md border px-2 text-xs font-medium outline-none transition-colors",
+                        item.status === "PENDING" && "bg-slate-100 text-slate-800 border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200",
+                        item.status === "CONTACTED" && "bg-emerald-100 text-emerald-800 border-emerald-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200",
+                        item.status === "CANCELLED" && "bg-red-100 text-red-800 border-red-200 focus:border-red-400 focus:ring-2 focus:ring-red-200"
+                      )}
+                      value={item.status}
+                      disabled={savingStatusId === item.id}
+                      onChange={(event) => void handleStatusUpdate(item.id, event.target.value as ConsultationStatus)}
+                    >
+                      <option value="PENDING" className="bg-white text-slate-900">Đang chờ</option>
+                      <option value="CONTACTED" className="bg-white text-slate-900">Đã tư vấn</option>
+                      <option value="CANCELLED" className="bg-white text-slate-900">Đã hủy</option>
+                    </select>
                   </TableCell>
                   <TableCell className="min-w-64">
                     <div className="flex flex-col gap-2">
