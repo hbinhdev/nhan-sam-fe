@@ -21,7 +21,6 @@ export default function MarketingLayout({
           <nav className="hidden items-center space-x-8 md:flex">
             <NavLink href="/">Trang chủ</NavLink>
             <NavLink href="/products">Sản phẩm</NavLink>
-            <NavLink href="#">Câu chuyện thương hiệu</NavLink>
             <NavLink href="/blogs">Kiến thức</NavLink>
             <NavLink href="/contact">Liên hệ</NavLink>
           </nav>
