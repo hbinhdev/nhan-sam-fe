@@ -32,7 +32,6 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [flashMessage, setFlashMessage] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -113,17 +112,17 @@ export default function ProductsPage() {
     if (!confirmed) return;
 
     setError(null);
-    setFlashMessage(null);
 
     try {
       await deleteAdminProduct(product.id);
-      setFlashMessage("Product deleted successfully.");
+      showToast("Product deleted successfully.", "success");
       await loadProducts(page, search, categoryId);
     } catch (deleteError) {
-      setError(
+      showToast(
         deleteError instanceof Error
           ? deleteError.message
           : "Failed to delete product.",
+        "error",
       );
     }
   };
@@ -148,6 +147,7 @@ export default function ProductsPage() {
         search: search || undefined,
         categoryId: categoryId || undefined,
       });
+      showToast("Export products thành công.", "success");
     } catch (error) {
       showToast(
         error instanceof Error ? error.message : "Export products failed.",
@@ -200,12 +200,6 @@ export default function ProductsPage() {
           </Button>
         </div>
       </div>
-
-      {flashMessage ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-          {flashMessage}
-        </div>
-      ) : null}
 
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">

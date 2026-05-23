@@ -39,7 +39,7 @@ export type PolicyListResponse = {
 export type AdminPolicyPayload = {
   type: PolicyType;
   title: string;
-  slug: string;
+  slug?: string;
   content: string;
   isPublished?: boolean;
 };

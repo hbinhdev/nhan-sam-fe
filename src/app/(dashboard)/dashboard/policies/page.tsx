@@ -31,13 +31,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Edit, Eye, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/components/shared/toast/ToastProvider";
+import { RichTextEditor } from "@/components/dashboard/blogs/RichTextEditor";
+import { normalizeBlogContentToHtml } from "@/lib/blog-helpers";
 
 type FormMode = "create" | "edit";
 
 type PolicyFormState = {
   type: PolicyType;
   title: string;
-  slug: string;
   content: string;
   isPublished: boolean;
 };
@@ -45,7 +46,6 @@ type PolicyFormState = {
 const EMPTY_FORM: PolicyFormState = {
   type: "privacy",
   title: "",
-  slug: "",
   content: "",
   isPublished: true,
 };
@@ -153,8 +153,7 @@ export default function PoliciesPage() {
     setForm({
       type: policy.type,
       title: policy.title,
-      slug: policy.slug,
-      content: policy.content,
+      content: normalizeBlogContentToHtml(policy.content),
       isPublished: policy.isPublished,
     });
     setFormError(null);
@@ -203,11 +202,10 @@ export default function PoliciesPage() {
     setError(null);
 
     const title = form.title.trim();
-    const slug = form.slug.trim();
     const content = form.content.trim();
 
-    if (!title || !slug || !content) {
-      setFormError("Title, slug and content are required.");
+    if (!title || !content) {
+      setFormError("Title and content are required.");
       return;
     }
 
@@ -217,7 +215,6 @@ export default function PoliciesPage() {
         await adminCreatePolicy({
           type: form.type,
           title,
-          slug,
           content,
           isPublished: form.isPublished,
         });
@@ -226,7 +223,6 @@ export default function PoliciesPage() {
         await adminUpdatePolicy(editingPolicy.id, {
           type: form.type,
           title,
-          slug,
           content,
           isPublished: form.isPublished,
         });
@@ -420,7 +416,7 @@ export default function PoliciesPage() {
             <DialogHeader className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
               <DialogTitle>{formMode === "create" ? "Add Policy" : "Edit Policy"}</DialogTitle>
               <DialogDescription>
-                Manage title, slug, content and publish status for policy page.
+                Manage title, content and publish status for policy page.
               </DialogDescription>
             </DialogHeader>
 
@@ -448,17 +444,6 @@ export default function PoliciesPage() {
                     ))}
                   </select>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Slug *</label>
-                  <Input
-                    value={form.slug}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, slug: event.target.value }))
-                    }
-                    className="h-10 border-slate-300 bg-white text-slate-900"
-                  />
-                </div>
               </div>
 
               <div className="space-y-2">
@@ -474,12 +459,12 @@ export default function PoliciesPage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700">Content *</label>
-                <textarea
+                <RichTextEditor
                   value={form.content}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, content: event.target.value }))
+                  onChange={(nextValue) =>
+                    setForm((prev) => ({ ...prev, content: nextValue }))
                   }
-                  className="min-h-[280px] w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                  placeholder="Enter policy content..."
                 />
               </div>
 
@@ -548,9 +533,10 @@ export default function PoliciesPage() {
                   <p>
                     <strong>Content:</strong>
                   </p>
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 whitespace-pre-wrap">
-                    {viewPolicy.content}
-                  </div>
+                  <div
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-slate-700 [&_a]:text-primary [&_a]:underline [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:mb-3 [&_ul]:mb-3"
+                    dangerouslySetInnerHTML={{ __html: normalizeBlogContentToHtml(viewPolicy.content) }}
+                  />
                 </div>
               </>
             ) : null}

@@ -74,9 +74,11 @@ export function OrderTable() {
       if (selectedOrder && selectedOrder.id === id) {
         setSelectedOrder(updated);
       }
+      showToast("Cập nhật trạng thái đơn hàng thành công.", "success");
     } catch (err) {
-      alert(
+      showToast(
         err instanceof Error ? err.message : "Cập nhật trạng thái thất bại.",
+        "error",
       );
     } finally {
       setUpdatingId(null);
@@ -139,6 +141,7 @@ export function OrderTable() {
     setExporting(true);
     try {
       await exportOrdersReport();
+      showToast("Export orders thành công.", "success");
     } catch (error) {
       showToast(
         error instanceof Error ? error.message : "Export orders failed.",

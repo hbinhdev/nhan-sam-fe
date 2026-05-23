@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { formatCurrencyVND } from '@/lib/product-api';
 import {
   createAdminCoupon,
   updateAdminCoupon,
@@ -46,6 +47,19 @@ function normalizeDiscountValueForInput(
   return String(numeric);
 }
 
+function normalizeMoneyValueForInput(value: number | string | null | undefined) {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return '';
+  }
+
+  return String(Math.trunc(numeric));
+}
+
 export function CouponForm({ mode, initialData }: CouponFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -59,10 +73,10 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
       initialData?.discountValue,
       (initialData?.discountType || 'PERCENTAGE') as CouponDiscountType,
     ),
-    minOrderAmount: String(initialData?.minOrderAmount ?? 0),
+    minOrderAmount: normalizeMoneyValueForInput(initialData?.minOrderAmount ?? 0),
     maxDiscountAmount:
       initialData?.maxDiscountAmount !== null && initialData?.maxDiscountAmount !== undefined
-        ? String(initialData.maxDiscountAmount)
+        ? normalizeMoneyValueForInput(initialData.maxDiscountAmount)
         : '',
     usageLimit:
       initialData?.usageLimit !== null && initialData?.usageLimit !== undefined
@@ -93,10 +107,12 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
 
     const discountValue = Number(form.discountValue);
     const minOrderAmount = Number(form.minOrderAmount || 0);
-    const maxDiscountAmount = form.maxDiscountAmount.trim()
+    const hasMaxDiscountAmount = form.maxDiscountAmount.trim() !== '';
+    const hasUsageLimit = form.usageLimit.trim() !== '';
+    const maxDiscountAmount = hasMaxDiscountAmount
       ? Number(form.maxDiscountAmount)
       : undefined;
-    const usageLimit = form.usageLimit.trim() ? Number(form.usageLimit) : undefined;
+    const usageLimit = hasUsageLimit ? Number(form.usageLimit) : undefined;
 
     if (!Number.isFinite(discountValue) || discountValue <= 0) {
       setFormError('Giá trị giảm phải lớn hơn 0.');
@@ -138,23 +154,31 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
 
     setSaving(true);
     try {
-      const payload = {
+      const basePayload = {
         code: form.code.trim().toUpperCase(),
         name: form.name.trim(),
         description: form.description.trim(),
         discountType: form.discountType,
         discountValue,
         minOrderAmount,
-        maxDiscountAmount,
-        usageLimit,
         startDate: new Date(form.startDate).toISOString(),
         endDate: new Date(form.endDate).toISOString(),
         isActive: form.isActive,
       };
 
       if (mode === 'create') {
+        const payload = {
+          ...basePayload,
+          maxDiscountAmount,
+          usageLimit,
+        };
         await createAdminCoupon(payload);
       } else if (initialData?.id) {
+        const payload = {
+          ...basePayload,
+          maxDiscountAmount: hasMaxDiscountAmount ? maxDiscountAmount : null,
+          usageLimit: hasUsageLimit ? usageLimit : null,
+        };
         await updateAdminCoupon(initialData.id, payload);
       }
 
@@ -229,9 +253,9 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
                 />
                 <p className="text-xs text-slate-500">
                   {form.discountType === 'FIXED_AMOUNT'
-                    ? `≈ ${new Intl.NumberFormat('vi-VN').format(
+                    ? `≈ ${formatCurrencyVND(
                         Number.isFinite(previewDiscountValue) ? previewDiscountValue : 0,
-                      )} VNĐ`
+                      )}`
                     : `Giảm ${Number.isFinite(previewDiscountValue) ? previewDiscountValue : 0}%`}
                 </p>
                 {discountValueError ? (
@@ -274,11 +298,13 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
               </Field>
 
               <Field label="Giá trị đơn hàng tối thiểu">
-                <Input type="number" min="0" step="0.01" value={form.minOrderAmount} onChange={(e) => setForm((p) => ({ ...p, minOrderAmount: e.target.value }))} />
+                <Input type="number" min="0" step="1" value={form.minOrderAmount} onChange={(e) => setForm((p) => ({ ...p, minOrderAmount: e.target.value }))} />
+                <p className="text-xs text-slate-500">{formatCurrencyVND(Number(form.minOrderAmount || 0))}</p>
               </Field>
 
               <Field label="Mức giảm tối đa">
-                <Input type="number" min="0" step="0.01" value={form.maxDiscountAmount} onChange={(e) => setForm((p) => ({ ...p, maxDiscountAmount: e.target.value }))} />
+                <Input type="number" min="0" step="1" value={form.maxDiscountAmount} onChange={(e) => setForm((p) => ({ ...p, maxDiscountAmount: e.target.value }))} />
+                <p className="text-xs text-slate-500">{formatCurrencyVND(Number(form.maxDiscountAmount || 0))}</p>
               </Field>
 
               <Field label="Giới hạn lượt dùng">

@@ -57,7 +57,7 @@ export type AdminBlogQueryParams = BlogQueryParams & {
 
 export type AdminBlogPayload = {
   title: string;
-  slug: string;
+  slug?: string;
   excerpt?: string;
   content: string;
   thumbnail?: string;

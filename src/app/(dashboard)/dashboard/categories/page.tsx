@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 
 function formatDate(date?: string) {
   if (!date) return "-";
@@ -39,7 +40,7 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [flashMessage, setFlashMessage] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const [viewCategory, setViewCategory] = useState<AdminCategory | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
@@ -105,11 +106,10 @@ export default function CategoriesPage() {
     if (!confirmed) return;
 
     setError(null);
-    setFlashMessage(null);
 
     try {
       await deleteAdminCategory(category.id);
-      setFlashMessage("Category deleted successfully.");
+      showToast("Category deleted successfully.", "success");
       await loadCategories();
     } catch (deleteError) {
       const rawMessage =
@@ -121,11 +121,11 @@ export default function CategoriesPage() {
         lower.includes("constraint") ||
         lower.includes("unable to delete")
       ) {
-        setError("Cannot delete category because it is used by existing products.");
+        showToast("Cannot delete category because it is used by existing products.", "error");
         return;
       }
 
-      setError(rawMessage);
+      showToast(rawMessage, "error");
     }
   };
 
@@ -164,12 +164,6 @@ export default function CategoriesPage() {
           Add Category
         </Button>
       </div>
-
-      {flashMessage ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-          {flashMessage}
-        </div>
-      ) : null}
 
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">

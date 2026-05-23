@@ -87,6 +87,10 @@ async function parseAuthResponse(response: Response, fallbackError: string): Pro
       throw new Error("Email đã được sử dụng. Vui lòng dùng email khác.");
     }
 
+    if (response.status === 400 && apiMessage.toLowerCase().includes("phone already exists")) {
+      throw new Error("Số điện thoại đã được sử dụng. Vui lòng dùng số khác.");
+    }
+
     if (response.status === 401) {
       throw new Error("Email hoặc mật khẩu không đúng.");
     }

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPolicyBySlug } from "@/lib/policy-api";
+import { normalizeBlogContentToHtml } from "@/lib/blog-helpers";
 
 type PolicySlug = "privacy" | "return" | "shipping" | "payment" | "terms";
 
@@ -88,9 +89,10 @@ export default async function PolicyDetailPage({
           <p className="mt-3 text-sm text-on-surface-variant">Cập nhật lần cuối: {updatedAt}</p>
         ) : null}
 
-        <article className="mt-8 whitespace-pre-line text-[15px] leading-7 text-on-surface-variant">
-          {policy.content}
-        </article>
+        <article
+          className="mt-8 text-[15px] leading-7 text-on-surface-variant [&_a]:text-primary [&_a]:underline [&_h1]:mt-6 [&_h1]:text-3xl [&_h1]:font-semibold [&_h2]:mt-5 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:text-xl [&_h3]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:mb-4 [&_ul]:mb-4"
+          dangerouslySetInnerHTML={{ __html: normalizeBlogContentToHtml(policy.content) }}
+        />
       </section>
     </main>
   );

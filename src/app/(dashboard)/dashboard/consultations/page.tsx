@@ -171,6 +171,7 @@ export default function ConsultationsPage() {
         search: search || undefined,
         status: statusFilter || undefined,
       });
+      showToast("Export consultations thành công.", "success");
     } catch (error) {
       showToast(
         error instanceof Error ? error.message : "Export consultations failed.",

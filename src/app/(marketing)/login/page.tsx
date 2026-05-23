@@ -119,7 +119,6 @@ export default function LoginPage() {
     const validationError = validateLogin();
     if (validationError) {
       setErrorMessage(validationError);
-      showToast(validationError, "error");
       return;
     }
 
@@ -146,7 +145,6 @@ export default function LoginPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Đăng nhập thất bại. Vui lòng thử lại.";
       setErrorMessage(message);
-      showToast(message, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +158,6 @@ export default function LoginPage() {
     const validationError = validateRegister();
     if (validationError) {
       setErrorMessage(validationError);
-      showToast(validationError, "error");
       return;
     }
 
@@ -189,7 +186,6 @@ export default function LoginPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Đăng ký thất bại. Vui lòng thử lại.";
       setErrorMessage(message);
-      showToast(message, "error");
     } finally {
       setIsSubmitting(false);
     }

@@ -67,9 +67,10 @@ export default function CouponsPage() {
 
     try {
       await deleteAdminCoupon(coupon.id);
+      showToast('Coupon deleted successfully.', 'success');
       await loadCoupons();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to delete coupon.');
+      showToast(e instanceof Error ? e.message : 'Failed to delete coupon.', 'error');
     }
   };
 
@@ -77,6 +78,7 @@ export default function CouponsPage() {
     setExporting(true);
     try {
       await exportCouponsReport();
+      showToast('Export coupons thành công.', 'success');
     } catch (e) {
       showToast(e instanceof Error ? e.message : 'Failed to export coupons.', 'error');
     } finally {
@@ -115,7 +117,7 @@ export default function CouponsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Code</TableHead>
-                <TableHead>Discount Type</TableHead>
+                <TableHead>Discount Name</TableHead>
                 <TableHead>Discount Value</TableHead>
                 <TableHead>Usage</TableHead>
                 <TableHead>Valid Date Range</TableHead>
@@ -127,7 +129,7 @@ export default function CouponsPage() {
               {coupons.map((coupon) => (
                 <TableRow key={coupon.id}>
                   <TableCell className="font-semibold">{coupon.code}</TableCell>
-                  <TableCell>{coupon.discountType}</TableCell>
+                  <TableCell>{coupon.name}</TableCell>
                   <TableCell>{discountLabel(coupon)}</TableCell>
                   <TableCell>
                     {coupon.usedCount}/{coupon.usageLimit ?? '∞'}

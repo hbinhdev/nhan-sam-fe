@@ -44,8 +44,8 @@ export type CouponPayload = {
   discountType: CouponDiscountType;
   discountValue: number;
   minOrderAmount?: number;
-  maxDiscountAmount?: number;
-  usageLimit?: number;
+  maxDiscountAmount?: number | null;
+  usageLimit?: number | null;
   startDate: string;
   endDate: string;
   isActive?: boolean;

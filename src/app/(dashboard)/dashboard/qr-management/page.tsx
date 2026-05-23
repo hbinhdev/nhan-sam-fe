@@ -31,7 +31,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, Eye, Plus, Trash2, CheckCircle, Upload, QrCode, Star } from "lucide-react";
+import { Edit, Eye, Plus, Trash2, Upload, QrCode, Star } from "lucide-react";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 
 const POPULAR_BANKS = [
   { name: "Vietcombank (VCB)", code: "VCB", bin: "970436" },
@@ -82,7 +83,7 @@ export default function QrManagementPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [flashMessage, setFlashMessage] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<FormMode>("create");
@@ -180,32 +181,30 @@ export default function QrManagementPage() {
 
   const handleDelete = async (item: PaymentQrConfig) => {
     if (item.isDefault) {
-      alert("Không thể xóa tài khoản đang đặt làm mặc định!");
+      showToast("Không thể xóa tài khoản đang đặt làm mặc định!", "error");
       return;
     }
     const confirmed = window.confirm(`Bạn có chắc muốn xóa tài khoản ${item.bankName} - ${item.accountNumber}?`);
     if (!confirmed) return;
 
     setError(null);
-    setFlashMessage(null);
     try {
       await deletePaymentQrConfig(item.id);
-      setFlashMessage("Đã xóa cấu hình tài khoản QR.");
+      showToast("Đã xóa cấu hình tài khoản QR.", "success");
       await loadConfigs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Xóa thất bại.");
+      showToast(err instanceof Error ? err.message : "Xóa thất bại.", "error");
     }
   };
 
   const handleSetDefault = async (item: PaymentQrConfig) => {
     setError(null);
-    setFlashMessage(null);
     try {
       await setDefaultPaymentQrConfig(item.id);
-      setFlashMessage(`Đã thiết lập ${item.bankName} làm tài khoản thanh toán mặc định.`);
+      showToast(`Đã thiết lập ${item.bankName} làm tài khoản thanh toán mặc định.`, "success");
       await loadConfigs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Thiết lập mặc định thất bại.");
+      showToast(err instanceof Error ? err.message : "Thiết lập mặc định thất bại.", "error");
     }
   };
 
@@ -213,7 +212,6 @@ export default function QrManagementPage() {
     event.preventDefault();
     setFormError(null);
     setError(null);
-    setFlashMessage(null);
 
     const accountNumber = form.accountNumber.trim();
     const accountName = form.accountName.trim();
@@ -240,7 +238,7 @@ export default function QrManagementPage() {
           isDefault: form.isDefault,
           isActive: form.isActive,
         });
-        setFlashMessage("Thêm cấu hình QR thành công.");
+        showToast("Thêm cấu hình QR thành công.", "success");
       } else if (editingId) {
         await updatePaymentQrConfig(editingId, {
           bankName: form.bankName,
@@ -252,7 +250,7 @@ export default function QrManagementPage() {
           isDefault: form.isDefault,
           isActive: form.isActive,
         });
-        setFlashMessage("Cập nhật cấu hình QR thành công.");
+        showToast("Cập nhật cấu hình QR thành công.", "success");
       }
 
       setIsFormOpen(false);
@@ -299,13 +297,6 @@ export default function QrManagementPage() {
           </Button>
         )}
       </div>
-
-      {flashMessage ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 flex items-center gap-2 font-medium">
-          <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
-          {flashMessage}
-        </div>
-      ) : null}
 
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">

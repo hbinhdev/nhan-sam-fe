@@ -47,7 +47,6 @@ export function CustomerTable() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [flashMessage, setFlashMessage] = useState<string | null>(null);
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -123,15 +122,15 @@ export function CustomerTable() {
 
     setProcessingUserId(user.id);
     setError(null);
-    setFlashMessage(null);
 
     try {
       await updateAdminUserRole(user.id, role);
-      setFlashMessage(`Updated role for ${getDisplayName(user)}.`);
+      showToast(`Updated role for ${getDisplayName(user)}.`, "success");
       await loadUsers(page, search, roleFilter);
     } catch (updateError) {
-      setError(
+      showToast(
         updateError instanceof Error ? updateError.message : "Failed to update role.",
+        "error",
       );
     } finally {
       setProcessingUserId(null);
@@ -144,18 +143,18 @@ export function CustomerTable() {
 
     setProcessingUserId(user.id);
     setError(null);
-    setFlashMessage(null);
 
     try {
       await deleteAdminUser(user.id);
-      setFlashMessage("User deleted successfully.");
+      showToast("User deleted successfully.", "success");
 
       const shouldGoPreviousPage = page > 1 && users.length === 1;
       const targetPage = shouldGoPreviousPage ? page - 1 : page;
       await loadUsers(targetPage, search, roleFilter);
     } catch (deleteError) {
-      setError(
+      showToast(
         deleteError instanceof Error ? deleteError.message : "Failed to delete user.",
+        "error",
       );
     } finally {
       setProcessingUserId(null);
@@ -169,6 +168,7 @@ export function CustomerTable() {
         search: search || undefined,
         role: roleFilter || undefined,
       });
+      showToast("Export customers thành công.", "success");
     } catch (error) {
       showToast(
         error instanceof Error ? error.message : "Export customers failed.",
@@ -205,12 +205,6 @@ export function CustomerTable() {
           {exporting ? "Exporting..." : "Export Excel"}
         </Button>
       </div>
-
-      {flashMessage ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-          {flashMessage}
-        </div>
-      ) : null}
 
       {error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
