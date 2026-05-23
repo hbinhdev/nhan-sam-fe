@@ -4,7 +4,10 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { formatCurrencyVND } from "@/lib/product-api";
-import { validateCoupon, type CouponValidationResponse } from "@/lib/coupon-api";
+import {
+  validateCoupon,
+  type CouponValidationResponse,
+} from "@/lib/coupon-api";
 
 const CHECKOUT_COUPON_KEY = "checkout_coupon";
 
@@ -18,26 +21,28 @@ type AppliedCouponState = {
 
 export function CheckoutSummary() {
   const { items, totalPrice, totalItems } = useCart();
-  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCouponState | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCouponState | null>(
+    () => {
+      if (typeof window === "undefined") {
+        return null;
+      }
 
-    try {
-      const saved = window.localStorage.getItem(CHECKOUT_COUPON_KEY);
-      if (!saved) return null;
-      const parsed = JSON.parse(saved) as AppliedCouponState;
-      if (!parsed?.code) return null;
-      if (Number(parsed.cartTotal) !== Number(totalPrice)) {
+      try {
+        const saved = window.localStorage.getItem(CHECKOUT_COUPON_KEY);
+        if (!saved) return null;
+        const parsed = JSON.parse(saved) as AppliedCouponState;
+        if (!parsed?.code) return null;
+        if (Number(parsed.cartTotal) !== Number(totalPrice)) {
+          window.localStorage.removeItem(CHECKOUT_COUPON_KEY);
+          return null;
+        }
+        return parsed;
+      } catch {
         window.localStorage.removeItem(CHECKOUT_COUPON_KEY);
         return null;
       }
-      return parsed;
-    } catch {
-      window.localStorage.removeItem(CHECKOUT_COUPON_KEY);
-      return null;
-    }
-  });
+    },
+  );
   const [couponCode, setCouponCode] = useState(() => appliedCoupon?.code || "");
   const [applying, setApplying] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -67,7 +72,10 @@ export function CheckoutSummary() {
     setCouponError(null);
 
     try {
-      const result: CouponValidationResponse = await validateCoupon(code, totalPrice);
+      const result: CouponValidationResponse = await validateCoupon(
+        code,
+        totalPrice,
+      );
       const payload: AppliedCouponState = {
         couponId: result.coupon.id,
         code: result.coupon.code,
@@ -80,7 +88,9 @@ export function CheckoutSummary() {
       setCouponCode(result.coupon.code);
       localStorage.setItem(CHECKOUT_COUPON_KEY, JSON.stringify(payload));
     } catch (error) {
-      setCouponError(error instanceof Error ? error.message : "Mã giảm giá không hợp lệ.");
+      setCouponError(
+        error instanceof Error ? error.message : "Mã giảm giá không hợp lệ.",
+      );
     } finally {
       setApplying(false);
     }
@@ -95,10 +105,12 @@ export function CheckoutSummary() {
 
   return (
     <div className="lg:col-span-5">
-      <div className="sticky top-32 space-y-8 bg-surface-container-low p-8 border border-yellow-600/10 rounded-xl">
-        <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-          <h3 className="text-headline-sm text-primary">Giỏ hàng của bạn</h3>
-          <span className="text-label-caps text-primary">
+      <div className="sticky top-32 space-y-6 rounded-xl border border-yellow-600/10 bg-surface-container-low p-5 sm:space-y-8 sm:p-8">
+        <div className="flex items-start justify-between gap-3 border-b border-outline-variant pb-4">
+          <h3 className="text-3xl font-serif leading-tight text-primary sm:text-headline-sm">
+            Giỏ hàng của bạn
+          </h3>
+          <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-primary sm:text-label-caps">
             {totalItems} SẢN PHẨM
           </span>
         </div>
@@ -109,7 +121,7 @@ export function CheckoutSummary() {
               key={item.id}
               image={item.image}
               name={item.name}
-              subtitle={item.sku ? `SKU: ${item.sku}` : item.brand || ""}
+              subtitle={item.sku ? `Mã SP: ${item.sku}` : item.brand || ""}
               quantity={item.quantity}
               price={formatCurrencyVND(item.price)}
             />
@@ -122,9 +134,9 @@ export function CheckoutSummary() {
         </div>
 
         <div className="space-y-2 pt-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
-              className="flex-grow bg-transparent border-0 border-b border-outline focus:border-primary focus:ring-0 px-0 py-2 text-xs text-label-caps placeholder:text-stone-300 disabled:opacity-60"
+              className="min-w-0 flex-grow border-0 border-b border-outline bg-transparent px-0 py-2 text-xs text-label-caps placeholder:text-stone-300 focus:border-primary focus:ring-0 disabled:opacity-60"
               placeholder="Mã giảm giá"
               type="text"
               value={couponCode}
@@ -134,7 +146,7 @@ export function CheckoutSummary() {
             {appliedCoupon ? (
               <button
                 onClick={handleRemoveCoupon}
-                className="px-6 py-2 border border-red-300 text-red-600 text-label-caps text-[10px] hover:bg-red-50 transition-all uppercase rounded-lg"
+                className="w-full shrink-0 rounded-lg border border-red-300 px-4 py-2 text-[10px] text-label-caps uppercase text-red-600 transition-all hover:bg-red-50 sm:w-auto sm:px-6"
               >
                 Bỏ mã
               </button>
@@ -142,7 +154,7 @@ export function CheckoutSummary() {
               <button
                 onClick={handleApplyCoupon}
                 disabled={applying || items.length === 0}
-                className="px-6 py-2 border border-secondary text-secondary text-label-caps text-[10px] hover:bg-secondary hover:text-white transition-all uppercase rounded-lg disabled:opacity-50"
+                className="w-full shrink-0 rounded-lg border border-secondary px-4 py-2 text-[10px] text-label-caps uppercase text-secondary transition-all hover:bg-secondary hover:text-white disabled:opacity-50 sm:w-auto sm:px-6"
               >
                 {applying ? "Đang áp dụng" : "Áp dụng"}
               </button>
@@ -156,7 +168,9 @@ export function CheckoutSummary() {
           ) : null}
 
           {couponError ? (
-            <p className="text-[11px] text-red-600 font-medium">{couponError}</p>
+            <p className="text-[11px] text-red-600 font-medium">
+              {couponError}
+            </p>
           ) : null}
         </div>
 
@@ -177,9 +191,11 @@ export function CheckoutSummary() {
               </span>
             </div>
           )}
-          <div className="flex justify-between items-center pt-4 border-t border-primary/20">
-            <span className="text-headline-sm text-primary">Tổng cộng</span>
-            <span className="text-headline-md text-primary font-bold">
+          <div className="border-t border-primary/20 pt-4">
+            <span className="block text-2xl font-serif leading-none text-primary sm:text-headline-sm">
+              Tổng cộng
+            </span>
+            <span className="mt-2 block whitespace-nowrap text-right text-[clamp(24px,9vw,38px)] font-bold leading-none text-primary sm:text-headline-md">
               {formatCurrencyVND(total)}
             </span>
           </div>
@@ -189,7 +205,7 @@ export function CheckoutSummary() {
           type="submit"
           form="checkout-form"
           disabled={items.length === 0}
-          className="w-full py-5 bg-primary text-white text-label-caps text-sm tracking-widest hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 rounded-xl shadow-lg active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-[12px] font-bold uppercase tracking-wide text-white whitespace-nowrap transition-all hover:bg-primary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:gap-3 sm:py-5 sm:text-sm sm:text-label-caps sm:tracking-widest"
         >
           XÁC NHẬN ĐẶT HÀNG
           <span className="material-symbols-outlined text-sm">
@@ -228,9 +244,15 @@ type SummaryItemProps = {
   price: string;
 };
 
-function SummaryItem({ image, name, subtitle, quantity, price }: SummaryItemProps) {
+function SummaryItem({
+  image,
+  name,
+  subtitle,
+  quantity,
+  price,
+}: SummaryItemProps) {
   return (
-    <div className="flex gap-4 group">
+    <div className="group flex gap-3 sm:gap-4">
       <div className="w-20 h-24 bg-surface-container-highest shrink-0 overflow-hidden rounded-lg relative">
         {image ? (
           <Image
@@ -247,9 +269,9 @@ function SummaryItem({ image, name, subtitle, quantity, price }: SummaryItemProp
           </div>
         )}
       </div>
-      <div className="flex-grow flex flex-col justify-between py-1">
+      <div className="min-w-0 flex-grow flex flex-col justify-between py-1">
         <div>
-          <h4 className="text-label-caps text-[11px] leading-tight text-primary">
+          <h4 className="text-[11px] font-bold uppercase tracking-wide leading-tight text-primary sm:text-label-caps">
             {name}
           </h4>
           <p className="text-[10px] text-on-surface-variant mt-1 italic">

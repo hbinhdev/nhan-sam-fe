@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/shared/auth/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,12 @@ export function CheckoutForm() {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
+  const [isRestoringAddress, setIsRestoringAddress] = useState(false);
+  const restoredCodesRef = useRef<{
+    provinceCode?: string;
+    districtCode?: string;
+    wardCode?: string;
+  }>({});
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -49,6 +55,14 @@ export function CheckoutForm() {
         if (parsed.phone && !phone) setPhone(parsed.phone);
         if (parsed.email && !email) setEmail(parsed.email);
         if (parsed.addressDetail) setAddressDetail(parsed.addressDetail);
+        if (parsed.selectedProvince || parsed.selectedDistrict || parsed.selectedWard) {
+          restoredCodesRef.current = {
+            provinceCode: parsed.selectedProvince || "",
+            districtCode: parsed.selectedDistrict || "",
+            wardCode: parsed.selectedWard || "",
+          };
+          setIsRestoringAddress(true);
+        }
       }
     } catch {}
   }, []);
@@ -66,6 +80,16 @@ export function CheckoutForm() {
     void fetchProvinces();
   }, []);
 
+  useEffect(() => {
+    if (!isRestoringAddress || provinces.length === 0) return;
+    const { provinceCode } = restoredCodesRef.current;
+    if (provinceCode) {
+      setSelectedProvince(provinceCode);
+    } else {
+      setIsRestoringAddress(false);
+    }
+  }, [isRestoringAddress, provinces]);
+
   // Fetch Districts when Province changes
   useEffect(() => {
     if (!selectedProvince) {
@@ -81,8 +105,13 @@ export function CheckoutForm() {
         const data = await res.json();
         setDistricts(data.districts);
         setWards([]);
-        setSelectedDistrict("");
-        setSelectedWard("");
+        if (isRestoringAddress) {
+          const { districtCode } = restoredCodesRef.current;
+          setSelectedDistrict(districtCode || "");
+        } else {
+          setSelectedDistrict("");
+          setSelectedWard("");
+        }
       } catch (err) {
         console.error("Error fetching districts:", err);
       }
@@ -94,6 +123,9 @@ export function CheckoutForm() {
   useEffect(() => {
     if (!selectedDistrict) {
       setWards([]);
+      if (isRestoringAddress && !restoredCodesRef.current.districtCode) {
+        setIsRestoringAddress(false);
+      }
       return;
     }
     async function fetchWards() {
@@ -103,7 +135,13 @@ export function CheckoutForm() {
         );
         const data = await res.json();
         setWards(data.wards);
-        setSelectedWard("");
+        if (isRestoringAddress) {
+          const { wardCode } = restoredCodesRef.current;
+          setSelectedWard(wardCode || "");
+          setIsRestoringAddress(false);
+        } else {
+          setSelectedWard("");
+        }
       } catch (err) {
         console.error("Error fetching wards:", err);
       }
@@ -129,6 +167,9 @@ export function CheckoutForm() {
       phone: phone.trim() || user?.phone || "",
       email: email.trim() || user?.email || "",
       addressDetail,
+      selectedProvince,
+      selectedDistrict,
+      selectedWard,
       fullAddress: fullAddress || "Nhận tại cửa hàng / Giao tận nơi",
     };
 
