@@ -241,7 +241,7 @@ function FilterItem({
     >
       <div
         className={cn(
-          "w-5 h-5 border transition-all flex items-center justify-center rounded-md",
+          "h-5 w-5 shrink-0 border transition-all flex items-center justify-center rounded-md",
           active
             ? "bg-primary border-primary"
             : "border-outline-variant group-hover:border-primary",

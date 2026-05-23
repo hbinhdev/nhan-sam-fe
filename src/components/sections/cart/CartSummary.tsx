@@ -103,7 +103,7 @@ export function CartSummary() {
 
   return (
     <div className="lg:col-span-4">
-      <div className="bg-white p-8 border border-outline-variant/30 rounded-xl sticky top-32">
+      <div className="sticky top-32 rounded-xl border border-outline-variant/30 bg-white p-5 sm:p-8">
         <h2 className="text-headline-sm text-on-surface mb-8">Tổng Đơn Hàng</h2>
 
         <div className="space-y-4 pb-8 border-b border-outline-variant/30">
@@ -119,9 +119,9 @@ export function CartSummary() {
 
         <div className="py-8">
           <label className="text-label-caps text-on-surface-variant mb-4 block">Mã Giảm Giá</label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
-              className="flex-grow bg-surface-container-low rounded-lg border-none px-4 py-3 focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
+              className="min-w-0 flex-grow rounded-lg border-none bg-surface-container-low px-4 py-3 outline-none transition-all placeholder:text-stone-400 focus:ring-1 focus:ring-primary"
               placeholder="Nhập mã ưu đãi..."
               type="text"
               value={couponCode}
@@ -131,7 +131,7 @@ export function CartSummary() {
             {appliedCoupon ? (
               <button
                 onClick={handleRemoveCoupon}
-                className="bg-red-100 text-red-700 px-6 py-3 rounded-lg text-label-caps hover:bg-red-200 transition-colors"
+                className="w-full shrink-0 rounded-lg bg-red-100 px-6 py-3 text-label-caps text-red-700 transition-colors hover:bg-red-200 sm:w-auto"
               >
                 BỎ MÃ
               </button>
@@ -139,7 +139,7 @@ export function CartSummary() {
               <button
                 onClick={handleApplyCoupon}
                 disabled={applying || items.length === 0}
-                className="bg-tertiary text-on-tertiary px-6 py-3 rounded-lg text-label-caps hover:bg-on-tertiary-fixed transition-colors disabled:opacity-50"
+                className="w-full shrink-0 rounded-lg bg-tertiary px-6 py-3 text-label-caps text-on-tertiary transition-colors hover:bg-on-tertiary-fixed disabled:opacity-50 sm:w-auto"
               >
                 {applying ? "ĐANG ÁP DỤNG" : "ÁP DỤNG"}
               </button>
@@ -175,7 +175,7 @@ export function CartSummary() {
 
           <Link
             href="/checkout"
-            className="w-full bg-primary text-on-primary py-5 rounded-xl text-label-caps tracking-widest hover:bg-primary-container transition-all flex items-center justify-center gap-3"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-[12px] font-bold uppercase tracking-wide text-on-primary whitespace-nowrap transition-all hover:bg-primary-container sm:gap-3 sm:py-5 sm:text-label-caps sm:tracking-widest"
           >
             TIẾN HÀNH THANH TOÁN <span className="material-symbols-outlined">arrow_forward</span>
           </Link>

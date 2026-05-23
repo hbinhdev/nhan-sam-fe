@@ -189,7 +189,7 @@ export default async function BlogsPage({ searchParams }: BlogsPageProps) {
           </section>
 
           {totalPages > 1 ? (
-            <section className="mt-12 flex items-center justify-center gap-1 sm:gap-2 border-t border-outline-variant/20 pt-8">
+            <section className="mt-12 flex flex-wrap items-center justify-center gap-1 border-t border-outline-variant/20 pt-8 sm:gap-2">
               {currentPage > 1 ? (
                 <Link
                   href={buildListLink({

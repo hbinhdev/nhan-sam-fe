@@ -41,7 +41,7 @@ export function CartItems() {
             image={item.image}
             tag={item.brand || "Heritage"}
             name={item.name}
-            subtitle={item.sku ? `SKU: ${item.sku}` : ""}
+            subtitle={item.sku ? `Mã SP: ${item.sku}` : ""}
             price={formatCurrencyVND(item.price)}
             quantity={item.quantity}
             onUpdateQuantity={(q: number) => updateQuantity(item.id, q)}

@@ -189,7 +189,11 @@ export function OrderTable() {
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
-        <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>
+        <Button
+          variant="outline"
+          onClick={() => void handleExport()}
+          disabled={exporting}
+        >
           <Download className="mr-2 h-4 w-4" />
           {exporting ? "Exporting..." : "Export Excel"}
         </Button>
@@ -423,7 +427,7 @@ export function OrderTable() {
                             </div>
                             {it.sku && (
                               <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                                SKU: {it.sku}
+                                Mã SP: {it.sku}
                               </div>
                             )}
                           </div>

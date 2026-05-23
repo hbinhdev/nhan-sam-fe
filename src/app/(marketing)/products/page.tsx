@@ -214,11 +214,11 @@ export default async function ProductsPage({
         <FilterSidebar filters={activeFilters} filterOptions={filterOptions} />
 
         <div className="lg:col-span-9 flex flex-col gap-12">
-          <div className="flex justify-between items-center pb-6 border-b border-outline-variant/30">
+          <div className="flex flex-col gap-3 border-b border-outline-variant/30 pb-6 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-on-surface-variant">
               Hiển thị {products.length}/{totalProducts} sản phẩm
             </span>
-            <div className="flex items-center gap-4">
+            <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start sm:gap-4">
               <span className="text-[11px] font-bold tracking-widest text-on-surface-variant/60 uppercase">
                 Sắp xếp:
               </span>
@@ -258,7 +258,7 @@ export default async function ProductsPage({
           )}
 
           {totalPages > 1 && (
-            <div className="mt-12 flex justify-center gap-2">
+            <div className="mt-12 flex flex-wrap justify-center gap-2">
               <PaginationButton
                 href={buildProductsLink(Math.max(1, apiPage - 1))}
                 disabled={!canGoPrevious}

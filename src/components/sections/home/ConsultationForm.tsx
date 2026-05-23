@@ -120,10 +120,18 @@ export function ConsultationForm({
 
   return (
     <>
-      <section className="w-full py-24 bg-primary text-on-primary text-center" id="consultation-cta">
+      <section
+        className="w-full py-24 bg-primary text-on-primary text-center"
+        id="consultation-cta"
+      >
         <div className="max-w-[800px] mx-auto px-6 flex flex-col gap-8 items-center">
-          <h2 className="text-3xl md:text-5xl font-serif leading-tight">{cms?.ctaTitle || "Bạn cần hỗ trợ chọn sản phẩm phù hợp?"}</h2>
-          <p className="text-lg opacity-80 leading-relaxed">{cms?.ctaSubtitle || "Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và tư vấn giải pháp sức khỏe tối ưu cho bạn."}</p>
+          <h2 className="text-3xl md:text-5xl font-serif leading-tight">
+            {cms?.ctaTitle || "Bạn cần hỗ trợ chọn sản phẩm phù hợp?"}
+          </h2>
+          <p className="text-lg opacity-80 leading-relaxed">
+            {cms?.ctaSubtitle ||
+              "Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và tư vấn giải pháp sức khỏe tối ưu cho bạn."}
+          </p>
           <Link
             href="#consultation"
             className={cn(
@@ -139,14 +147,23 @@ export function ConsultationForm({
       <section className="w-full py-24 bg-surface" id="consultation">
         <div className="max-w-[1280px] mx-auto px-6 flex flex-col lg:flex-row gap-20 items-center">
           <div className="w-full lg:w-1/2 flex flex-col gap-6">
-            <h2 className="text-3xl md:text-4xl font-serif text-primary leading-tight">{cms?.formTitle || "Nhận Tư Vấn Từ Chuyên Gia Sâm"}</h2>
-            <p className="text-lg text-on-surface-variant leading-relaxed">{cms?.formSubtitle || "Để lại thông tin để chúng tôi có thể hỗ trợ bạn chọn lựa sản phẩm phù hợp nhất với thể trạng và nhu cầu sức khỏe của bạn."}</p>
+            <h2 className="text-3xl md:text-4xl font-serif text-primary leading-tight">
+              {cms?.formTitle || "Nhận Tư Vấn Từ Chuyên Gia Sâm"}
+            </h2>
+            <p className="text-lg text-on-surface-variant leading-relaxed">
+              {cms?.formSubtitle ||
+                "Để lại thông tin để chúng tôi có thể hỗ trợ bạn chọn lựa sản phẩm phù hợp nhất với thể trạng và nhu cầu sức khỏe của bạn."}
+            </p>
             <div className="flex flex-row items-center gap-4 mt-4">
               <div className="w-14 h-14 rounded-full border border-outline text-secondary flex items-center justify-center">
-                <span className="material-symbols-outlined text-2xl">support_agent</span>
+                <span className="material-symbols-outlined text-2xl">
+                  support_agent
+                </span>
               </div>
               <div className="flex flex-col">
-                <p className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-60">Hotline hỗ trợ 24/7</p>
+                <p className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-60">
+                  Hotline hỗ trợ 24/7
+                </p>
                 <p className="text-2xl font-bold text-primary">1900 8888 99</p>
               </div>
             </div>
@@ -154,7 +171,9 @@ export function ConsultationForm({
           <div className="w-full lg:w-1/2 bg-white p-12 rounded-2xl shadow-xl border border-outline-variant/30">
             <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">Họ và tên</label>
+                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  Họ và tên
+                </label>
                 <input
                   className="w-full border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 bg-transparent"
                   placeholder="Nhập tên của bạn..."
@@ -165,7 +184,9 @@ export function ConsultationForm({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">Số điện thoại</label>
+                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  Số điện thoại
+                </label>
                 <input
                   className="w-full border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 bg-transparent"
                   placeholder="090..."
@@ -176,7 +197,9 @@ export function ConsultationForm({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">Nhu cầu quan tâm</label>
+                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  Nhu cầu quan tâm
+                </label>
                 <select
                   className="w-full border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 bg-transparent"
                   value={interest}
@@ -192,19 +215,27 @@ export function ConsultationForm({
               </div>
 
               {isCheckingActive && canCheckAvailability ? (
-                <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">Đang kiểm tra trạng thái yêu cầu tư vấn...</p>
+                <p className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+                  Đang kiểm tra trạng thái yêu cầu tư vấn...
+                </p>
               ) : null}
 
               {hasActiveRequest && activeMessage ? (
-                <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">{activeMessage}</p>
+                <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                  {activeMessage}
+                </p>
               ) : null}
 
               {successMessage ? (
-                <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">{successMessage}</p>
+                <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                  {successMessage}
+                </p>
               ) : null}
 
               {errorMessage ? (
-                <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{errorMessage}</p>
+                <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                  {errorMessage}
+                </p>
               ) : null}
 
               <button
@@ -216,7 +247,11 @@ export function ConsultationForm({
                   submitDisabled && "opacity-70 cursor-not-allowed",
                 )}
               >
-                {isSubmitting ? "ĐANG GỬI..." : hasActiveRequest ? "ĐANG CHỜ XỬ LÝ" : "ĐĂNG KÝ TƯ VẤN"}
+                {isSubmitting
+                  ? "ĐANG GỬI..."
+                  : hasActiveRequest
+                    ? "ĐANG CHỜ XỬ LÝ"
+                    : "ĐĂNG KÝ TƯ VẤN"}
               </button>
             </form>
           </div>

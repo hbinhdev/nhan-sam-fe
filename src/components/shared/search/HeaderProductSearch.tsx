@@ -97,7 +97,7 @@ export function HeaderProductSearch() {
       {isOpen ? (
         <form
           onSubmit={handleSubmit}
-          className="absolute right-0 top-11 z-50 w-[min(86vw,360px)] rounded-xl border border-outline-variant/40 bg-white p-3 shadow-xl"
+          className="absolute left-1/2 top-11 z-50 w-[min(92vw,360px)] max-w-[calc(100vw-12px)] -translate-x-1/2 rounded-xl border border-outline-variant/40 bg-white p-3 shadow-xl sm:left-auto sm:right-0 sm:translate-x-0"
         >
           <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.1em] text-on-surface-variant">
             Tìm sản phẩm
@@ -109,11 +109,11 @@ export function HeaderProductSearch() {
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
               placeholder="Nhập tên hoặc công dụng..."
-              className="h-10 w-full rounded-lg border border-outline-variant/60 bg-white px-3 text-sm text-on-surface outline-none focus:border-primary"
+              className="h-10 min-w-0 flex-1 rounded-lg border border-outline-variant/60 bg-white px-3 text-sm text-on-surface outline-none focus:border-primary"
             />
             <button
               type="submit"
-              className="h-10 rounded-lg bg-primary px-3 text-sm font-semibold text-on-primary transition-opacity hover:opacity-90"
+              className="h-10 shrink-0 rounded-lg bg-primary px-3 text-sm font-semibold text-on-primary transition-opacity hover:opacity-90"
             >
               Tìm
             </button>

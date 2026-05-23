@@ -26,7 +26,7 @@ export function Hero({
   const secondaryCtaLink = typeof data?.secondaryCtaLink === "string" ? data.secondaryCtaLink : "#";
 
   return (
-    <section className="relative w-full h-[calc(100vh-80px)] min-h-[600px] flex items-center overflow-hidden bg-surface" id="hero-banner">
+    <section className="relative flex min-h-[560px] w-full items-center overflow-hidden bg-surface md:min-h-[600px] md:h-[calc(100vh-80px)]" id="hero-banner">
       <div className="absolute inset-0 z-0">
         <Image
           alt={title || "Home Hero"}
@@ -41,16 +41,16 @@ export function Hero({
       <div className="relative z-10 w-full max-w-[1280px] mx-auto px-6">
         <div className="max-w-[640px] flex flex-col gap-6">
           {subtitle ? <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{subtitle}</span> : null}
-          {title ? <h1 className="text-5xl md:text-6xl font-serif text-primary leading-[1.1] tracking-tight text-balance">{title}</h1> : null}
-          {content ? <p className="text-lg text-on-surface-variant leading-relaxed max-w-[500px]">{content}</p> : null}
+          {title ? <h1 className="text-4xl md:text-6xl font-serif text-primary leading-[1.1] tracking-tight text-balance">{title}</h1> : null}
+          {content ? <p className="max-w-[500px] text-base leading-relaxed text-on-surface-variant md:text-lg">{content}</p> : null}
 
-          <div className="flex flex-row gap-4 pt-4">
+          <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:gap-4">
             {ctaText ? (
               <Link
                 href={ctaLink || "#"}
                 className={cn(
                   buttonVariants({ variant: "default" }),
-                  "h-14 px-10 rounded-lg text-sm font-bold tracking-widest uppercase flex items-center bg-primary text-on-primary",
+                  "h-12 sm:h-14 px-6 sm:px-10 rounded-lg text-xs sm:text-sm font-bold tracking-wide sm:tracking-widest uppercase flex items-center justify-center bg-primary text-on-primary",
                 )}
               >
                 {ctaText}
@@ -62,7 +62,7 @@ export function Hero({
                 href={secondaryCtaLink}
                 className={cn(
                   buttonVariants({ variant: "outline" }),
-                  "border-secondary text-secondary h-14 px-10 rounded-lg text-sm font-bold tracking-widest uppercase flex items-center hover:bg-secondary/5",
+                  "border-secondary text-secondary h-12 sm:h-14 px-6 sm:px-10 rounded-lg text-xs sm:text-sm font-bold tracking-wide sm:tracking-widest uppercase flex items-center justify-center hover:bg-secondary/5",
                 )}
               >
                 {secondaryCtaText}

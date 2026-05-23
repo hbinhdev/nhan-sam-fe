@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Table,
   TableBody,
@@ -7,13 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge, badgeVariants } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import type { VariantProps } from 'class-variance-authority';
-import { Edit, Eye, Trash2 } from 'lucide-react';
-import type { ProductSummary } from '@/lib/product-api';
+import { Badge, badgeVariants } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { VariantProps } from "class-variance-authority";
+import { Edit, Eye, Trash2 } from "lucide-react";
+import type { ProductSummary } from "@/lib/product-api";
 
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
+type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 
 type ProductTableProps = {
   products: ProductSummary[];
@@ -23,22 +23,27 @@ type ProductTableProps = {
 };
 
 function getStockBadge(stock: number | null | undefined): BadgeVariant {
-  if (!stock || stock <= 0) return 'danger';
-  if (stock <= 10) return 'warning';
-  return 'success';
+  if (!stock || stock <= 0) return "danger";
+  if (stock <= 10) return "warning";
+  return "success";
 }
 
 function getStockLabel(stock: number | null | undefined) {
-  if (!stock || stock <= 0) return 'Out of stock';
-  if (stock <= 10) return 'Low stock';
-  return 'In stock';
+  if (!stock || stock <= 0) return "Out of stock";
+  if (stock <= 10) return "Low stock";
+  return "In stock";
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat('vi-VN').format(value) + ' VND';
+  return new Intl.NumberFormat("vi-VN").format(value) + " VND";
 }
 
-export function ProductTable({ products, onView, onEdit, onDelete }: ProductTableProps) {
+export function ProductTable({
+  products,
+  onView,
+  onEdit,
+  onDelete,
+}: ProductTableProps) {
   return (
     <div className="rounded-md border border-slate-200 dark:border-slate-800">
       <Table>
@@ -46,7 +51,7 @@ export function ProductTable({ products, onView, onEdit, onDelete }: ProductTabl
           <TableRow>
             <TableHead className="w-[100px]">Image</TableHead>
             <TableHead>Product Name</TableHead>
-            <TableHead>SKU</TableHead>
+            <TableHead>Mã SP</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Stock</TableHead>
@@ -58,14 +63,18 @@ export function ProductTable({ products, onView, onEdit, onDelete }: ProductTabl
             <TableRow key={product.id}>
               <TableCell>
                 <img
-                  src={product.imageUrl || product.thumbnail || '/images/product-root.png'}
+                  src={
+                    product.imageUrl ||
+                    product.thumbnail ||
+                    "/images/product-root.png"
+                  }
                   alt={product.name}
                   className="h-10 w-10 rounded-md object-cover bg-slate-100"
                 />
               </TableCell>
               <TableCell className="font-medium">{product.name}</TableCell>
-              <TableCell>{product.sku || '-'}</TableCell>
-              <TableCell>{product.category?.name || '-'}</TableCell>
+              <TableCell>{product.sku || "-"}</TableCell>
+              <TableCell>{product.category?.name || "-"}</TableCell>
               <TableCell>{formatCurrency(product.price)}</TableCell>
               <TableCell>
                 <Badge variant={getStockBadge(product.stock)}>

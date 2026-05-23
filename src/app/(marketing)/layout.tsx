@@ -10,10 +10,10 @@ export default function MarketingLayout({
   return (
     <div className="flex min-h-screen flex-col bg-surface selection:bg-primary-fixed selection:text-primary">
       <header className="sticky top-0 z-50 border-b border-yellow-600/20 bg-white dark:border-yellow-900/30 dark:bg-stone-950">
-        <div className="mx-auto flex h-20 w-full max-w-screen-2xl items-center justify-between px-12">
+        <div className="mx-auto flex h-[72px] w-full max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-12">
           <LoadingLink
             href="/"
-            className="text-2xl font-serif font-bold uppercase tracking-widest text-primary dark:text-red-500"
+            className="max-w-[180px] text-xl font-serif font-bold uppercase leading-tight tracking-[0.14em] text-primary dark:text-red-500 sm:max-w-none sm:text-2xl sm:tracking-widest"
           >
             Heritage Ginseng
           </LoadingLink>
@@ -25,11 +25,11 @@ export default function MarketingLayout({
             <NavLink href="/contact">Liên hệ</NavLink>
           </nav>
 
-          <div className="flex items-center space-x-6 text-primary dark:text-red-500">
+          <div className="flex items-center gap-1 sm:gap-3 text-primary dark:text-red-500">
             <AuthHeaderActions />
             <LoadingLink
               href="/cart"
-              className="relative flex items-center transition-all duration-300 hover:text-primary/70 focus:outline-none"
+              className="relative hidden items-center p-2 transition-all duration-300 hover:text-primary/70 focus:outline-none sm:flex"
             >
               <span
                 className="material-symbols-outlined"
@@ -40,6 +40,15 @@ export default function MarketingLayout({
             </LoadingLink>
             <AuthHeaderMenu />
           </div>
+        </div>
+
+        <div className="border-t border-yellow-600/10 px-4 py-2 sm:px-6 md:hidden">
+          <nav className="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
+            <MobileNavButton href="/">Trang chủ</MobileNavButton>
+            <MobileNavButton href="/products">Sản phẩm</MobileNavButton>
+            <MobileNavButton href="/blogs">Kiến thức</MobileNavButton>
+            <MobileNavButton href="/contact">Liên hệ</MobileNavButton>
+          </nav>
         </div>
       </header>
 
@@ -72,6 +81,23 @@ export default function MarketingLayout({
         </div>
       </footer>
     </div>
+  );
+}
+
+function MobileNavButton({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <LoadingLink
+      href={href}
+      className="inline-flex h-8 items-center rounded-full border border-outline-variant/40 px-3 text-xs font-semibold text-primary transition-colors hover:bg-surface-container-low"
+    >
+      {children}
+    </LoadingLink>
   );
 }
 

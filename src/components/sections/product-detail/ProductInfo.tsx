@@ -98,16 +98,16 @@ export function ProductInfo({
           </span>
         </div>
 
-        <p className="text-lg text-on-surface-variant leading-relaxed">
-          {safeShortDescription}
-        </p>
-
         <div className="text-sm text-on-surface-variant">
-          SKU:{" "}
+          Mã sản phẩm:{" "}
           <span className="font-semibold text-primary">
             {sku?.trim() || "Đang cập nhật"}
           </span>
         </div>
+
+        <p className="text-lg text-on-surface-variant leading-relaxed">
+          {safeShortDescription}
+        </p>
 
         <div className="text-3xl md:text-4xl font-serif text-primary border-y border-outline-variant/30 py-8 my-2">
           {price}
