@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -42,12 +42,12 @@ export default function EditProductPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Edit Product</h1>
-        <p className="text-sm text-slate-500">Update existing product details.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Sửa sản phẩm</h1>
+        <p className="text-sm text-slate-500">Cập nhật thông tin sản phẩm hiện có.</p>
       </div>
 
       {loading ? (
-        <div className="p-4 text-sm text-slate-500">Loading product...</div>
+        <div className="p-4 text-sm text-slate-500">Đang tải sản phẩm...</div>
       ) : error ? (
         <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
       ) : (

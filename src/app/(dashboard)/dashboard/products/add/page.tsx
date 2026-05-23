@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { ProductForm } from "@/components/dashboard/products/ProductForm";
@@ -26,12 +26,12 @@ export default function AddProductPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add New Product</h1>
-        <p className="text-sm text-slate-500">Create a new product in your catalog.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Thêm sản phẩm mới</h1>
+        <p className="text-sm text-slate-500">Tạo sản phẩm mới trong danh mục.</p>
       </div>
 
       {loading ? (
-        <div className="p-4 text-sm text-slate-500">Loading form...</div>
+        <div className="p-4 text-sm text-slate-500">Đang tải biểu mẫu...</div>
       ) : (
         <ProductForm mode="create" categories={categories} />
       )}

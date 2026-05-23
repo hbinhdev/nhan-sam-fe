@@ -25,14 +25,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Edit, Eye, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/components/shared/toast/ToastProvider";
 
 function formatDate(date?: string) {
   if (!date) return "-";
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleString();
+  return parsed.toLocaleString("vi-VN");
 }
 
 export default function CategoriesPage() {
@@ -44,6 +44,8 @@ export default function CategoriesPage() {
 
   const [viewCategory, setViewCategory] = useState<AdminCategory | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState<AdminCategory | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [authChecked, setAuthChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -60,7 +62,7 @@ export default function CategoriesPage() {
     } catch (loadError) {
       setCategories([]);
       setError(
-        loadError instanceof Error ? loadError.message : "Failed to load categories.",
+        loadError instanceof Error ? loadError.message : "Không thể tải danh sách danh mục.",
       );
     } finally {
       setLoading(false);
@@ -101,19 +103,19 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleDelete = async (category: AdminCategory) => {
-    const confirmed = window.confirm(`Delete category "${category.name}"?`);
-    if (!confirmed) return;
-
+  const confirmDeleteCategory = async () => {
+    if (!deletingCategory) return;
+    setDeleting(true);
     setError(null);
 
     try {
-      await deleteAdminCategory(category.id);
-      showToast("Category deleted successfully.", "success");
+      await deleteAdminCategory(deletingCategory.id);
+      showToast("Xóa danh mục thành công.", "success");
+      setDeletingCategory(null);
       await loadCategories();
     } catch (deleteError) {
       const rawMessage =
-        deleteError instanceof Error ? deleteError.message : "Failed to delete category.";
+        deleteError instanceof Error ? deleteError.message : "Không thể xóa danh mục.";
       const lower = rawMessage.toLowerCase();
 
       if (
@@ -121,18 +123,20 @@ export default function CategoriesPage() {
         lower.includes("constraint") ||
         lower.includes("unable to delete")
       ) {
-        showToast("Cannot delete category because it is used by existing products.", "error");
+        showToast("Không thể xóa danh mục vì đang được dùng bởi sản phẩm hiện có.", "error");
         return;
       }
 
       showToast(rawMessage, "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
   if (!authChecked) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
-        Checking admin access...
+        Đang kiểm tra quyền quản trị...
       </div>
     );
   }
@@ -140,7 +144,7 @@ export default function CategoriesPage() {
   if (!isAdmin) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Admin access is required.
+        Cần quyền quản trị.
       </div>
     );
   }
@@ -150,10 +154,10 @@ export default function CategoriesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            Categories
+            Danh mục
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage product categories.
+            Quản lý danh mục sản phẩm.
           </p>
         </div>
         <Button
@@ -161,7 +165,7 @@ export default function CategoriesPage() {
           className="bg-slate-900 text-white hover:bg-slate-800"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Category
+          Thêm danh mục
         </Button>
       </div>
 
@@ -173,23 +177,23 @@ export default function CategoriesPage() {
 
       {loading ? (
         <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
-          Loading categories...
+          Đang tải danh mục...
         </div>
       ) : categories.length === 0 ? (
         <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
-          No categories found.
+          Không tìm thấy danh mục.
         </div>
       ) : (
         <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-x-auto">
           <Table className="table-fixed min-w-[980px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[16%]">Name</TableHead>
+                <TableHead className="w-[16%]">Tên</TableHead>
                 <TableHead className="w-[16%]">Slug</TableHead>
-                <TableHead className="w-[34%]">Description</TableHead>
-                <TableHead className="w-[14%] whitespace-nowrap">Created At</TableHead>
-                <TableHead className="w-[14%] whitespace-nowrap">Updated At</TableHead>
-                <TableHead className="w-[120px] text-right whitespace-nowrap">Actions</TableHead>
+                <TableHead className="w-[34%]">Mô tả</TableHead>
+                <TableHead className="w-[14%] whitespace-nowrap">Ngày tạo</TableHead>
+                <TableHead className="w-[14%] whitespace-nowrap">Ngày cập nhật</TableHead>
+                <TableHead className="w-[120px] text-right whitespace-nowrap">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -202,7 +206,7 @@ export default function CategoriesPage() {
                       className="text-slate-600 break-words line-clamp-2 leading-5"
                       title={category.description ?? ""}
                     >
-                      {category.description?.trim() ? category.description.trim() : "No description"}
+                      {category.description?.trim() ? category.description.trim() : "Không có mô tả"}
                     </p>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{formatDate(category.createdAt)}</TableCell>
@@ -229,7 +233,7 @@ export default function CategoriesPage() {
                         variant="destructive"
                         size="icon-sm"
                         className="h-8 w-8"
-                        onClick={() => void handleDelete(category)}
+                        onClick={() => setDeletingCategory(category)}
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -242,33 +246,77 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      <div className="text-sm text-slate-500">{total} categories</div>
+      <div className="text-sm text-slate-500">{total} danh mục</div>
 
       <Dialog open={Boolean(viewCategory)} onOpenChange={() => setViewCategory(null)}>
         <DialogContent className="w-[95vw] max-w-2xl sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+          <button
+            type="button"
+            aria-label="Đóng"
+            onClick={() => setViewCategory(null)}
+            className="absolute right-4 top-4 z-20 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X size={16} />
+          </button>
           <DialogHeader className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
-            <DialogTitle>Category Detail</DialogTitle>
-            <DialogDescription>Read-only category information.</DialogDescription>
+            <DialogTitle>Chi tiết danh mục</DialogTitle>
+            <DialogDescription>Thông tin danh mục (chỉ xem).</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 px-4 py-5 text-sm sm:px-6">
-            {viewLoading ? <p className="text-slate-500">Loading category detail...</p> : null}
+            {viewLoading ? <p className="text-slate-500">Đang tải chi tiết danh mục...</p> : null}
 
             {viewCategory ? (
               <>
-                <p><strong>Name:</strong> {viewCategory.name}</p>
+                <p><strong>Tên:</strong> {viewCategory.name}</p>
                 <p><strong>Slug:</strong> {viewCategory.slug}</p>
                 <p>
-                  <strong>Description:</strong>{" "}
-                  {viewCategory.description?.trim() || "No description"}
+                  <strong>Mô tả:</strong>{" "}
+                  {viewCategory.description?.trim() || "Không có mô tả"}
                 </p>
-                <p><strong>Created at:</strong> {formatDate(viewCategory.createdAt)}</p>
-                <p><strong>Updated at:</strong> {formatDate(viewCategory.updatedAt)}</p>
+                <p><strong>Tạo lúc:</strong> {formatDate(viewCategory.createdAt)}</p>
+                <p><strong>Cập nhật lúc:</strong> {formatDate(viewCategory.updatedAt)}</p>
               </>
             ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(deletingCategory)}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeletingCategory(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg rounded-2xl border border-slate-200 p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100">
+            <DialogTitle className="flex items-center gap-3 text-xl text-slate-900">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <AlertTriangle size={20} />
+              </span>
+              Xác nhận xóa danh mục
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-[15px] leading-7 text-slate-600">
+              Bạn có chắc muốn xóa danh mục:
+              <span className="block mt-2 rounded-lg bg-slate-50 px-3 py-2 font-semibold text-slate-900">
+                {deletingCategory?.name}
+              </span>
+              <span className="mt-2 block text-red-600">
+                Hành động này không thể hoàn tác.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 px-6 py-4 bg-slate-50/60">
+            <Button variant="outline" onClick={() => setDeletingCategory(null)} disabled={deleting} className="min-w-24 border-slate-300">
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={() => void confirmDeleteCategory()} disabled={deleting} className="min-w-32">
+              {deleting ? "Đang xóa..." : "Xóa danh mục"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
+

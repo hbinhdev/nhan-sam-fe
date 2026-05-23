@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import {
   updateAdminCategory,
   type AdminCategory,
 } from "@/lib/admin-category-api";
+import { useToast } from "@/components/shared/toast/ToastProvider";
 
 type FormMode = "create" | "edit";
 
@@ -19,21 +20,20 @@ interface CategoryFormProps {
 
 export function CategoryForm({ mode, initialData }: CategoryFormProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
   });
-  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
 
     const name = form.name.trim();
     const description = form.description.trim();
     if (!name) {
-      setFormError("Category name is required.");
+      showToast("Tên danh mục là bắt buộc.", "error");
       return;
     }
 
@@ -44,13 +44,19 @@ export function CategoryForm({ mode, initialData }: CategoryFormProps) {
       } else if (initialData) {
         await updateAdminCategory(initialData.id, { name, description });
       }
+
+      showToast(
+        mode === "create" ? "Tạo danh mục thành công." : "Cập nhật danh mục thành công.",
+        "success",
+      );
       router.push("/dashboard/categories");
       router.refresh();
     } catch (submitError) {
-      setFormError(
+      showToast(
         submitError instanceof Error
           ? submitError.message
-          : "Failed to save category.",
+          : "Không thể lưu danh mục.",
+        "error",
       );
     } finally {
       setSaving(false);
@@ -61,16 +67,8 @@ export function CategoryForm({ mode, initialData }: CategoryFormProps) {
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <form className="flex flex-col" onSubmit={handleSubmitForm}>
         <div className="p-4 sm:p-6 space-y-6">
-          {formError ? (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {formError}
-            </div>
-          ) : null}
-
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">
-              Name *
-            </label>
+            <label className="text-sm font-semibold text-slate-700">Tên *</label>
             <Input
               className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
               value={form.name}
@@ -81,9 +79,7 @@ export function CategoryForm({ mode, initialData }: CategoryFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-700">
-              Description
-            </label>
+            <label className="text-sm font-semibold text-slate-700">Mô tả</label>
             <textarea
               className="min-h-[120px] w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
               value={form.description}
@@ -102,7 +98,7 @@ export function CategoryForm({ mode, initialData }: CategoryFormProps) {
             onClick={() => router.back()}
             disabled={saving}
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
@@ -110,10 +106,10 @@ export function CategoryForm({ mode, initialData }: CategoryFormProps) {
             disabled={saving}
           >
             {saving
-              ? "Saving..."
+              ? "Đang lưu..."
               : mode === "create"
-                ? "Save Category"
-                : "Update Category"}
+                ? "Lưu danh mục"
+                : "Cập nhật danh mục"}
           </Button>
         </div>
       </form>

@@ -11,6 +11,7 @@ import {
   type Coupon,
   type CouponDiscountType,
 } from '@/lib/coupon-api';
+import { useToast } from '@/components/shared/toast/ToastProvider';
 
 type FormMode = 'create' | 'edit';
 
@@ -63,7 +64,7 @@ function normalizeMoneyValueForInput(value: number | string | null | undefined) 
 export function CouponForm({ mode, initialData }: CouponFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const { showToast } = useToast();
   const [form, setForm] = useState({
     code: initialData?.code || '',
     name: initialData?.name || '',
@@ -98,10 +99,9 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
-
+    
     if (!form.code.trim() || !form.name.trim()) {
-      setFormError('Code và Tên mã là bắt buộc.');
+      showToast('Code và Tên mã là bắt buộc.', 'error');
       return;
     }
 
@@ -115,40 +115,40 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
     const usageLimit = hasUsageLimit ? Number(form.usageLimit) : undefined;
 
     if (!Number.isFinite(discountValue) || discountValue <= 0) {
-      setFormError('Giá trị giảm phải lớn hơn 0.');
+      showToast('Giá trị giảm phải lớn hơn 0.', 'error');
       return;
     }
 
     if (form.discountType === 'PERCENTAGE' && discountValue > 100) {
-      setFormError('Giảm theo phần trăm không được lớn hơn 100.');
+      showToast('Giảm theo phần trăm không được lớn hơn 100.', 'error');
       return;
     }
     if (form.discountType === 'PERCENTAGE' && discountValue < 0) {
-      setFormError('Giảm theo phần trăm phải lớn hơn hoặc bằng 0.');
+      showToast('Giảm theo phần trăm phải lớn hơn hoặc bằng 0.', 'error');
       return;
     }
     if (discountValueError) {
-      setFormError(discountValueError);
+      showToast(discountValueError, 'error');
       return;
     }
 
     if (Number.isNaN(minOrderAmount) || minOrderAmount < 0) {
-      setFormError('Giá trị đơn hàng tối thiểu không hợp lệ.');
+      showToast('Giá trị đơn hàng tối thiểu không hợp lệ.', 'error');
       return;
     }
 
     if (maxDiscountAmount !== undefined && (Number.isNaN(maxDiscountAmount) || maxDiscountAmount < 0)) {
-      setFormError('Mức giảm tối đa không hợp lệ.');
+      showToast('Mức giảm tối đa không hợp lệ.', 'error');
       return;
     }
 
     if (usageLimit !== undefined && (Number.isNaN(usageLimit) || usageLimit < 1)) {
-      setFormError('Giới hạn lượt dùng phải lớn hơn hoặc bằng 1.');
+      showToast('Giới hạn lượt dùng phải lớn hơn hoặc bằng 1.', 'error');
       return;
     }
 
     if (form.discountType === 'FIXED_AMOUNT' && maxDiscountAmount !== undefined) {
-      setFormError('Giảm số tiền cố định không dùng mức giảm tối đa.');
+      showToast('Giảm số tiền cố định không dùng mức giảm tối đa.', 'error');
       return;
     }
 
@@ -182,10 +182,11 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
         await updateAdminCoupon(initialData.id, payload);
       }
 
+      showToast(mode === 'create' ? 'Tạo mã giảm giá thành công.' : 'Cập nhật mã giảm giá thành công.', 'success');
       router.push('/dashboard/coupons');
       router.refresh();
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'Không thể lưu mã giảm giá.');
+      showToast(error instanceof Error ? error.message : 'Không thể lưu mã giảm giá.', 'error');
     } finally {
       setSaving(false);
     }
@@ -194,13 +195,7 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <form className="flex flex-col" onSubmit={handleSubmit}>
-        <div className="p-4 sm:p-6 space-y-6">
-          {formError ? (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {formError}
-            </div>
-          ) : null}
-
+        <div className="p-4 sm:p-6 space-y-6">`r`n
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Code *">
               <Input value={form.code} onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))} />
@@ -225,7 +220,7 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
                 }
               >
                 <option value="PERCENTAGE">Giảm theo phần trăm (%)</option>
-                <option value="FIXED_AMOUNT">Giảm số tiền cố định (VND)</option>
+                <option value="FIXED_AMOUNT">Giảm số tiền cố định (đ)</option>
               </select>
             </Field>
             <Field label="Giá trị giảm *">
@@ -278,14 +273,14 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
                   checked={form.isActive}
                   onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))}
                 />
-                <span className="font-medium text-slate-700">Active</span>
+                <span className="font-medium text-slate-700">Đang bật</span>
               </label>
             </Field>
           </div>
 
           <details className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
             <summary className="cursor-pointer select-none text-sm font-semibold text-slate-800">
-              Advanced settings
+              Cài đặt nâng cao
             </summary>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -315,9 +310,9 @@ export function CouponForm({ mode, initialData }: CouponFormProps) {
         </div>
 
         <div className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={saving}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => router.back()} disabled={saving}>Hủy</Button>
           <Button type="submit" className="bg-slate-900 text-white hover:bg-slate-800" disabled={saving}>
-            {saving ? 'Saving...' : mode === 'create' ? 'Save Coupon' : 'Update Coupon'}
+            {saving ? 'Đang lưu...' : mode === 'create' ? 'Lưu mã giảm giá' : 'Cập nhật mã giảm giá'}
           </Button>
         </div>
       </form>
@@ -333,3 +328,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+

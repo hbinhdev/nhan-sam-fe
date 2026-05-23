@@ -9,10 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AlertTriangle, Download, Trash2 } from "lucide-react";
 import { getAuthSession } from "@/lib/auth-api";
 import {
   deleteAdminUser,
@@ -30,12 +36,12 @@ function formatDate(value?: string) {
   if (!value) return "-";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleString();
+  return parsed.toLocaleString("vi-VN");
 }
 
 function getDisplayName(user: AdminUser) {
   const label = user.name?.trim();
-  return label && label.length > 0 ? label : "Unknown";
+  return label && label.length > 0 ? label : "Không xác định";
 }
 
 function getInitial(user: AdminUser) {
@@ -55,6 +61,7 @@ export function CustomerTable() {
   const [total, setTotal] = useState(0);
 
   const [processingUserId, setProcessingUserId] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
   const [exporting, setExporting] = useState(false);
   const { showToast } = useToast();
 
@@ -87,7 +94,7 @@ export function CustomerTable() {
     } catch (loadError) {
       setUsers([]);
       setTotal(0);
-      setError(loadError instanceof Error ? loadError.message : "Failed to load users.");
+      setError(loadError instanceof Error ? loadError.message : "Không thể tải danh sách người dùng.");
     } finally {
       setLoading(false);
     }
@@ -125,11 +132,11 @@ export function CustomerTable() {
 
     try {
       await updateAdminUserRole(user.id, role);
-      showToast(`Updated role for ${getDisplayName(user)}.`, "success");
+      showToast(`Đã cập nhật vai trò cho ${getDisplayName(user)}.`, "success");
       await loadUsers(page, search, roleFilter);
     } catch (updateError) {
       showToast(
-        updateError instanceof Error ? updateError.message : "Failed to update role.",
+        updateError instanceof Error ? updateError.message : "Không thể cập nhật vai trò.",
         "error",
       );
     } finally {
@@ -138,27 +145,30 @@ export function CustomerTable() {
   };
 
   const handleDelete = async (user: AdminUser) => {
-    const confirmed = window.confirm(`Delete user \"${getDisplayName(user)}\"?`);
-    if (!confirmed) return;
-
     setProcessingUserId(user.id);
     setError(null);
 
     try {
       await deleteAdminUser(user.id);
-      showToast("User deleted successfully.", "success");
+      showToast("Xóa người dùng thành công.", "success");
 
       const shouldGoPreviousPage = page > 1 && users.length === 1;
       const targetPage = shouldGoPreviousPage ? page - 1 : page;
       await loadUsers(targetPage, search, roleFilter);
     } catch (deleteError) {
       showToast(
-        deleteError instanceof Error ? deleteError.message : "Failed to delete user.",
+        deleteError instanceof Error ? deleteError.message : "Không thể xóa người dùng.",
         "error",
       );
     } finally {
       setProcessingUserId(null);
     }
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deletingUser) return;
+    await handleDelete(deletingUser);
+    setDeletingUser(null);
   };
 
   const handleExport = async () => {
@@ -171,7 +181,7 @@ export function CustomerTable() {
       showToast("Export customers thành công.", "success");
     } catch (error) {
       showToast(
-        error instanceof Error ? error.message : "Export customers failed.",
+        error instanceof Error ? error.message : "Xuất danh sách khách hàng thất bại.",
         "error",
       );
     } finally {
@@ -184,7 +194,7 @@ export function CustomerTable() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <form className="flex-1" onSubmit={handleSearchSubmit}>
           <Input
-            placeholder="Search by name, email, phone..."
+            placeholder="Tìm theo tên, email, số điện thoại..."
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -195,14 +205,14 @@ export function CustomerTable() {
           value={roleFilter}
           onChange={handleRoleFilterChange}
         >
-          <option value="">All roles</option>
+          <option value="">Tất cả vai trò</option>
           <option value="ADMIN">ADMIN</option>
           <option value="USER">USER</option>
         </select>
 
         <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>
           <Download className="mr-2 h-4 w-4" />
-          {exporting ? "Exporting..." : "Export Excel"}
+          {exporting ? "Đang xuất..." : "Xuất Excel"}
         </Button>
       </div>
 
@@ -216,25 +226,25 @@ export function CustomerTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead>Tên</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Vai trò</TableHead>
+              <TableHead>Ngày tạo</TableHead>
+              <TableHead className="text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-20 text-center text-slate-500">
-                  Loading users...
+                  Đang tải người dùng...
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-20 text-center text-slate-500">
-                  No users found.
+                  Không tìm thấy người dùng.
                 </TableCell>
               </TableRow>
             ) : (
@@ -255,32 +265,28 @@ export function CustomerTable() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.phone || "-"}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === "ADMIN" ? "warning" : "secondary"}>
-                        {user.role}
-                      </Badge>
+                      <select
+                        className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs"
+                        value={user.role}
+                        onChange={(event) =>
+                          void handleUpdateRole(user, event.target.value as AdminUserRole)
+                        }
+                        disabled={isProcessing || isSelf}
+                      >
+                        <option value="USER">USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                      </select>
                     </TableCell>
                     <TableCell>{formatDate(user.createdAt)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <select
-                          className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs"
-                          value={user.role}
-                          onChange={(event) =>
-                            void handleUpdateRole(user, event.target.value as AdminUserRole)
-                          }
-                          disabled={isProcessing || isSelf}
-                        >
-                          <option value="USER">USER</option>
-                          <option value="ADMIN">ADMIN</option>
-                        </select>
-
                         <Button
                           variant="destructive"
                           size="icon-sm"
                           className="h-8 w-8"
-                          onClick={() => void handleDelete(user)}
+                          onClick={() => setDeletingUser(user)}
                           disabled={isProcessing || isSelf}
-                          title={isSelf ? "You cannot delete your own account" : "Delete user"}
+                          title={isSelf ? "Bạn không thể xóa tài khoản của chính mình" : "Xóa người dùng"}
                         >
                           <Trash2 size={16} />
                         </Button>
@@ -296,7 +302,7 @@ export function CustomerTable() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">
-          Page {page} of {totalPages} ({total} users)
+          Trang {page} / {totalPages} ({total} người dùng)
         </p>
         <div className="flex gap-2">
           <Button
@@ -305,7 +311,7 @@ export function CustomerTable() {
             disabled={page <= 1 || loading}
             onClick={() => void loadUsers(page - 1, search, roleFilter)}
           >
-            Previous
+            Trước
           </Button>
           <Button
             variant="outline"
@@ -313,10 +319,53 @@ export function CustomerTable() {
             disabled={page >= totalPages || loading}
             onClick={() => void loadUsers(page + 1, search, roleFilter)}
           >
-            Next
+            Sau
           </Button>
         </div>
       </div>
+
+      <Dialog
+        open={Boolean(deletingUser)}
+        onOpenChange={(open) => {
+          if (!open && !processingUserId) setDeletingUser(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg rounded-2xl border border-slate-200 p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100">
+            <DialogTitle className="flex items-center gap-3 text-xl text-slate-900">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <AlertTriangle size={20} />
+              </span>
+              Xác nhận xóa người dùng
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-[15px] leading-7 text-slate-600">
+              Bạn có chắc muốn xóa:
+              <span className="block mt-2 rounded-lg bg-slate-50 px-3 py-2 font-semibold text-slate-900">
+                {deletingUser ? getDisplayName(deletingUser) : ""}
+              </span>
+              <span className="mt-2 block text-red-600">Hành động này không thể hoàn tác.</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 px-6 py-4 bg-slate-50/60">
+            <Button
+              variant="outline"
+              onClick={() => setDeletingUser(null)}
+              disabled={Boolean(processingUserId)}
+              className="min-w-24 border-slate-300"
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void confirmDeleteUser()}
+              disabled={Boolean(processingUserId)}
+              className="min-w-32"
+            >
+              {processingUserId ? "Đang xóa..." : "Xóa người dùng"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

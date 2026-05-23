@@ -41,7 +41,7 @@ export default function DashboardPage() {
       } catch (error) {
         if (!mounted) return;
         const message =
-          error instanceof Error ? error.message : "Failed to load dashboard.";
+          error instanceof Error ? error.message : "Không thể tải bảng điều khiển.";
         setState({ loading: false, error: message, summary: null });
       }
     };
@@ -68,15 +68,15 @@ export default function DashboardPage() {
     if (!overview) return [];
 
     return [
-      { name: "Pending", value: overview.pendingConsultations },
-      { name: "Contacted", value: overview.contactedConsultations },
-      { name: "Cancelled", value: overview.cancelledConsultations },
+      { name: "Chờ xử lý", value: overview.pendingConsultations },
+      { name: "Đã liên hệ", value: overview.contactedConsultations },
+      { name: "Đã hủy", value: overview.cancelledConsultations },
     ];
   }, [state.summary]);
 
   if (state.loading) {
     return (
-      <div className="text-sm text-slate-500">Loading dashboard data...</div>
+      <div className="text-sm text-slate-500">Đang tải dữ liệu bảng điều khiển...</div>
     );
   }
 
@@ -92,7 +92,7 @@ export default function DashboardPage() {
   if (!summary) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
-        No dashboard data available.
+        Chưa có dữ liệu bảng điều khiển.
       </div>
     );
   }
@@ -101,38 +101,38 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-          Dashboard Overview
+          Tổng quan bảng điều khiển
         </h1>
         <div className="text-sm text-slate-500 dark:text-slate-400">
-          Last updated: {new Date().toLocaleDateString()}
+          Cập nhật lần cuối: {new Date().toLocaleDateString("vi-VN")}
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KPICard
-          title="Total Products"
+          title="Tổng sản phẩm"
           value={summary.overview.totalProducts.toLocaleString()}
           icon={<Boxes size={20} />}
         />
 
         <KPICard
-          title="Total Reviews"
+          title="Tổng đánh giá"
           value={summary.overview.totalReviews.toLocaleString()}
-          change={`${summary.overview.pendingReviews} pending`}
+          change={`${summary.overview.pendingReviews} chờ duyệt`}
           trend={summary.overview.pendingReviews > 0 ? "down" : "up"}
           icon={<MessageSquare size={20} />}
         />
 
         <KPICard
-          title="Total Orders"
+          title="Tổng đơn hàng"
           value={summary.overview.totalOrders.toLocaleString()}
           icon={<ShoppingCart size={20} />}
         />
 
         <KPICard
-          title="Consultations"
+          title="Tư vấn"
           value={summary.overview.totalConsultations.toLocaleString()}
-          change={`${summary.overview.cancelledConsultations} cancelled`}
+          change={`${summary.overview.cancelledConsultations} đã hủy`}
           trend={summary.overview.cancelledConsultations > 0 ? "down" : "up"}
           icon={<Phone size={20} />}
           description=""
@@ -150,7 +150,7 @@ export default function DashboardPage() {
 
       <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 flex items-center gap-2">
         <TrendingDown size={14} />
-        Revenue, orders, and payment statistics are not available yet.
+        Thống kê doanh thu, đơn hàng và thanh toán hiện chưa khả dụng.
       </div>
     </div>
   );

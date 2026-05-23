@@ -44,47 +44,47 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
     {
       to: "/dashboard",
       icon: LayoutDashboard,
-      label: "Dashboard",
+      label: "Bảng điều khiển",
     },
     {
       to: "/dashboard/products",
       icon: Package,
-      label: "Products",
+      label: "Sản phẩm",
     },
     {
       to: "/dashboard/categories",
       icon: FolderTree,
-      label: "Categories",
+      label: "Danh mục",
     },
     {
       to: "/dashboard/policies",
       icon: FileText,
-      label: "Policies",
+      label: "Chính sách",
     },
     {
       to: "/dashboard/blogs",
       icon: BookOpen,
-      label: "Blogs",
+      label: "Bài viết",
     },
     {
       to: "/dashboard/orders",
       icon: ShoppingCart,
-      label: "Orders",
+      label: "Đơn hàng",
     },
     {
       to: "/dashboard/coupons",
       icon: TicketPercent,
-      label: "Coupons",
+      label: "Mã giảm giá",
     },
     {
       to: "/dashboard/customers",
       icon: Users,
-      label: "Customers",
+      label: "Khách hàng",
     },
     {
       to: "/dashboard/consultations",
       icon: PhoneCall,
-      label: "Consultations",
+      label: "Tư vấn",
     },
     // {
     //   to: '/dashboard/home-sections',
@@ -208,7 +208,7 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
           </nav>
 
           <div className="border-t border-slate-200 dark:border-slate-800 px-3 py-3">
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
+            {/* <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors">
               <Settings size={22} className="shrink-0" />
               <span
                 className={cn(
@@ -216,9 +216,9 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
                   !isOpen && !isMobile ? "w-0 opacity-0" : "w-auto opacity-100",
                 )}
               >
-                Settings
+                Cài đặt
               </span>
-            </button>
+            </button> */}
             <button
               onClick={handleLogout}
               className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors"
@@ -230,7 +230,7 @@ export function Sidebar({ isOpen, toggleSidebar, isMobile }: SidebarProps) {
                   !isOpen && !isMobile ? "w-0 opacity-0" : "w-auto opacity-100",
                 )}
               >
-                Logout
+                Đăng xuất
               </span>
             </button>
           </div>

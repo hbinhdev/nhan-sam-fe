@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -86,10 +86,9 @@ function buildPayload(form: BlogFormState) {
 }
 
 function validateForm(form: BlogFormState) {
-  if (!form.title.trim()) return "Title is required.";
-  if (!slugifyVietnamese(form.title))
-    return "Slug cannot be generated from title.";
-  if (!form.content.trim()) return "Content is required.";
+  if (!form.title.trim()) return "Tiêu đề là bắt buộc.";
+  if (!slugifyVietnamese(form.title)) return "Không thể tạo slug từ tiêu đề.";
+  if (!form.content.trim()) return "Nội dung là bắt buộc.";
   return null;
 }
 
@@ -101,7 +100,6 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
   const [form, setForm] = useState<BlogFormState>(
     initialData ? mapBlogToForm(initialData) : EMPTY_FORM,
   );
-  const [formError, setFormError] = useState<string | null>(null);
 
   const handleUploadThumbnail = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -114,12 +112,12 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
     try {
       const url = await uploadImage(file);
       setForm((prev) => ({ ...prev, thumbnail: url }));
-      showToast("Thumbnail uploaded successfully.", "success");
+      showToast("Tải ảnh thumbnail thành công.", "success");
     } catch (uploadError) {
       const message =
         uploadError instanceof Error
           ? uploadError.message
-          : "Failed to upload thumbnail.";
+          : "Không thể tải ảnh thumbnail.";
       showToast(message, "error");
     } finally {
       setUploadingThumbnail(false);
@@ -128,11 +126,10 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
 
   const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
 
     const validationError = validateForm(form);
     if (validationError) {
-      setFormError(validationError);
+      showToast(validationError, "error");
       return;
     }
 
@@ -142,10 +139,10 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
     try {
       if (mode === "create") {
         await adminCreateBlog(payload);
-        showToast("Blog post created successfully.", "success");
+        showToast("Tạo bài viết thành công.", "success");
       } else if (initialData) {
         await adminUpdateBlog(initialData.id, payload);
-        showToast("Blog post updated successfully.", "success");
+        showToast("Cập nhật bài viết thành công.", "success");
       }
       router.push("/dashboard/blogs");
       router.refresh();
@@ -153,8 +150,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
       const message =
         submitError instanceof Error
           ? submitError.message
-          : "Failed to save blog post.";
-      setFormError(message);
+          : "Không thể lưu bài viết.";
       showToast(message, "error");
     } finally {
       setSaving(false);
@@ -165,17 +161,9 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <form className="flex flex-col" onSubmit={handleSubmitForm}>
         <div className="p-4 sm:p-6 space-y-6">
-          {formError ? (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {formError}
-            </div>
-          ) : null}
-
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Title *
-              </label>
+              <label className="text-sm font-semibold text-slate-700">Tiêu đề *</label>
               <Input
                 value={form.title}
                 onChange={(e) =>
@@ -186,9 +174,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Category *
-              </label>
+              <label className="text-sm font-semibold text-slate-700">Danh mục *</label>
               <select
                 className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900"
                 value={form.category}
@@ -208,9 +194,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Author Name
-              </label>
+              <label className="text-sm font-semibold text-slate-700">Tên tác giả</label>
               <Input
                 value={form.authorName}
                 onChange={(e) =>
@@ -221,9 +205,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Excerpt
-              </label>
+              <label className="text-sm font-semibold text-slate-700">Tóm tắt</label>
               <textarea
                 value={form.excerpt}
                 onChange={(e) =>
@@ -234,9 +216,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Content *
-              </label>
+              <label className="text-sm font-semibold text-slate-700">Nội dung *</label>
               <RichTextEditor
                 value={form.content}
                 onChange={(nextValue) =>
@@ -248,9 +228,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Thumbnail
-              </label>
+              <label className="text-sm font-semibold text-slate-700">Ảnh thumbnail</label>
               <div className="rounded-lg border border-slate-300 bg-white p-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <label className="inline-flex cursor-pointer items-center rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
@@ -261,7 +239,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
                       onChange={handleUploadThumbnail}
                       disabled={uploadingThumbnail || saving}
                     />
-                    {uploadingThumbnail ? "Uploading..." : "Upload Thumbnail"}
+                    {uploadingThumbnail ? "Đang tải lên..." : "Tải ảnh thumbnail"}
                   </label>
                   {form.thumbnail ? (
                     <button
@@ -272,13 +250,12 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
                       }
                       disabled={uploadingThumbnail || saving}
                     >
-                      Remove thumbnail
+                      Xóa thumbnail
                     </button>
                   ) : null}
                 </div>
                 {form.thumbnail ? (
                   <div className="mt-3">
-                    {/* Keep URL value in state for payload, preview for admin confirmation */}
                     <img
                       src={form.thumbnail}
                       alt="Thumbnail preview"
@@ -286,17 +263,13 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
                     />
                   </div>
                 ) : (
-                  <p className="mt-3 text-xs text-slate-500">
-                    No thumbnail selected.
-                  </p>
+                  <p className="mt-3 text-xs text-slate-500">Chưa chọn thumbnail.</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Tags (comma separated)
-              </label>
+              <label className="text-sm font-semibold text-slate-700">Thẻ (phân tách bằng dấu phẩy)</label>
               <Input
                 value={form.tags}
                 onChange={(e) =>
@@ -318,7 +291,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
                   }))
                 }
               />
-              Published
+              Xuất bản
             </label>
           </div>
         </div>
@@ -331,7 +304,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
             onClick={() => router.back()}
             disabled={saving}
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
@@ -339,10 +312,10 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
             disabled={saving}
           >
             {saving
-              ? "Saving..."
+              ? "Đang lưu..."
               : mode === "create"
-                ? "Save Blog"
-                : "Update Blog"}
+                ? "Lưu bài viết"
+                : "Cập nhật bài viết"}
           </Button>
         </div>
       </form>

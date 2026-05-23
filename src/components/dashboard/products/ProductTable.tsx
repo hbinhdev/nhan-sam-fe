@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Table,
   TableBody,
@@ -29,13 +29,13 @@ function getStockBadge(stock: number | null | undefined): BadgeVariant {
 }
 
 function getStockLabel(stock: number | null | undefined) {
-  if (!stock || stock <= 0) return "Out of stock";
-  if (stock <= 10) return "Low stock";
-  return "In stock";
+  if (!stock || stock <= 0) return "Hết hàng";
+  if (stock <= 10) return "Sắp hết hàng";
+  return "Còn hàng";
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("vi-VN").format(value) + " VND";
+  return new Intl.NumberFormat("vi-VN").format(value) + "đ";
 }
 
 export function ProductTable({
@@ -49,13 +49,13 @@ export function ProductTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Image</TableHead>
-            <TableHead>Product Name</TableHead>
+            <TableHead className="w-[100px]">Hình ảnh</TableHead>
+            <TableHead className="w-[34%]">Tên sản phẩm</TableHead>
             <TableHead>Mã SP</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Stock</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Danh mục</TableHead>
+            <TableHead>Giá</TableHead>
+            <TableHead>Tồn kho</TableHead>
+            <TableHead className="text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,7 +72,14 @@ export function ProductTable({
                   className="h-10 w-10 rounded-md object-cover bg-slate-100"
                 />
               </TableCell>
-              <TableCell className="font-medium">{product.name}</TableCell>
+              <TableCell className="font-medium">
+                <p
+                  className="block max-w-[320px] truncate leading-5"
+                  title={product.name}
+                >
+                  {product.name}
+                </p>
+              </TableCell>
               <TableCell>{product.sku || "-"}</TableCell>
               <TableCell>{product.category?.name || "-"}</TableCell>
               <TableCell>{formatCurrency(product.price)}</TableCell>

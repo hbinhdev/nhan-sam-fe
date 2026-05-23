@@ -1,7 +1,7 @@
-import React from 'react';
-import type { VariantProps } from 'class-variance-authority';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge, badgeVariants } from '@/components/ui/badge';
+import React from "react";
+import type { VariantProps } from "class-variance-authority";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge, badgeVariants } from "@/components/ui/badge";
 
 type RecentConsultationItem = {
   id: string;
@@ -16,26 +16,26 @@ type RecentTransactionsProps = {
   consultations: RecentConsultationItem[];
 };
 
-type BadgeVariant = VariantProps<typeof badgeVariants>['variant'];
+type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 
 export function RecentTransactions({ consultations }: RecentTransactionsProps) {
   const getStatusVariant = (status: string): BadgeVariant => {
     switch (status.toLowerCase()) {
-      case 'contacted':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'cancelled':
-        return 'danger';
+      case "contacted":
+        return "success";
+      case "pending":
+        return "warning";
+      case "cancelled":
+        return "danger";
       default:
-        return 'secondary';
+        return "secondary";
     }
   };
 
   return (
     <Card className="col-span-1 lg:col-span-3">
       <CardHeader>
-        <CardTitle>Recent Consultations</CardTitle>
+        <CardTitle>Tư vấn gần đây</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -43,7 +43,10 @@ export function RecentTransactions({ consultations }: RecentTransactionsProps) {
             <div className="text-sm text-slate-500">No consultations yet.</div>
           ) : (
             consultations.map((consultation) => (
-              <div key={consultation.id} className="flex items-center justify-between">
+              <div
+                key={consultation.id}
+                className="flex items-center justify-between"
+              >
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium dark:bg-slate-800 dark:text-slate-300">
                     {consultation.fullName.charAt(0)}

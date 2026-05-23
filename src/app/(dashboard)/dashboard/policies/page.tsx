@@ -1,13 +1,12 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getAuthSession } from "@/lib/auth-api";
 import {
-  adminCreatePolicy,
   adminDeletePolicy,
-  adminGetPolicyById,
   adminGetPolicies,
-  adminUpdatePolicy,
+  adminGetPolicyById,
   type PolicyItem,
   type PolicyType,
 } from "@/lib/policy-api";
@@ -29,26 +28,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Edit, Eye, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/components/shared/toast/ToastProvider";
-import { RichTextEditor } from "@/components/dashboard/blogs/RichTextEditor";
 import { normalizeBlogContentToHtml } from "@/lib/blog-helpers";
-
-type FormMode = "create" | "edit";
-
-type PolicyFormState = {
-  type: PolicyType;
-  title: string;
-  content: string;
-  isPublished: boolean;
-};
-
-const EMPTY_FORM: PolicyFormState = {
-  type: "privacy",
-  title: "",
-  content: "",
-  isPublished: true,
-};
 
 const POLICY_TYPES: PolicyType[] = ["privacy", "return", "shipping", "payment", "terms"];
 const PAGE_LIMIT = 10;
@@ -57,16 +39,15 @@ function formatDate(date?: string) {
   if (!date) return "-";
   const parsed = new Date(date);
   if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleString();
+  return parsed.toLocaleString("vi-VN");
 }
 
 export default function PoliciesPage() {
+  const router = useRouter();
   const { showToast } = useToast();
 
   const [policies, setPolicies] = useState<PolicyItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -74,13 +55,10 @@ export default function PoliciesPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState<FormMode>("create");
-  const [editingPolicy, setEditingPolicy] = useState<PolicyItem | null>(null);
-  const [form, setForm] = useState<PolicyFormState>(EMPTY_FORM);
-  const [formError, setFormError] = useState<string | null>(null);
   const [viewPolicy, setViewPolicy] = useState<PolicyItem | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
+  const [deletingPolicy, setDeletingPolicy] = useState<PolicyItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [authChecked, setAuthChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -96,7 +74,6 @@ export default function PoliciesPage() {
     nextType = typeFilter,
   ) => {
     setLoading(true);
-    setError(null);
 
     try {
       const response = await adminGetPolicies({
@@ -112,8 +89,8 @@ export default function PoliciesPage() {
     } catch (loadError) {
       setPolicies([]);
       setTotal(0);
-      const message = loadError instanceof Error ? loadError.message : "Failed to load policies.";
-      setError(message);
+      const message =
+        loadError instanceof Error ? loadError.message : "Không thể tải danh sách chính sách.";
       showToast(message, "error");
     } finally {
       setLoading(false);
@@ -139,27 +116,6 @@ export default function PoliciesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authChecked, isAdmin]);
 
-  const openCreateModal = () => {
-    setFormMode("create");
-    setEditingPolicy(null);
-    setForm(EMPTY_FORM);
-    setFormError(null);
-    setIsFormOpen(true);
-  };
-
-  const openEditModal = (policy: PolicyItem) => {
-    setFormMode("edit");
-    setEditingPolicy(policy);
-    setForm({
-      type: policy.type,
-      title: policy.title,
-      content: normalizeBlogContentToHtml(policy.content),
-      isPublished: policy.isPublished,
-    });
-    setFormError(null);
-    setIsFormOpen(true);
-  };
-
   const openViewModal = async (policy: PolicyItem) => {
     setViewLoading(true);
     setViewPolicy(policy);
@@ -170,74 +126,27 @@ export default function PoliciesPage() {
         setViewPolicy(latest);
       }
     } catch {
-      // Keep current table data when detail request fails.
+      // Keep current row data when detail request fails.
     } finally {
       setViewLoading(false);
     }
   };
 
-  const handleDelete = async (policy: PolicyItem) => {
-    const confirmed = window.confirm(`Delete policy \"${policy.title}\"?`);
-    if (!confirmed) return;
-
-    setError(null);
+  const confirmDeletePolicy = async () => {
+    if (!deletingPolicy) return;
+    setDeleting(true);
 
     try {
-      await adminDeletePolicy(policy.id);
-      showToast("Policy deleted successfully.", "success");
+      await adminDeletePolicy(deletingPolicy.id);
+      showToast("Xóa chính sách thành công.", "success");
+      setDeletingPolicy(null);
       await loadPolicies(page, search, typeFilter);
     } catch (deleteError) {
       const message =
-        deleteError instanceof Error
-          ? deleteError.message
-          : "Failed to delete policy.";
-      setError(message);
-      showToast(message, "error");
-    }
-  };
-
-  const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setFormError(null);
-    setError(null);
-
-    const title = form.title.trim();
-    const content = form.content.trim();
-
-    if (!title || !content) {
-      setFormError("Title and content are required.");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      if (formMode === "create") {
-        await adminCreatePolicy({
-          type: form.type,
-          title,
-          content,
-          isPublished: form.isPublished,
-        });
-        showToast("Policy created successfully.", "success");
-      } else if (editingPolicy) {
-        await adminUpdatePolicy(editingPolicy.id, {
-          type: form.type,
-          title,
-          content,
-          isPublished: form.isPublished,
-        });
-        showToast("Policy updated successfully.", "success");
-      }
-
-      setIsFormOpen(false);
-      await loadPolicies(page, search, typeFilter);
-    } catch (submitError) {
-      const message =
-        submitError instanceof Error ? submitError.message : "Failed to save policy.";
-      setFormError(message);
+        deleteError instanceof Error ? deleteError.message : "Không thể xóa chính sách.";
       showToast(message, "error");
     } finally {
-      setSaving(false);
+      setDeleting(false);
     }
   };
 
@@ -257,7 +166,7 @@ export default function PoliciesPage() {
   if (!authChecked) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
-        Checking admin access...
+        Đang kiểm tra quyền quản trị...
       </div>
     );
   }
@@ -265,7 +174,7 @@ export default function PoliciesPage() {
   if (!isAdmin) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Admin access is required.
+        Cần quyền quản trị.
       </div>
     );
   }
@@ -275,28 +184,25 @@ export default function PoliciesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            Policies
+            Chính sách
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage CMS policy pages for website footer and legal pages.
+            Quản lý trang chính sách cho chân trang và nội dung pháp lý.
           </p>
         </div>
-        <Button onClick={openCreateModal} className="bg-slate-900 text-white hover:bg-slate-800">
+        <Button
+          onClick={() => router.push("/dashboard/policies/add")}
+          className="bg-slate-900 text-white hover:bg-slate-800"
+        >
           <Plus className="mr-2 h-4 w-4" />
-          Add Policy
+          Thêm chính sách
         </Button>
       </div>
-
-      {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
-      ) : null}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <form className="flex-1" onSubmit={handleSearchSubmit}>
           <Input
-            placeholder="Search policies..."
+            placeholder="Tìm kiếm chính sách..."
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -307,7 +213,7 @@ export default function PoliciesPage() {
           value={typeFilter}
           onChange={handleTypeFilterChange}
         >
-          <option value="">All types</option>
+          <option value="">Tất cả loại</option>
           {POLICY_TYPES.map((type) => (
             <option key={type} value={type}>
               {type}
@@ -318,23 +224,23 @@ export default function PoliciesPage() {
 
       {loading ? (
         <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
-          Loading policies...
+          Đang tải chính sách...
         </div>
       ) : policies.length === 0 ? (
         <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
-          No policies found.
+          Không tìm thấy chính sách.
         </div>
       ) : (
         <div className="rounded-md border border-slate-200 dark:border-slate-800">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>Tiêu đề</TableHead>
+                <TableHead>Loại</TableHead>
                 <TableHead>Slug</TableHead>
-                <TableHead>Published</TableHead>
-                <TableHead>Updated At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Xuất bản</TableHead>
+                <TableHead>Cập nhật lúc</TableHead>
+                <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -347,7 +253,7 @@ export default function PoliciesPage() {
                   <TableCell>{policy.slug}</TableCell>
                   <TableCell>
                     <Badge variant={policy.isPublished ? "success" : "secondary"}>
-                      {policy.isPublished ? "Published" : "Draft"}
+                      {policy.isPublished ? "Đã xuất bản" : "Nháp"}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatDate(policy.updatedAt)}</TableCell>
@@ -365,7 +271,7 @@ export default function PoliciesPage() {
                         variant="outline"
                         size="icon-sm"
                         className="h-8 w-8 text-slate-700"
-                        onClick={() => openEditModal(policy)}
+                        onClick={() => router.push(`/dashboard/policies/${policy.id}/edit`)}
                       >
                         <Edit size={16} />
                       </Button>
@@ -373,7 +279,7 @@ export default function PoliciesPage() {
                         variant="destructive"
                         size="icon-sm"
                         className="h-8 w-8"
-                        onClick={() => void handleDelete(policy)}
+                        onClick={() => setDeletingPolicy(policy)}
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -388,7 +294,7 @@ export default function PoliciesPage() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">
-          Page {page} of {totalPages} ({total} policies)
+          Trang {page} / {totalPages} ({total} chính sách)
         </p>
         <div className="flex gap-2">
           <Button
@@ -397,7 +303,7 @@ export default function PoliciesPage() {
             disabled={page <= 1 || loading}
             onClick={() => void loadPolicies(page - 1, search, typeFilter)}
           >
-            Previous
+            Trước
           </Button>
           <Button
             variant="outline"
@@ -405,133 +311,49 @@ export default function PoliciesPage() {
             disabled={page >= totalPages || loading}
             onClick={() => void loadPolicies(page + 1, search, typeFilter)}
           >
-            Next
+            Sau
           </Button>
         </div>
       </div>
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
-          <form className="flex max-h-[90vh] w-full flex-col" onSubmit={handleSubmitForm}>
-            <DialogHeader className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
-              <DialogTitle>{formMode === "create" ? "Add Policy" : "Edit Policy"}</DialogTitle>
-              <DialogDescription>
-                Manage title, content and publish status for policy page.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 space-y-4">
-              {formError ? (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                  {formError}
-                </div>
-              ) : null}
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Type *</label>
-                  <select
-                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900"
-                    value={form.type}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, type: event.target.value as PolicyType }))
-                    }
-                  >
-                    {POLICY_TYPES.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Title *</label>
-                <Input
-                  value={form.title}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, title: event.target.value }))
-                  }
-                  className="h-10 border-slate-300 bg-white text-slate-900"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Content *</label>
-                <RichTextEditor
-                  value={form.content}
-                  onChange={(nextValue) =>
-                    setForm((prev) => ({ ...prev, content: nextValue }))
-                  }
-                  placeholder="Enter policy content..."
-                />
-              </div>
-
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={form.isPublished}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, isPublished: event.target.checked }))
-                  }
-                />
-                Published
-              </label>
-            </div>
-
-            <div className="sticky bottom-0 z-10 flex justify-end gap-3 border-t border-slate-200 bg-white px-4 py-4 sm:px-6">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10 min-w-24 border-slate-300 bg-white text-slate-800 hover:bg-slate-100"
-                onClick={() => setIsFormOpen(false)}
-                disabled={saving}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="h-10 min-w-32 bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-500 disabled:text-white"
-                disabled={saving}
-              >
-                {saving ? "Saving..." : formMode === "create" ? "Save Policy" : "Update Policy"}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={Boolean(viewPolicy)} onOpenChange={() => setViewPolicy(null)}>
         <DialogContent className="w-[95vw] max-w-3xl sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+          <button
+            type="button"
+            aria-label="Đóng"
+            onClick={() => setViewPolicy(null)}
+            className="absolute right-4 top-4 z-20 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X size={16} />
+          </button>
           <DialogHeader className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
-            <DialogTitle>Policy Detail</DialogTitle>
-            <DialogDescription>Read-only policy information.</DialogDescription>
+            <DialogTitle>Chi tiết chính sách</DialogTitle>
+            <DialogDescription>Thông tin chính sách (chỉ xem).</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 px-4 py-5 text-sm sm:px-6">
-            {viewLoading ? <p className="text-slate-500">Loading policy detail...</p> : null}
+            {viewLoading ? <p className="text-slate-500">Đang tải chi tiết chính sách...</p> : null}
 
             {viewPolicy ? (
               <>
                 <p>
-                  <strong>Title:</strong> {viewPolicy.title}
+                  <strong>Tiêu đề:</strong> {viewPolicy.title}
                 </p>
                 <p>
-                  <strong>Type:</strong> {viewPolicy.type}
+                  <strong>Loại:</strong> {viewPolicy.type}
                 </p>
                 <p>
                   <strong>Slug:</strong> {viewPolicy.slug}
                 </p>
                 <p>
-                  <strong>Published:</strong> {viewPolicy.isPublished ? "Yes" : "No"}
+                  <strong>Xuất bản:</strong> {viewPolicy.isPublished ? "Có" : "Không"}
                 </p>
                 <p>
-                  <strong>Updated at:</strong> {formatDate(viewPolicy.updatedAt)}
+                  <strong>Cập nhật lúc:</strong> {formatDate(viewPolicy.updatedAt)}
                 </p>
                 <div className="space-y-2">
                   <p>
-                    <strong>Content:</strong>
+                    <strong>Nội dung:</strong>
                   </p>
                   <div
                     className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-slate-700 [&_a]:text-primary [&_a]:underline [&_h1]:text-2xl [&_h1]:font-semibold [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:mb-3 [&_ul]:mb-3"
@@ -543,6 +365,40 @@ export default function PoliciesPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={Boolean(deletingPolicy)}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeletingPolicy(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg rounded-2xl border border-slate-200 p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100">
+            <DialogTitle className="flex items-center gap-3 text-xl text-slate-900">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <AlertTriangle size={20} />
+              </span>
+              Xác nhận xóa chính sách
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-[15px] leading-7 text-slate-600">
+              Bạn có chắc muốn xóa:
+              <span className="block mt-2 rounded-lg bg-slate-50 px-3 py-2 font-semibold text-slate-900">
+                {deletingPolicy?.title}
+              </span>
+              <span className="mt-2 block text-red-600">Hành động này không thể hoàn tác.</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 px-6 py-4 bg-slate-50/60">
+            <Button variant="outline" onClick={() => setDeletingPolicy(null)} disabled={deleting} className="min-w-24 border-slate-300">
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={() => void confirmDeletePolicy()} disabled={deleting} className="min-w-32">
+              {deleting ? "Đang xóa..." : "Xóa chính sách"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+

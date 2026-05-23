@@ -20,13 +20,13 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <Card className="col-span-1 lg:col-span-2">
       <CardHeader>
-        <CardTitle>Orders Overview</CardTitle>
+        <CardTitle>Tổng quan đơn hàng</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
           {data.length === 0 ? (
             <div className="h-full w-full flex items-center justify-center text-sm text-slate-500">
-              No order data available.
+              Chưa có dữ liệu đơn hàng.
             </div>
           ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -55,7 +55,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 tickLine={false}
                 tick={{ fill: '#64748b', fontSize: 12 }}
                 tickFormatter={(value) =>
-                  new Date(value).toLocaleDateString("en-GB", {
+                  new Date(value).toLocaleDateString("vi-VN", {
                     day: "2-digit",
                     month: "2-digit",
                   })
@@ -69,9 +69,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 tickFormatter={(value) => `${value}`} 
               />
               <Tooltip
-                formatter={(value) => [`${Number(value ?? 0)}`, "Total orders"]}
+                formatter={(value) => [`${Number(value ?? 0)}`, "Tổng đơn hàng"]}
                 labelFormatter={(label) =>
-                  `Date: ${new Date(label).toLocaleDateString("en-GB")}`
+                  `Ngày: ${new Date(label).toLocaleDateString("vi-VN")}`
                 }
                 contentStyle={{
                   backgroundColor: '#fff',

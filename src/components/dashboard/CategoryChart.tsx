@@ -21,13 +21,13 @@ export function CategoryChart({ data }: CategoryChartProps) {
   return (
     <Card className="col-span-1">
       <CardHeader>
-        <CardTitle>Consultation Status</CardTitle>
+        <CardTitle>Trạng thái tư vấn</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
           {data.length === 0 ? (
             <div className="h-full w-full flex items-center justify-center text-sm text-slate-500">
-              No consultation data available.
+              Chưa có dữ liệu tư vấn.
             </div>
           ) : (
           <ResponsiveContainer width="100%" height="100%">

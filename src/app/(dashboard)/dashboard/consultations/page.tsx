@@ -27,7 +27,12 @@ import { useToast } from "@/components/shared/toast/ToastProvider";
 
 const PAGE_LIMIT = 10;
 
-const STATUSES: Array<"" | ConsultationStatus> = ["", "PENDING", "CONTACTED", "CANCELLED"];
+const STATUSES: Array<"" | ConsultationStatus> = [
+  "",
+  "PENDING",
+  "CONTACTED",
+  "CANCELLED",
+];
 
 function formatDate(date?: string) {
   if (!date) return "-";
@@ -42,7 +47,9 @@ function statusLabel(status: ConsultationStatus) {
   return "Đã hủy";
 }
 
-function statusBadgeVariant(status: ConsultationStatus): "secondary" | "success" | "destructive" {
+function statusBadgeVariant(
+  status: ConsultationStatus,
+): "secondary" | "success" | "destructive" {
   if (status === "CONTACTED") return "success";
   if (status === "CANCELLED") return "destructive";
   return "secondary";
@@ -103,7 +110,12 @@ export default function ConsultationsPage() {
     } catch (loadError) {
       setItems([]);
       setTotal(0);
-      showToast(loadError instanceof Error ? loadError.message : "Không tải được yêu cầu tư vấn.", "error");
+      showToast(
+        loadError instanceof Error
+          ? loadError.message
+          : "Không tải được yêu cầu tư vấn.",
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -130,13 +142,18 @@ export default function ConsultationsPage() {
     void loadData(1, keyword, statusFilter);
   };
 
-  const handleStatusFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleStatusFilterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const nextStatus = event.target.value as "" | ConsultationStatus;
     setStatusFilter(nextStatus);
     void loadData(1, search, nextStatus);
   };
 
-  const handleStatusUpdate = async (id: string, nextStatus: ConsultationStatus) => {
+  const handleStatusUpdate = async (
+    id: string,
+    nextStatus: ConsultationStatus,
+  ) => {
     setSavingStatusId(id);
 
     try {
@@ -144,7 +161,12 @@ export default function ConsultationsPage() {
       showToast("Cập nhật trạng thái thành công.", "success");
       await loadData(page, search, statusFilter);
     } catch (updateError) {
-      showToast(updateError instanceof Error ? updateError.message : "Không thể cập nhật trạng thái.", "error");
+      showToast(
+        updateError instanceof Error
+          ? updateError.message
+          : "Không thể cập nhật trạng thái.",
+        "error",
+      );
     } finally {
       setSavingStatusId(null);
     }
@@ -158,7 +180,12 @@ export default function ConsultationsPage() {
       showToast("Cập nhật ghi chú nội bộ thành công.", "success");
       await loadData(page, search, statusFilter);
     } catch (updateError) {
-      showToast(updateError instanceof Error ? updateError.message : "Không thể cập nhật ghi chú.", "error");
+      showToast(
+        updateError instanceof Error
+          ? updateError.message
+          : "Không thể cập nhật ghi chú.",
+        "error",
+      );
     } finally {
       setSavingNoteId(null);
     }
@@ -183,56 +210,86 @@ export default function ConsultationsPage() {
   };
 
   if (!authChecked) {
-    return <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">Checking admin access...</div>;
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
+        Đang kiểm tra quyền quản trị...
+      </div>
+    );
   }
 
   if (!isAdmin) {
-    return <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Admin access is required.</div>;
+    return (
+      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        Cần quyền quản trị.
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Consultations</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Manage customer consultation requests and follow-up status.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+            Tư vấn
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Quản lý yêu cầu tư vấn và trạng thái chăm sóc khách hàng.
+          </p>
         </div>
-        <Button variant="outline" onClick={() => void handleExport()} disabled={exporting}>
+        <Button
+          variant="outline"
+          onClick={() => void handleExport()}
+          disabled={exporting}
+        >
           <Download className="mr-2 h-4 w-4" />
-          {exporting ? "Exporting..." : "Export Excel"}
+          {exporting ? "Đang xuất..." : "Xuất Excel"}
         </Button>
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <form className="flex-1" onSubmit={handleSearchSubmit}>
-          <Input placeholder="Search by name or phone..." value={searchInput} onChange={(event) => setSearchInput(event.target.value)} />
+          <Input
+            placeholder="Tìm theo tên hoặc số điện thoại..."
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
         </form>
 
-        <select className="h-8 rounded-lg border border-input bg-background px-3 text-sm" value={statusFilter} onChange={handleStatusFilterChange}>
+        <select
+          className="h-8 rounded-lg border border-input bg-background px-3 text-sm"
+          value={statusFilter}
+          onChange={handleStatusFilterChange}
+        >
           {STATUSES.map((status) => (
             <option key={status || "ALL"} value={status}>
-              {status ? statusLabel(status as ConsultationStatus) : "All statuses"}
+              {status
+                ? statusLabel(status as ConsultationStatus)
+                : "Tất cả trạng thái"}
             </option>
           ))}
         </select>
       </div>
 
       {loading ? (
-        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">Loading consultations...</div>
+        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
+          Đang tải yêu cầu tư vấn...
+        </div>
       ) : items.length === 0 ? (
-        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">No consultations found.</div>
+        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
+          Không tìm thấy yêu cầu tư vấn.
+        </div>
       ) : (
         <div className="rounded-md border border-slate-200 dark:border-slate-800">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Need</TableHead>
-                <TableHead>Customer Note</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Internal Note</TableHead>
+                <TableHead>Khách hàng</TableHead>
+                <TableHead>Số điện thoại</TableHead>
+                <TableHead>Quan tâm</TableHead>
+                <TableHead>Ghi chú khách hàng</TableHead>
+                <TableHead>Ngày tạo</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Ghi chú nội bộ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -241,23 +298,48 @@ export default function ConsultationsPage() {
                   <TableCell className="font-medium">{item.fullName}</TableCell>
                   <TableCell>{item.phone}</TableCell>
                   <TableCell>{item.interest}</TableCell>
-                  <TableCell className="max-w-56 whitespace-pre-wrap text-slate-600">{item.message || "-"}</TableCell>
+                  <TableCell className="max-w-56 whitespace-pre-wrap text-slate-600">
+                    {item.message || "-"}
+                  </TableCell>
                   <TableCell>{formatDate(item.createdAt)}</TableCell>
                   <TableCell>
                     <select
                       className={cn(
                         "h-8 rounded-md border px-2 text-xs font-medium outline-none transition-colors",
-                        item.status === "PENDING" && "bg-slate-100 text-slate-800 border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200",
-                        item.status === "CONTACTED" && "bg-emerald-100 text-emerald-800 border-emerald-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200",
-                        item.status === "CANCELLED" && "bg-red-100 text-red-800 border-red-200 focus:border-red-400 focus:ring-2 focus:ring-red-200"
+                        item.status === "PENDING" &&
+                          "bg-slate-100 text-slate-800 border-slate-200 focus:border-slate-400 focus:ring-2 focus:ring-slate-200",
+                        item.status === "CONTACTED" &&
+                          "bg-emerald-100 text-emerald-800 border-emerald-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200",
+                        item.status === "CANCELLED" &&
+                          "bg-red-100 text-red-800 border-red-200 focus:border-red-400 focus:ring-2 focus:ring-red-200",
                       )}
                       value={item.status}
                       disabled={savingStatusId === item.id}
-                      onChange={(event) => void handleStatusUpdate(item.id, event.target.value as ConsultationStatus)}
+                      onChange={(event) =>
+                        void handleStatusUpdate(
+                          item.id,
+                          event.target.value as ConsultationStatus,
+                        )
+                      }
                     >
-                      <option value="PENDING" className="bg-white text-slate-900">Đang chờ</option>
-                      <option value="CONTACTED" className="bg-white text-slate-900">Đã tư vấn</option>
-                      <option value="CANCELLED" className="bg-white text-slate-900">Đã hủy</option>
+                      <option
+                        value="PENDING"
+                        className="bg-white text-slate-900"
+                      >
+                        Đang chờ
+                      </option>
+                      <option
+                        value="CONTACTED"
+                        className="bg-white text-slate-900"
+                      >
+                        Đã tư vấn
+                      </option>
+                      <option
+                        value="CANCELLED"
+                        className="bg-white text-slate-900"
+                      >
+                        Đã hủy
+                      </option>
                     </select>
                   </TableCell>
                   <TableCell className="min-w-64">
@@ -266,7 +348,10 @@ export default function ConsultationsPage() {
                         className="min-h-20 w-full rounded-md border border-slate-300 bg-white p-2 text-xs outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
                         value={noteDrafts[item.id] ?? ""}
                         onChange={(event) =>
-                          setNoteDrafts((prev) => ({ ...prev, [item.id]: event.target.value }))
+                          setNoteDrafts((prev) => ({
+                            ...prev,
+                            [item.id]: event.target.value,
+                          }))
                         }
                       />
                       <Button
@@ -275,7 +360,9 @@ export default function ConsultationsPage() {
                         disabled={savingNoteId === item.id}
                         onClick={() => void handleNoteSave(item.id)}
                       >
-                        {savingNoteId === item.id ? "Saving..." : "Save note"}
+                        {savingNoteId === item.id
+                          ? "Đang lưu..."
+                          : "Lưu ghi chú"}
                       </Button>
                     </div>
                   </TableCell>
@@ -287,13 +374,25 @@ export default function ConsultationsPage() {
       )}
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-500">Page {page} of {totalPages} ({total} consultations)</p>
+        <p className="text-sm text-slate-500">
+          Page {page} of {totalPages} ({total} consultations)
+        </p>
         <div className="flex gap-2">
-          <Button variant="outline" className="text-slate-800" disabled={page <= 1 || loading} onClick={() => void loadData(page - 1, search, statusFilter)}>
-            Previous
+          <Button
+            variant="outline"
+            className="text-slate-800"
+            disabled={page <= 1 || loading}
+            onClick={() => void loadData(page - 1, search, statusFilter)}
+          >
+            Trước
           </Button>
-          <Button variant="outline" className="text-slate-800" disabled={page >= totalPages || loading} onClick={() => void loadData(page + 1, search, statusFilter)}>
-            Next
+          <Button
+            variant="outline"
+            className="text-slate-800"
+            disabled={page >= totalPages || loading}
+            onClick={() => void loadData(page + 1, search, statusFilter)}
+          >
+            Sau
           </Button>
         </div>
       </div>

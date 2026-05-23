@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,9 +29,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, Plus, Trash2 } from "lucide-react";
+import { Edit, Eye, Plus, Trash2, X } from "lucide-react";
 import { useToast } from "@/components/shared/toast/ToastProvider";
-import { BLOG_CATEGORY_OPTIONS, getBlogCategoryLabel, normalizeBlogContentToHtml } from "@/lib/blog-helpers";
+import {
+  BLOG_CATEGORY_OPTIONS,
+  getBlogCategoryLabel,
+  normalizeBlogContentToHtml,
+} from "@/lib/blog-helpers";
 
 const PAGE_LIMIT = 10;
 
@@ -53,7 +57,9 @@ export default function BlogsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<"" | BlogCategory>("");
-  const [publishedFilter, setPublishedFilter] = useState<"" | "true" | "false">("");
+  const [publishedFilter, setPublishedFilter] = useState<"" | "true" | "false">(
+    "",
+  );
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
@@ -98,7 +104,9 @@ export default function BlogsPage() {
       setBlogs([]);
       setTotal(0);
       const message =
-        loadError instanceof Error ? loadError.message : "Failed to load blog posts.";
+        loadError instanceof Error
+          ? loadError.message
+          : "Không thể tải danh sách bài viết.";
       setError(message);
       showToast(message, "error");
     } finally {
@@ -142,18 +150,18 @@ export default function BlogsPage() {
   };
 
   const handleDelete = async (blog: BlogPostItem) => {
-    const confirmed = window.confirm(`Delete blog post "${blog.title}"?`);
+    const confirmed = window.confirm(`Xóa bài viết "${blog.title}"?`);
     if (!confirmed) return;
 
     try {
       await adminDeleteBlog(blog.id);
-      showToast("Blog post deleted successfully.", "success");
+      showToast("Xóa bài viết thành công.", "success");
       await loadBlogs(page, search, categoryFilter, publishedFilter);
     } catch (deleteError) {
       const message =
         deleteError instanceof Error
           ? deleteError.message
-          : "Failed to delete blog post.";
+          : "Không thể xóa bài viết.";
       setError(message);
       showToast(message, "error");
     }
@@ -163,7 +171,9 @@ export default function BlogsPage() {
     try {
       await adminUpdateBlog(blog.id, { isPublished: !blog.isPublished });
       showToast(
-        !blog.isPublished ? "Blog post published." : "Blog post unpublished.",
+        !blog.isPublished
+          ? "Đã xuất bản bài viết."
+          : "Đã chuyển bài viết về nháp.",
         "success",
       );
       await loadBlogs(page, search, categoryFilter, publishedFilter);
@@ -171,7 +181,7 @@ export default function BlogsPage() {
       const message =
         toggleError instanceof Error
           ? toggleError.message
-          : "Failed to update publish status.";
+          : "Không thể cập nhật trạng thái xuất bản.";
       showToast(message, "error");
     }
   };
@@ -183,13 +193,17 @@ export default function BlogsPage() {
     void loadBlogs(1, keyword, categoryFilter, publishedFilter);
   };
 
-  const handleCategoryFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCategoryFilterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const nextCategory = event.target.value as "" | BlogCategory;
     setCategoryFilter(nextCategory);
     void loadBlogs(1, search, nextCategory, publishedFilter);
   };
 
-  const handlePublishedFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handlePublishedFilterChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const nextPublished = event.target.value as "" | "true" | "false";
     setPublishedFilter(nextPublished);
     void loadBlogs(1, search, categoryFilter, nextPublished);
@@ -198,7 +212,7 @@ export default function BlogsPage() {
   if (!authChecked) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
-        Checking admin access...
+        Đang kiểm tra quyền quản trị...
       </div>
     );
   }
@@ -206,7 +220,7 @@ export default function BlogsPage() {
   if (!isAdmin) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Admin access is required.
+        Cần quyền quản trị.
       </div>
     );
   }
@@ -216,18 +230,18 @@ export default function BlogsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            Blogs
+            Bài viết
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage knowledge and SEO blog posts.
+            Quản lý bài viết kiến thức và SEO.
           </p>
         </div>
-        <Button 
-          onClick={() => router.push("/dashboard/blogs/add")} 
+        <Button
+          onClick={() => router.push("/dashboard/blogs/add")}
           className="bg-slate-900 text-white hover:bg-slate-800"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Blog
+          Thêm bài viết
         </Button>
       </div>
 
@@ -240,7 +254,7 @@ export default function BlogsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <form className="flex-1" onSubmit={handleSearchSubmit}>
           <Input
-            placeholder="Search blogs..."
+            placeholder="Tìm kiếm bài viết..."
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -251,7 +265,7 @@ export default function BlogsPage() {
           value={categoryFilter}
           onChange={handleCategoryFilterChange}
         >
-          <option value="">All categories</option>
+          <option value="">Tất cả danh mục</option>
           {BLOG_CATEGORY_OPTIONS.map((category) => (
             <option key={category.value} value={category.value}>
               {category.label}
@@ -264,37 +278,43 @@ export default function BlogsPage() {
           value={publishedFilter}
           onChange={handlePublishedFilterChange}
         >
-          <option value="">All status</option>
-          <option value="true">Published</option>
-          <option value="false">Unpublished</option>
+          <option value="">Tất cả trạng thái</option>
+          <option value="true">Đã xuất bản</option>
+          <option value="false">Chưa xuất bản</option>
         </select>
       </div>
 
       {loading ? (
         <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
-          Loading blog posts...
+          Đang tải bài viết...
         </div>
       ) : blogs.length === 0 ? (
         <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
-          No blog posts found.
+          Không tìm thấy bài viết.
         </div>
       ) : (
         <div className="rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden">
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow>
-                <TableHead className="w-[45%]">Title</TableHead>
-                <TableHead className="w-[15%]">Status</TableHead>
-                <TableHead className="w-[20%]">Published At</TableHead>
-                <TableHead className="w-[20%] text-right">Actions</TableHead>
+                <TableHead className="w-[45%]">Tiêu đề</TableHead>
+                <TableHead className="w-[15%]">Trạng thái</TableHead>
+                <TableHead className="w-[20%]">Ngày xuất bản</TableHead>
+                <TableHead className="w-[20%] text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {blogs.map((blog) => (
-                <TableRow key={blog.id} className="hover:bg-slate-50/50 transition-colors">
+                <TableRow
+                  key={blog.id}
+                  className="hover:bg-slate-50/50 transition-colors"
+                >
                   <TableCell className="py-4">
                     <div className="flex flex-col gap-1 max-w-md">
-                      <span className="font-semibold text-slate-900 truncate block" title={blog.title}>
+                      <span
+                        className="font-semibold text-slate-900 truncate block"
+                        title={blog.title}
+                      >
                         {blog.title}
                       </span>
                       <div className="flex items-center gap-2">
@@ -308,8 +328,11 @@ export default function BlogsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={blog.isPublished ? "success" : "secondary"} className="font-medium">
-                      {blog.isPublished ? "Published" : "Draft"}
+                    <Badge
+                      variant={blog.isPublished ? "success" : "secondary"}
+                      className="font-medium"
+                    >
+                      {blog.isPublished ? "Đã xuất bản" : "Nháp"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-slate-500 text-sm">
@@ -322,7 +345,7 @@ export default function BlogsPage() {
                         size="icon-sm"
                         className="h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                         onClick={() => void openViewModal(blog)}
-                        title="View"
+                        title="Xem"
                       >
                         <Eye size={16} />
                       </Button>
@@ -330,8 +353,10 @@ export default function BlogsPage() {
                         variant="ghost"
                         size="icon-sm"
                         className="h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50"
-                        onClick={() => router.push(`/dashboard/blogs/${blog.id}/edit`)}
-                        title="Edit"
+                        onClick={() =>
+                          router.push(`/dashboard/blogs/${blog.id}/edit`)
+                        }
+                        title="Sửa"
                       >
                         <Edit size={16} />
                       </Button>
@@ -340,7 +365,7 @@ export default function BlogsPage() {
                         size="icon-sm"
                         className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50"
                         onClick={() => void handleDelete(blog)}
-                        title="Delete"
+                        title="Xóa"
                       >
                         <Trash2 size={16} />
                       </Button>
@@ -355,63 +380,82 @@ export default function BlogsPage() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">
-          Page {page} of {totalPages} ({total} blog posts)
+          Trang {page} / {totalPages} ({total} bài viết)
         </p>
         <div className="flex gap-2">
           <Button
             variant="outline"
             className="text-slate-800"
             disabled={page <= 1 || loading}
-            onClick={() => void loadBlogs(page - 1, search, categoryFilter, publishedFilter)}
+            onClick={() =>
+              void loadBlogs(page - 1, search, categoryFilter, publishedFilter)
+            }
           >
-            Previous
+            Trước
           </Button>
           <Button
             variant="outline"
             className="text-slate-800"
             disabled={page >= totalPages || loading}
-            onClick={() => void loadBlogs(page + 1, search, categoryFilter, publishedFilter)}
+            onClick={() =>
+              void loadBlogs(page + 1, search, categoryFilter, publishedFilter)
+            }
           >
-            Next
+            Sau
           </Button>
         </div>
       </div>
 
       <Dialog open={Boolean(viewBlog)} onOpenChange={() => setViewBlog(null)}>
         <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+          <button
+            type="button"
+            aria-label="Đóng"
+            onClick={() => setViewBlog(null)}
+            className="absolute right-4 top-4 z-20 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X size={16} />
+          </button>
           <DialogHeader className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
-            <DialogTitle>Blog Detail</DialogTitle>
-            <DialogDescription>Read-only blog information.</DialogDescription>
+            <DialogTitle>Chi tiết bài viết</DialogTitle>
+            <DialogDescription>Thông tin bài viết (chỉ xem).</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 px-4 py-5 text-sm sm:px-6">
-            {viewLoading ? <p className="text-slate-500">Loading blog detail...</p> : null}
+            {viewLoading ? (
+              <p className="text-slate-500">Đang tải chi tiết bài viết...</p>
+            ) : null}
 
             {viewBlog ? (
               <>
                 <p>
-                  <strong>Title:</strong> {viewBlog.title}
+                  <strong>Tiêu đề:</strong> {viewBlog.title}
                 </p>
                 <p>
                   <strong>Slug:</strong> {viewBlog.slug}
                 </p>
                 <p>
-                  <strong>Category:</strong> {getBlogCategoryLabel(viewBlog.category)}
+                  <strong>Danh mục:</strong>{" "}
+                  {getBlogCategoryLabel(viewBlog.category)}
                 </p>
                 <p>
-                  <strong>Status:</strong> {viewBlog.isPublished ? "Published" : "Draft"}
+                  <strong>Trạng thái:</strong>{" "}
+                  {viewBlog.isPublished ? "Đã xuất bản" : "Nháp"}
                 </p>
                 <p>
-                  <strong>Author:</strong> {viewBlog.authorName || "-"}
+                  <strong>Tác giả:</strong> {viewBlog.authorName || "-"}
                 </p>
                 <p>
-                  <strong>Tags:</strong> {viewBlog.tags.length > 0 ? viewBlog.tags.join(", ") : "-"}
+                  <strong>Thẻ:</strong>{" "}
+                  {viewBlog.tags.length > 0 ? viewBlog.tags.join(", ") : "-"}
                 </p>
                 <p>
-                  <strong>Published at:</strong> {formatDate(viewBlog.publishedAt)}
+                  <strong>Xuất bản lúc:</strong>{" "}
+                  {formatDate(viewBlog.publishedAt)}
                 </p>
                 <p>
-                  <strong>Updated at:</strong> {formatDate(viewBlog.updatedAt)}
+                  <strong>Cập nhật lúc:</strong>{" "}
+                  {formatDate(viewBlog.updatedAt)}
                 </p>
                 {viewBlog.thumbnail ? (
                   <div className="space-y-2">
@@ -435,11 +479,13 @@ export default function BlogsPage() {
                 </div>
                 <div className="space-y-2">
                   <p>
-                    <strong>Content:</strong>
+                    <strong>Nội dung:</strong>
                   </p>
                   <div
                     className="rounded-lg border border-slate-200 bg-slate-50 p-3 [&_a]:text-primary [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
-                    dangerouslySetInnerHTML={{ __html: normalizeBlogContentToHtml(viewBlog.content) }}
+                    dangerouslySetInnerHTML={{
+                      __html: normalizeBlogContentToHtml(viewBlog.content),
+                    }}
                   />
                 </div>
               </>

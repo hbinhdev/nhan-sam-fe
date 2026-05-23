@@ -24,12 +24,12 @@ export function PaymentTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Transaction ID</TableHead>
-            <TableHead>Order ID</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Method</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Mã giao dịch</TableHead>
+            <TableHead>Mã đơn hàng</TableHead>
+            <TableHead>Ngày</TableHead>
+            <TableHead>Phương thức</TableHead>
+            <TableHead>Số tiền</TableHead>
+            <TableHead>Trạng thái</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -44,7 +44,7 @@ export function PaymentTable() {
                   {payment.method}
                 </div>
               </TableCell>
-              <TableCell>{payment.amount.toLocaleString()}Ä‘</TableCell>
+              <TableCell>{payment.amount.toLocaleString("vi-VN")}đ</TableCell>
               <TableCell>
                 <Badge
                   variant={payment.status === 'Success' ? 'success' : 'warning'}>

@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProductTable } from "@/components/dashboard/products/ProductTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Plus, Search, SearchIcon } from "lucide-react";
+import { AlertTriangle, Download, Plus, SearchIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -23,8 +23,21 @@ import {
 } from "@/lib/admin-product-api";
 import { exportProductsReport } from "@/lib/report-api";
 import { useToast } from "@/components/shared/toast/ToastProvider";
+import { normalizeBlogContentToHtml } from "@/lib/blog-helpers";
 
 const PAGE_LIMIT = 10;
+
+function decodeHtmlEntities(value: string) {
+  if (typeof window === "undefined") return value;
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = value;
+  return textarea.value;
+}
+
+function renderRichText(value?: string | null) {
+  if (!value?.trim()) return "";
+  return normalizeBlogContentToHtml(decodeHtmlEntities(value));
+}
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -39,6 +52,8 @@ export default function ProductsPage() {
   const [total, setTotal] = useState(0);
 
   const [viewProduct, setViewProduct] = useState<ProductSummary | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<ProductSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -72,7 +87,9 @@ export default function ProductsPage() {
       setProducts([]);
       setTotal(0);
       setError(
-        loadError instanceof Error ? loadError.message : "Failed to load products.",
+        loadError instanceof Error
+          ? loadError.message
+          : "Không thể tải danh sách sản phẩm.",
       );
     } finally {
       setLoading(false);
@@ -107,23 +124,25 @@ export default function ProductsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authChecked, isAdmin]);
 
-  const handleDelete = async (product: ProductSummary) => {
-    const confirmed = window.confirm(`Delete product "${product.name}"?`);
-    if (!confirmed) return;
-
+  const confirmDeleteProduct = async () => {
+    if (!deletingProduct) return;
     setError(null);
+    setDeleting(true);
 
     try {
-      await deleteAdminProduct(product.id);
-      showToast("Product deleted successfully.", "success");
+      await deleteAdminProduct(deletingProduct.id);
+      showToast("Xóa sản phẩm thành công.", "success");
+      setDeletingProduct(null);
       await loadProducts(page, search, categoryId);
     } catch (deleteError) {
       showToast(
         deleteError instanceof Error
           ? deleteError.message
-          : "Failed to delete product.",
+          : "Không thể xóa sản phẩm.",
         "error",
       );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -134,7 +153,9 @@ export default function ProductsPage() {
     void loadProducts(1, nextSearch, categoryId);
   };
 
-  const handleCategoryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCategoryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const nextCategoryId = event.target.value;
     setCategoryId(nextCategoryId);
     void loadProducts(1, search, nextCategoryId);
@@ -147,10 +168,12 @@ export default function ProductsPage() {
         search: search || undefined,
         categoryId: categoryId || undefined,
       });
-      showToast("Export products thành công.", "success");
-    } catch (error) {
+      showToast("Xuất danh sách sản phẩm thành công.", "success");
+    } catch (exportError) {
       showToast(
-        error instanceof Error ? error.message : "Export products failed.",
+        exportError instanceof Error
+          ? exportError.message
+          : "Xuất danh sách sản phẩm thất bại.",
         "error",
       );
     } finally {
@@ -161,7 +184,7 @@ export default function ProductsPage() {
   if (!authChecked) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">
-        Checking admin access...
+        Đang kiểm tra quyền quản trị...
       </div>
     );
   }
@@ -169,7 +192,7 @@ export default function ProductsPage() {
   if (!isAdmin) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-        Admin access is required to manage products.
+        Cần quyền quản trị để quản lý sản phẩm.
       </div>
     );
   }
@@ -179,10 +202,10 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            Products
+            Sản phẩm
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage your product inventory and catalog.
+            Quản lý tồn kho và danh mục sản phẩm.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -192,11 +215,14 @@ export default function ProductsPage() {
             disabled={exporting}
           >
             <Download className="mr-2 h-4 w-4" />
-            {exporting ? "Exporting..." : "Export Excel"}
+            {exporting ? "Đang xuất..." : "Xuất Excel"}
           </Button>
-          <Button onClick={() => router.push("/dashboard/products/add")} className="bg-slate-900 text-white hover:bg-slate-800">
+          <Button
+            onClick={() => router.push("/dashboard/products/add")}
+            className="bg-slate-900 text-white hover:bg-slate-800"
+          >
             <Plus className="mr-2 h-4 w-4" />
-            Add Product
+            Thêm sản phẩm
           </Button>
         </div>
       </div>
@@ -211,7 +237,7 @@ export default function ProductsPage() {
         <form className="relative flex-1" onSubmit={handleSearchSubmit}>
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Search products..."
+            placeholder="Tìm kiếm sản phẩm..."
             className="pl-10"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
@@ -223,7 +249,7 @@ export default function ProductsPage() {
           value={categoryId}
           onChange={handleCategoryChange}
         >
-          <option value="">All categories</option>
+          <option value="">Tất cả danh mục</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -233,21 +259,25 @@ export default function ProductsPage() {
       </div>
 
       {loading ? (
-        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">Loading products...</div>
+        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
+          Đang tải sản phẩm...
+        </div>
       ) : products.length === 0 ? (
-        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">No products found.</div>
+        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500">
+          Không tìm thấy sản phẩm.
+        </div>
       ) : (
         <ProductTable
           products={products}
           onView={(product) => setViewProduct(product)}
           onEdit={(product) => router.push(`/dashboard/products/${product.id}/edit`)}
-          onDelete={handleDelete}
+          onDelete={(product) => setDeletingProduct(product)}
         />
       )}
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">
-          Page {page} of {totalPages} ({total} products)
+          Trang {page} / {totalPages} ({total} sản phẩm)
         </p>
         <div className="flex gap-2">
           <Button
@@ -256,7 +286,7 @@ export default function ProductsPage() {
             disabled={page <= 1 || loading}
             onClick={() => void loadProducts(page - 1, search, categoryId)}
           >
-            Previous
+            Trước
           </Button>
           <Button
             variant="outline"
@@ -264,76 +294,164 @@ export default function ProductsPage() {
             disabled={page >= totalPages || loading}
             onClick={() => void loadProducts(page + 1, search, categoryId)}
           >
-            Next
+            Sau
           </Button>
         </div>
       </div>
 
       <Dialog open={Boolean(viewProduct)} onOpenChange={() => setViewProduct(null)}>
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-y-auto p-0">
           <DialogHeader>
-            <DialogTitle>Product Detail</DialogTitle>
-            <DialogDescription>Read-only product information.</DialogDescription>
+            <DialogTitle className="px-6 pt-6">Chi tiết sản phẩm</DialogTitle>
+            <DialogDescription className="px-6 pb-4">
+              Thông tin sản phẩm (chỉ xem).
+            </DialogDescription>
           </DialogHeader>
 
           {viewProduct ? (
-            <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
+            <div className="space-y-6 px-6 pb-6 text-sm">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+                <div className="lg:col-span-3 space-y-4">
                   <img
                     src={viewProduct.imageUrl || viewProduct.thumbnail || "/images/product-root.png"}
                     alt={viewProduct.name}
-                    className="h-56 w-full rounded-lg object-cover bg-slate-100"
+                    className="h-[340px] w-full rounded-xl object-cover bg-slate-100"
                   />
+
+                  {Array.isArray(viewProduct.images) && viewProduct.images.length > 0 ? (
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Bộ sưu tập
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                        {viewProduct.images.map((imageUrl, index) => (
+                          <img
+                            key={`${viewProduct.id}-image-${index}`}
+                            src={imageUrl}
+                            alt={`${viewProduct.name} ${index + 1}`}
+                            className="h-20 w-full rounded-lg object-cover bg-slate-100"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-                <div className="space-y-2">
-                  <p><strong>Name:</strong> {viewProduct.name}</p>
-                  <p><strong>SKU:</strong> {viewProduct.sku || "-"}</p>
-                  <p><strong>Price:</strong> {new Intl.NumberFormat("vi-VN").format(viewProduct.price)} VND</p>
-                  <p><strong>Stock:</strong> {viewProduct.stock ?? 0}</p>
-                  <p><strong>Category:</strong> {viewProduct.category?.name || "-"}</p>
-                  <p><strong>Brand:</strong> {viewProduct.brand || "-"}</p>
-                  <p><strong>Origin:</strong> {viewProduct.origin || "-"}</p>
-                  <p><strong>Ginseng Age:</strong> {viewProduct.ginsengAge || "-"}</p>
-                  <p><strong>Usage Purpose:</strong> {viewProduct.usagePurpose || "-"}</p>
-                  <p><strong>Video URL:</strong> {viewProduct.videoUrl || "-"}</p>
+
+                <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <h3 className="text-lg font-semibold text-slate-900">{viewProduct.name}</h3>
+                  <div className="mt-4 grid grid-cols-1 gap-2 text-sm">
+                    <p><strong>Mã SP:</strong> {viewProduct.sku || "-"}</p>
+                    <p><strong>Giá:</strong> {new Intl.NumberFormat("vi-VN").format(viewProduct.price)}đ</p>
+                    <p><strong>Tồn kho:</strong> {viewProduct.stock ?? 0}</p>
+                    <p><strong>Danh mục:</strong> {viewProduct.category?.name || "-"}</p>
+                    <p><strong>Thương hiệu:</strong> {viewProduct.brand || "-"}</p>
+                    <p><strong>Xuất xứ:</strong> {viewProduct.origin || "-"}</p>
+                    <p><strong>Tuổi sâm:</strong> {viewProduct.ginsengAge || "-"}</p>
+                    <p className="text-xs text-slate-500 pt-2 border-t border-slate-200">
+                      Tạo lúc: {viewProduct.createdAt || "-"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Cập nhật lúc: {viewProduct.updatedAt || "-"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <p className="font-semibold">Description</p>
-                <p className="text-slate-600">{viewProduct.description || "No description"}</p>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="mb-3 font-semibold text-slate-900">Mô tả</p>
+                  {viewProduct.description ? (
+                    <div
+                      className="prose prose-sm max-w-none text-slate-700 [&_img]:rounded-md [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+                      dangerouslySetInnerHTML={{ __html: renderRichText(viewProduct.description) }}
+                    />
+                  ) : (
+                    <p className="text-slate-500">Không có mô tả</p>
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="mb-3 font-semibold text-slate-900">Công dụng</p>
+                  {viewProduct.usagePurpose ? (
+                    <div
+                      className="prose prose-sm max-w-none text-slate-700 [&_img]:rounded-md [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+                      dangerouslySetInnerHTML={{ __html: renderRichText(viewProduct.usagePurpose) }}
+                    />
+                  ) : (
+                    <p className="text-slate-500">Không có thông tin</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <p className="mb-3 font-semibold text-slate-900">Hướng dẫn sử dụng</p>
+                {viewProduct.usageInstructions ? (
+                  <div
+                    className="prose prose-sm max-w-none text-slate-700 [&_img]:rounded-md [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+                    dangerouslySetInnerHTML={{ __html: renderRichText(viewProduct.usageInstructions) }}
+                  />
+                ) : (
+                  <p className="text-slate-500">Không có thông tin</p>
+                )}
               </div>
 
               {viewProduct.videoUrl ? (
-                <div>
-                  <p className="mb-2 font-semibold">Video Preview</p>
-                  <video className="max-h-72 w-full rounded-lg border border-slate-200 bg-black" controls src={viewProduct.videoUrl} />
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="mb-3 font-semibold text-slate-900">Video sản phẩm</p>
+                  <video
+                    className="max-h-80 w-full rounded-lg border border-slate-200 bg-black"
+                    controls
+                    src={viewProduct.videoUrl}
+                  />
                 </div>
               ) : null}
-
-              {Array.isArray(viewProduct.images) && viewProduct.images.length > 0 ? (
-                <div>
-                  <p className="mb-2 font-semibold">Gallery</p>
-                  <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                    {viewProduct.images.map((imageUrl, index) => (
-                      <img
-                        key={`${viewProduct.id}-image-${index}`}
-                        src={imageUrl}
-                        alt={`${viewProduct.name} ${index + 1}`}
-                        className="h-24 w-full rounded-md object-cover bg-slate-100"
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              <div className="text-xs text-slate-500">
-                <p>Created at: {viewProduct.createdAt || "-"}</p>
-                <p>Updated at: {viewProduct.updatedAt || "-"}</p>
-              </div>
             </div>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(deletingProduct)}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeletingProduct(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg rounded-2xl border border-slate-200 p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100">
+            <DialogTitle className="flex items-center gap-3 text-xl text-slate-900">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <AlertTriangle size={20} />
+              </span>
+              Xác nhận xóa sản phẩm
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-[15px] leading-7 text-slate-600">
+              Bạn có chắc muốn xóa sản phẩm:
+              <span className="block mt-2 rounded-lg bg-slate-50 px-3 py-2 font-semibold text-slate-900">
+                {deletingProduct?.name}
+              </span>
+              <span className="mt-2 block text-red-600">
+                Hành động này không thể hoàn tác.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 px-6 py-4 bg-slate-50/60">
+            <Button
+              variant="outline"
+              onClick={() => setDeletingProduct(null)}
+              disabled={deleting}
+              className="min-w-24 border-slate-300"
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void confirmDeleteProduct()}
+              disabled={deleting}
+              className="min-w-32"
+            >
+              {deleting ? "Đang xóa..." : "Xóa sản phẩm"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
