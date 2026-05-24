@@ -1,4 +1,4 @@
-﻿type TestimonialsProps = {
+type TestimonialsProps = {
   title?: string | null;
   subtitle?: string | null;
   data?: Record<string, unknown> | null;
@@ -10,10 +10,10 @@ export function Testimonials({ title, subtitle, data }: TestimonialsProps) {
     : [];
 
   return (
-    <section className="w-full py-24 bg-surface-container-low" id="testimonials">
+    <section className="w-full pt-6 pb-16 bg-surface-container-low" id="testimonials">
       <div className="max-w-[1280px] mx-auto px-6">
-        <div className="text-center flex flex-col gap-3 mb-16">
-          {subtitle ? <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{subtitle}</span> : null}
+        <div className="text-center flex flex-col gap-3 mb-10">
+          {subtitle ? <span className="font-semibold text-sm tracking-wider text-secondary">{subtitle}</span> : null}
           {title ? <h2 className="text-3xl md:text-4xl font-serif text-primary">{title}</h2> : null}
         </div>
 
@@ -43,7 +43,7 @@ function TestimonialCard({ name, loc, quote }: { name: string; loc: string; quot
       <p className="text-base italic text-on-surface mb-8 leading-relaxed">"{quote}"</p>
       <div className="flex flex-col">
         <h3 className="font-bold text-primary text-base">{name}</h3>
-        <p className="text-xs text-on-surface-variant uppercase tracking-widest">{loc}</p>
+        <p className="text-sm text-on-surface-variant font-medium tracking-wide">{loc}</p>
       </div>
       <span className="absolute top-8 right-8 material-symbols-outlined text-6xl text-secondary/5 select-none">format_quote</span>
     </div>

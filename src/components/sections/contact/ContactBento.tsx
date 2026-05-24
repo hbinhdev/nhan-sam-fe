@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -127,14 +127,12 @@ export function ContactBento() {
               </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-6">
+          {/* <div className="grid grid-cols-2 gap-6">
             <SocialLink icon="chat" label="Messenger" />
             <SocialLink icon="forum" label="Zalo OA" />
-          </div>
-
+          </div> */}
           <div className="bg-surface-container-low p-10 rounded-2xl border border-outline-variant/20">
-            <h4 className="text-[11px] font-bold tracking-[0.2em] text-secondary uppercase mb-8">Trụ sở chính</h4>
+            <h4 className="text-[11px] font-bold tracking-[0.2em] text-secondary mb-8">Trụ sở chính</h4>
             <div className="flex flex-col gap-6">
               <div className="flex gap-4">
                 <span className="material-symbols-outlined text-primary">location_on</span>

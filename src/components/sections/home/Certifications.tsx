@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 
 type CertificationsProps = {
   title?: string | null;
@@ -22,7 +22,7 @@ export function Certifications({ title, subtitle, content, data }: Certification
       <div className="max-w-[1280px] mx-auto px-6 flex flex-col md:flex-row gap-16 items-center">
         <div className="w-full md:w-1/2 flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            {subtitle ? <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{subtitle}</span> : null}
+            {subtitle ? <span className="font-semibold text-sm tracking-wider text-secondary">{subtitle}</span> : null}
             {title ? <h2 className="text-3xl md:text-4xl font-serif text-primary leading-[1.2] text-balance tracking-tight">{title}</h2> : null}
           </div>
           {content ? <p className="text-base text-on-surface-variant leading-relaxed">{content}</p> : null}

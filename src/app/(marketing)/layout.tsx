@@ -27,7 +27,7 @@ export default function MarketingLayout({
 
           <div className="flex items-center gap-1 sm:gap-3 text-primary dark:text-red-500">
             <AuthHeaderActions />
-            <LoadingLink
+            {/* <LoadingLink
               href="/cart"
               className="relative hidden items-center p-2 transition-all duration-300 hover:text-primary/70 focus:outline-none sm:flex"
             >
@@ -37,7 +37,7 @@ export default function MarketingLayout({
               >
                 shopping_cart
               </span>
-            </LoadingLink>
+            </LoadingLink> */}
             <AuthHeaderMenu />
           </div>
         </div>
@@ -57,7 +57,7 @@ export default function MarketingLayout({
       <footer className="border-t border-yellow-600/10 bg-stone-100 dark:bg-stone-900">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-between px-12 py-12 md:flex-row">
           <div className="mb-8 md:mb-0">
-            <div className="mb-4 text-lg font-serif font-bold uppercase tracking-widest text-primary dark:text-red-500">
+            <div className="mb-4 text-xl font-serif font-bold tracking-wider text-primary dark:text-red-500">
               Heritage Ginseng
             </div>
             <p className="font-serif text-xs tracking-tighter text-stone-500 dark:text-stone-400">
@@ -111,7 +111,7 @@ function NavLink({
   return (
     <LoadingLink
       href={href}
-      className="font-serif text-sm uppercase tracking-wide text-stone-600 transition-colors hover:text-primary dark:text-stone-400"
+      className="font-serif text-base font-semibold tracking-wide text-stone-600 transition-colors hover:text-primary dark:text-stone-400"
     >
       {children}
     </LoadingLink>

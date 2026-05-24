@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -125,7 +125,7 @@ export function ConsultationForm({
         id="consultation-cta"
       >
         <div className="max-w-[800px] mx-auto px-6 flex flex-col gap-8 items-center">
-          <h2 className="text-3xl md:text-5xl font-serif leading-tight">
+          <h2 className="text-2xl md:text-4xl font-serif leading-tight">
             {cms?.ctaTitle || "Bạn cần hỗ trợ chọn sản phẩm phù hợp?"}
           </h2>
           <p className="text-lg opacity-80 leading-relaxed">
@@ -136,10 +136,10 @@ export function ConsultationForm({
             href="#consultation"
             className={cn(
               buttonVariants({ variant: "default" }),
-              "bg-white text-primary h-14 px-12 rounded-lg text-sm font-bold tracking-widest uppercase hover:bg-surface-variant flex items-center",
+              "bg-white text-primary h-14 px-12 rounded-lg text-base font-semibold tracking-wide hover:bg-surface-variant flex items-center",
             )}
           >
-            {cms?.ctaButtonText || "NHẬN TƯ VẤN NGAY"}
+            {cms?.ctaButtonText || "Nhận tư vấn ngay"}
           </Link>
         </div>
       </section>
@@ -161,9 +161,7 @@ export function ConsultationForm({
                 </span>
               </div>
               <div className="flex flex-col">
-                <p className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-60">
-                  Hotline hỗ trợ 24/7
-                </p>
+                <p className="text-sm font-semibold tracking-wide text-on-surface-variant/80">Hotline hỗ trợ 24/7</p>
                 <p className="text-2xl font-bold text-primary">1900 8888 99</p>
               </div>
             </div>
@@ -171,9 +169,7 @@ export function ConsultationForm({
           <div className="w-full lg:w-1/2 bg-white p-12 rounded-2xl shadow-xl border border-outline-variant/30">
             <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
-                  Họ và tên
-                </label>
+                <label className="text-sm font-semibold text-on-surface-variant">Họ và tên</label>
                 <input
                   className="w-full border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 bg-transparent"
                   placeholder="Nhập tên của bạn..."
@@ -184,9 +180,7 @@ export function ConsultationForm({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
-                  Số điện thoại
-                </label>
+                <label className="text-sm font-semibold text-on-surface-variant">Số điện thoại</label>
                 <input
                   className="w-full border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 bg-transparent"
                   placeholder="090..."
@@ -197,9 +191,7 @@ export function ConsultationForm({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
-                  Nhu cầu quan tâm
-                </label>
+                <label className="text-sm font-semibold text-on-surface-variant">Nhu cầu quan tâm</label>
                 <select
                   className="w-full border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 bg-transparent"
                   value={interest}
@@ -243,15 +235,11 @@ export function ConsultationForm({
                 disabled={submitDisabled}
                 className={cn(
                   buttonVariants({ variant: "default" }),
-                  "w-full bg-primary text-on-primary h-14 rounded-lg text-sm font-bold tracking-widest uppercase flex items-center justify-center",
+                  "w-full bg-primary text-on-primary h-14 rounded-lg text-base font-semibold tracking-wide flex items-center justify-center",
                   submitDisabled && "opacity-70 cursor-not-allowed",
                 )}
               >
-                {isSubmitting
-                  ? "ĐANG GỬI..."
-                  : hasActiveRequest
-                    ? "ĐANG CHỜ XỬ LÝ"
-                    : "ĐĂNG KÝ TƯ VẤN"}
+                {isSubmitting ? "Đang gửi..." : hasActiveRequest ? "Đang chờ xử lý" : "Đăng ký tư vấn"}
               </button>
             </form>
           </div>

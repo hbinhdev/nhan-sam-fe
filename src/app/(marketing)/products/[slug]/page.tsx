@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/sections/product-detail/ProductGallery";
 import { ProductInfo } from "@/components/sections/product-detail/ProductInfo";
 import { CertificationSection } from "@/components/sections/product-detail/CertificationSection";
@@ -187,13 +187,13 @@ export default async function ProductDetailPage({
             {relatedProducts.map((item) => (
               <ProductCard
                 key={item.id}
-                  id={item.id}
+                id={item.id}
                 name={item.name}
                 price={formatCurrencyVND(item.price)}
-                  priceValue={item.price}
+                priceValue={item.price}
                 subtitle={
                   item.brand && item.origin
-                    ? `${item.origin} â€¢ ${item.brand}`
+                    ? `${item.origin} • ${item.brand}`
                     : item.brand || item.origin || "Heritage Selection"
                 }
                 tag={item.category?.name || undefined}
@@ -202,6 +202,7 @@ export default async function ProductDetailPage({
                 }
                 aspectRatio="portrait"
                 href={`/products/${item.slug || item.id}`}
+                description={item.shortDescription ?? undefined}
               />
             ))}
           </div>
