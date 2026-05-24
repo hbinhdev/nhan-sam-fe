@@ -9,12 +9,15 @@ type ProductGalleryProps = {
   thumbnail?: string;
   images?: string[];
   videoUrl?: string | null;
+  videoThumbnail?: string | null;
+  poster?: string | null;
 };
 
 type GalleryMedia = {
   type: "image" | "video";
   src: string;
   alt: string;
+  posterSrc?: string;
 };
 
 function toYouTubeEmbedUrl(url: string) {
@@ -44,12 +47,21 @@ export function ProductGallery({
   thumbnail,
   images,
   videoUrl,
+  videoThumbnail,
+  poster,
 }: ProductGalleryProps) {
   const media = useMemo<GalleryMedia[]>(() => {
     const normalizedImages =
       images?.filter((item) => typeof item === "string" && item.trim().length > 0) ?? [];
 
     const fallback = thumbnail || imageUrl || "/images/product-imperial-main.png";
+    const videoPoster =
+      videoThumbnail?.trim() ||
+      poster?.trim() ||
+      thumbnail?.trim() ||
+      normalizedImages[0]?.trim() ||
+      imageUrl?.trim() ||
+      "/images/product-imperial-main.png";
     const imageItems = (normalizedImages.length > 0 ? normalizedImages : [fallback]).map((src, idx) => ({
       type: "image" as const,
       src,
@@ -66,9 +78,10 @@ export function ProductGallery({
         type: "video" as const,
         src: videoUrl,
         alt: `${name} video`,
+        posterSrc: videoPoster,
       },
     ];
-  }, [images, imageUrl, name, thumbnail, videoUrl]);
+  }, [images, imageUrl, name, poster, thumbnail, videoThumbnail, videoUrl]);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selected = media[selectedIndex] ?? media[0];
@@ -112,30 +125,42 @@ export function ProductGallery({
         )}
       </div>
 
-      {media.map((item, idx) => (
-        <button
-          key={`${item.type}-${item.src}-${idx}`}
-          type="button"
-          onClick={() => setSelectedIndex(idx)}
-          className={`col-span-4 aspect-square bg-surface-container-low rounded-xl overflow-hidden border relative group cursor-pointer ${
-            idx === selectedIndex ? "border-secondary" : "border-outline-variant/20"
-          }`}
-          aria-label={`Select ${item.alt}`}
-        >
-          {item.type === "image" ? (
-            <Image
-              alt={item.alt}
-              src={item.src}
-              fill
-              className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-4xl">play_circle</span>
-            </div>
-          )}
-        </button>
-      ))}
+      <div className="col-span-12 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+        <div className="flex min-w-full flex-nowrap gap-4">
+          {media.map((item, idx) => (
+            <button
+              key={`${item.type}-${item.src}-${idx}`}
+              type="button"
+              onClick={() => setSelectedIndex(idx)}
+              className={`relative aspect-square basis-[calc((100%-2rem)/3)] shrink-0 bg-surface-container-low rounded-xl overflow-hidden border group cursor-pointer ${
+                idx === selectedIndex ? "border-secondary" : "border-outline-variant/20"
+              }`}
+              aria-label={`Select ${item.alt}`}
+            >
+              {item.type === "image" ? (
+                <Image
+                  alt={item.alt}
+                  src={item.src}
+                  fill
+                  className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                />
+              ) : (
+                <>
+                  <Image
+                    alt={item.alt}
+                    src={item.posterSrc || "/images/product-imperial-main.png"}
+                    fill
+                    className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white text-4xl">play_circle</span>
+                  </div>
+                </>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

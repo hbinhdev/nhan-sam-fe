@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/sections/product-detail/ProductGallery";
 import { ProductInfo } from "@/components/sections/product-detail/ProductInfo";
 import { CertificationSection } from "@/components/sections/product-detail/CertificationSection";
@@ -21,7 +21,10 @@ import {
 const RELATED_PRODUCTS_LIMIT = 4;
 const SHORT_DESCRIPTION_MAX_LENGTH = 220;
 
-function toPlainTextPreview(htmlOrText?: string | null, maxLength = SHORT_DESCRIPTION_MAX_LENGTH) {
+function toPlainTextPreview(
+  htmlOrText?: string | null,
+  maxLength = SHORT_DESCRIPTION_MAX_LENGTH,
+) {
   const source = (htmlOrText ?? "").trim();
   if (!source) return "";
 
@@ -140,6 +143,8 @@ export default async function ProductDetailPage({
           thumbnail={product.thumbnail || product.imageUrl || undefined}
           images={product.images}
           videoUrl={product.videoUrl}
+          videoThumbnail={product.videoThumbnail}
+          poster={product.poster}
         />
         <ProductInfo
           id={product.id}
@@ -177,7 +182,7 @@ export default async function ProductDetailPage({
       <section className="py-24 border-t border-outline-variant/30">
         <div className="flex items-center gap-6 mb-16">
           <h2 className="text-3xl font-serif text-primary shrink-0">
-            KhÃ¡m PhÃ¡ ThÃªm
+            Khám phá thêm
           </h2>
           <div className="h-px w-full bg-outline-variant/30"></div>
         </div>
@@ -215,5 +220,3 @@ export default async function ProductDetailPage({
     </main>
   );
 }
-
-

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ImagePlus, Loader2, Upload, Video, X } from "lucide-react";
+import { ImagePlus, Loader2, Trash2, Upload, Video, X } from "lucide-react";
 import type { ProductSummary } from "@/lib/product-api";
 import type { Category } from "@/lib/category-api";
 import {
@@ -20,7 +20,6 @@ import { useToast } from "@/components/shared/toast/ToastProvider";
 type FormMode = "create" | "edit";
 
 type ProductFormState = {
-  sku: string;
   name: string;
   shortDescription: string;
   description: string;
@@ -44,7 +43,6 @@ interface ProductFormProps {
 }
 
 const EMPTY_FORM: ProductFormState = {
-  sku: "",
   name: "",
   shortDescription: "",
   description: "",
@@ -61,10 +59,22 @@ const EMPTY_FORM: ProductFormState = {
   origin: "",
 };
 
+const MAX_IMAGE_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/pjpeg",
+  "image/png",
+  "image/webp",
+]);
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+
 function isAllowedUploadedAssetUrl(value: string) {
   try {
     const parsed = new URL(value);
-    return parsed.protocol === "https:" && parsed.hostname === "res.cloudinary.com";
+    return (
+      parsed.protocol === "https:" && parsed.hostname === "res.cloudinary.com"
+    );
   } catch {
     return false;
   }
@@ -88,7 +98,6 @@ function mapProductToForm(product: ProductSummary): ProductFormState {
     : [];
 
   return {
-    sku: product.sku ?? "",
     name: product.name,
     shortDescription: product.shortDescription ?? "",
     description: normalizeBlogContentToHtml(product.description ?? ""),
@@ -120,7 +129,6 @@ function buildPayload(form: ProductFormState): AdminProductPayload {
         : [];
 
   return {
-    sku: form.sku.trim() || undefined,
     name: form.name.trim(),
     shortDescription: form.shortDescription.trim() || undefined,
     description: form.description.trim() || undefined,
@@ -168,7 +176,10 @@ function validateForm(form: ProductFormState) {
     return "Ảnh chi tiết phải là URL hợp lệ.";
   }
 
-  if (form.videoUrl?.trim() && !isAllowedUploadedAssetUrl(form.videoUrl.trim())) {
+  if (
+    form.videoUrl?.trim() &&
+    !isAllowedUploadedAssetUrl(form.videoUrl.trim())
+  ) {
     return "Video phải là video đã tải từ máy lên.";
   }
 
@@ -219,38 +230,110 @@ export function ProductForm({
   const handleGalleryUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const files = event.target.files;
+    const selectedFiles = event.target.files
+      ? Array.from(event.target.files)
+      : [];
     event.target.value = "";
-    if (!files || files.length === 0) return;
+    if (selectedFiles.length === 0) return;
 
     setUploadingGallery(true);
 
     try {
       const uploadedUrls: string[] = [];
-      for (const file of Array.from(files)) {
-        const url = await uploadImage(file);
-        uploadedUrls.push(url);
+      const failedFiles: string[] = [];
+      console.info("[product-form][gallery] selected_files", {
+        count: selectedFiles.length,
+        files: selectedFiles.map((file) => ({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        })),
+      });
+
+      for (const file of selectedFiles) {
+        const lowerFileName = file.name.toLowerCase();
+        const hasAllowedExtension = ALLOWED_IMAGE_EXTENSIONS.some((ext) =>
+          lowerFileName.endsWith(ext),
+        );
+        const hasAllowedMimeType =
+          !file.type || ALLOWED_IMAGE_MIME_TYPES.has(file.type);
+
+        if (!hasAllowedMimeType || !hasAllowedExtension) {
+          console.warn("[product-form][gallery] rejected_by_type", {
+            name: file.name,
+            type: file.type,
+            hasAllowedExtension,
+            hasAllowedMimeType,
+          });
+          failedFiles.push(`${file.name} (định dạng không hỗ trợ)`);
+          continue;
+        }
+
+        if (file.size > MAX_IMAGE_FILE_SIZE_BYTES) {
+          console.warn("[product-form][gallery] rejected_by_size", {
+            name: file.name,
+            size: file.size,
+            maxSize: MAX_IMAGE_FILE_SIZE_BYTES,
+          });
+          failedFiles.push(`${file.name} (vượt quá 5MB)`);
+          continue;
+        }
+
+        try {
+          const url = await uploadImage(file);
+          uploadedUrls.push(url);
+          console.info("[product-form][gallery] uploaded", {
+            name: file.name,
+            url,
+          });
+        } catch (uploadError) {
+          console.error("[product-form][gallery] upload_failed", {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            uploadError,
+          });
+          const detail =
+            uploadError instanceof Error && uploadError.message.trim()
+              ? uploadError.message.trim()
+              : "tải lên thất bại";
+          failedFiles.push(`${file.name} (${detail})`);
+        }
       }
 
-      setForm((prev) => {
-        const nextImages = Array.from(
-          new Set([...prev.images, ...uploadedUrls]),
-        );
-        const nextThumbnail = prev.thumbnail || nextImages[0] || "";
+      if (uploadedUrls.length > 0) {
+        setForm((prev) => {
+          const nextImages = Array.from(
+            new Set([...prev.images, ...uploadedUrls]),
+          );
+          const nextThumbnail = prev.thumbnail || nextImages[0] || "";
 
-        return {
-          ...prev,
-          thumbnail: nextThumbnail,
-          images: nextImages,
-        };
-      });
-    } catch (uploadError) {
-      showToast(
-        uploadError instanceof Error
-          ? uploadError.message
-          : "Tải ảnh từ thư viện thất bại.",
-        "error",
-      );
+          return {
+            ...prev,
+            thumbnail: nextThumbnail,
+            images: nextImages,
+          };
+        });
+      }
+
+      if (failedFiles.length > 0) {
+        console.warn("[product-form][gallery] completed_with_failures", {
+          uploadedCount: uploadedUrls.length,
+          failedCount: failedFiles.length,
+          failedFiles,
+        });
+        showToast(
+          `Một số ảnh không tải được: ${failedFiles.slice(0, 3).join(", ")}${
+            failedFiles.length > 3 ? "..." : ""
+          }`,
+          "error",
+        );
+      } else {
+        console.info("[product-form][gallery] completed_success", {
+          uploadedCount: uploadedUrls.length,
+        });
+        showToast("Tải ảnh chi tiết thành công.", "success");
+      }
     } finally {
       setUploadingGallery(false);
     }
@@ -316,7 +399,9 @@ export function ProductForm({
         await updateAdminProduct(initialData.id, payload);
       }
       showToast(
-        mode === "create" ? "Tạo sản phẩm thành công." : "Cập nhật sản phẩm thành công.",
+        mode === "create"
+          ? "Tạo sản phẩm thành công."
+          : "Cập nhật sản phẩm thành công.",
         "success",
       );
       router.push("/dashboard/products");
@@ -351,19 +436,6 @@ export function ProductForm({
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Mã SP
-              </label>
-              <Input
-                className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
-                value={form.sku}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, sku: e.target.value }))
-                }
-              />
-            </div>
-
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-semibold text-slate-700">
                 Mô tả ngắn
@@ -394,99 +466,103 @@ export function ProductForm({
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Giá *
-              </label>
-              <Input
-                className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
-                type="number"
-                min={0}
-                value={form.price}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, price: e.target.value }))
-                }
-              />
-              <p className="text-xs text-slate-500">
-                {new Intl.NumberFormat("vi-VN").format(
-                  Number.isFinite(Number(form.price)) ? Number(form.price) : 0,
-                )}
-                đ
-              </p>
-            </div>
+            <div className="grid grid-cols-1 gap-5 md:col-span-2 md:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">
+                  Giá *
+                </label>
+                <Input
+                  className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
+                  type="number"
+                  min={0}
+                  value={form.price}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, price: e.target.value }))
+                  }
+                />
+                <p className="text-xs text-slate-500">
+                  {new Intl.NumberFormat("vi-VN").format(
+                    Number.isFinite(Number(form.price))
+                      ? Number(form.price)
+                      : 0,
+                  )}
+                  đ
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Tồn kho
-              </label>
-              <Input
-                className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
-                type="number"
-                min={0}
-                value={form.stock}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, stock: e.target.value }))
-                }
-              />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">
+                  Tồn kho
+                </label>
+                <Input
+                  className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
+                  type="number"
+                  min={0}
+                  value={form.stock}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, stock: e.target.value }))
+                  }
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Danh mục *
-              </label>
-              <select
-                className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
-                value={form.categoryId}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, categoryId: e.target.value }))
-                }
-              >
-                <option value="">Chọn danh mục</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">
+                  Danh mục *
+                </label>
+                <select
+                  className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                  value={form.categoryId}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, categoryId: e.target.value }))
+                  }
+                >
+                  <option value="">Chọn danh mục</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Xuất xứ
-              </label>
-              <Input
-                className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
-                value={form.origin}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, origin: e.target.value }))
-                }
-              />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">
+                  Xuất xứ
+                </label>
+                <Input
+                  className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
+                  value={form.origin}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, origin: e.target.value }))
+                  }
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Thương hiệu
-              </label>
-              <Input
-                className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
-                value={form.brand}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, brand: e.target.value }))
-                }
-              />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">
+                  Thương hiệu
+                </label>
+                <Input
+                  className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
+                  value={form.brand}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, brand: e.target.value }))
+                  }
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                Tuổi sâm
-              </label>
-              <Input
-                className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
-                value={form.ginsengAge}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, ginsengAge: e.target.value }))
-                }
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">
+                  Tuổi sâm
+                </label>
+                <Input
+                  className="h-10 border-slate-300 bg-white text-slate-900 focus-visible:border-slate-500 focus-visible:ring-slate-300"
+                  value={form.ginsengAge}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, ginsengAge: e.target.value }))
+                  }
+                />
+              </div>
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -556,13 +632,15 @@ export function ProductForm({
                   <Button
                     type="button"
                     variant="destructive"
-                    size="icon-xs"
-                    className="absolute -right-2 -top-2"
+                    size="icon-sm"
+                    className="absolute -right-3 -top-3 h-9 w-9 rounded-full border border-white bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2"
+                    aria-label="Xóa thumbnail"
+                    title="Xóa thumbnail"
                     onClick={() =>
                       setForm((prev) => ({ ...prev, thumbnail: "" }))
                     }
                   >
-                    <X className="h-3 w-3" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
@@ -571,28 +649,52 @@ export function ProductForm({
             </div>
 
             <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-800">
-                    Ảnh chi tiết sản phẩm
+                    Media sản phẩm
                   </h3>
-                  <p className="text-xs text-slate-500">Tải lên nhiều ảnh.</p>
+                  <p className="text-xs text-slate-500">
+                    Tải lên ảnh chi tiết và video sản phẩm.
+                  </p>
                 </div>
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                  {uploadingGallery ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ImagePlus className="h-4 w-4" />
-                  )}
-                  Tải thư viện ảnh
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    className="hidden"
-                    onChange={handleGalleryUpload}
-                  />
-                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                    {uploadingGallery ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ImagePlus className="h-4 w-4" />
+                    )}
+                    Tải ảnh chi tiết
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleGalleryUpload}
+                    />
+                  </label>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                    {uploadingVideo ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Video className="h-4 w-4" />
+                    )}
+                    Tải video
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                      className="hidden"
+                      onChange={handleVideoUpload}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs text-slate-500">
+                  Ảnh: JPG/JPEG/PNG/WEBP. Video: MP4/WEBM/MOV/AVI.
+                </p>
               </div>
 
               {form.images.length > 0 ? (
@@ -607,11 +709,13 @@ export function ProductForm({
                       <Button
                         type="button"
                         variant="destructive"
-                        size="icon-xs"
-                        className="absolute -right-2 -top-2"
+                        size="icon-sm"
+                        className="absolute -right-3 -top-3 h-9 w-9 rounded-full border border-white bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2"
+                        aria-label="Xóa ảnh chi tiết"
+                        title="Xóa ảnh chi tiết"
                         onClick={() => removeGalleryImage(url)}
                       >
-                        <X className="h-3 w-3" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
@@ -619,33 +723,6 @@ export function ProductForm({
               ) : (
                 <p className="text-xs text-slate-500">Chưa có ảnh chi tiết.</p>
               )}
-            </div>
-
-            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-800">
-                    Video sản phẩm
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    MP4/WEBM/MOV/AVI, max 50MB
-                  </p>
-                </div>
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                  {uploadingVideo ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Video className="h-4 w-4" />
-                  )}
-                  Tải video
-                  <input
-                    type="file"
-                    accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
-                    className="hidden"
-                    onChange={handleVideoUpload}
-                  />
-                </label>
-              </div>
 
               {form.videoUrl ? (
                 <div className="space-y-3">
@@ -661,7 +738,6 @@ export function ProductForm({
                       className="h-10 min-w-24"
                       onClick={() => {
                         setForm((prev) => ({ ...prev, videoUrl: null }));
-                        
                       }}
                     >
                       Xóa video
@@ -703,4 +779,3 @@ export function ProductForm({
     </div>
   );
 }
-
