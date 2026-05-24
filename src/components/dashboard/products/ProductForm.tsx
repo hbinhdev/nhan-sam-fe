@@ -569,12 +569,12 @@ export function ProductForm({
               <label className="text-sm font-semibold text-slate-700">
                 Công dụng
               </label>
-              <RichTextEditor
+              <textarea
+                className="min-h-28 w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
                 value={form.usagePurpose}
-                onChange={(nextValue) =>
-                  setForm((prev) => ({ ...prev, usagePurpose: nextValue }))
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, usagePurpose: e.target.value }))
                 }
-                onUploadImage={uploadImage}
                 placeholder="Nhập công dụng sản phẩm..."
               />
             </div>
