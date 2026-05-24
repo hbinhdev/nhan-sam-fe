@@ -208,7 +208,7 @@ export default function LoginPage() {
       <section className="max-w-[1280px] mx-auto">
         <div className="max-w-[620px] mx-auto bg-white p-10 md:p-12 rounded-2xl border border-outline-variant/30 shadow-xl">
           <div className="flex flex-col gap-3 mb-8">
-            <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">
+            <span className="font-semibold text-sm tracking-wider text-secondary">
               Tài khoản khách hàng
             </span>
             <h1 className="text-3xl md:text-4xl font-serif text-primary">
@@ -226,7 +226,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => switchMode("login")}
               className={cn(
-                "h-11 rounded-lg text-xs font-bold tracking-widest uppercase transition-all",
+                "h-11 rounded-lg text-base font-semibold tracking-wide transition-all",
                 mode === "login"
                   ? "bg-white text-primary shadow"
                   : "text-on-surface-variant hover:text-primary"
@@ -238,7 +238,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => switchMode("register")}
               className={cn(
-                "h-11 rounded-lg text-xs font-bold tracking-widest uppercase transition-all",
+                "h-11 rounded-lg text-base font-semibold tracking-wide transition-all",
                 mode === "register"
                   ? "bg-white text-primary shadow"
                   : "text-on-surface-variant hover:text-primary"
@@ -251,7 +251,7 @@ export default function LoginPage() {
           {mode === "login" ? (
             <form className="flex flex-col gap-8" onSubmit={handleLoginSubmit}>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                <label className="text-sm font-semibold text-on-surface-variant">
                   Email
                 </label>
                 <input
@@ -266,12 +266,12 @@ export default function LoginPage() {
 
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  <label className="text-sm font-semibold text-on-surface-variant">
                     Mật khẩu
                   </label>
                   <Link
                     href="#"
-                    className="text-[11px] font-bold tracking-[0.12em] uppercase text-secondary hover:opacity-70 transition-opacity"
+                    className="text-sm font-semibold text-secondary hover:opacity-70 transition-opacity"
                   >
                     Quên mật khẩu?
                   </Link>
@@ -297,7 +297,7 @@ export default function LoginPage() {
                 disabled={isSubmitting}
                 className={cn(
                   buttonVariants({ variant: "default" }),
-                  "w-full bg-primary text-on-primary h-14 rounded-lg text-sm font-bold tracking-widest uppercase flex items-center justify-center",
+                  "w-full bg-primary text-on-primary h-14 rounded-lg text-base font-semibold tracking-wide flex items-center justify-center",
                   isSubmitting && "opacity-70 cursor-not-allowed"
                 )}
               >
@@ -307,7 +307,7 @@ export default function LoginPage() {
           ) : (
             <form className="flex flex-col gap-8" onSubmit={handleRegisterSubmit}>
               <div className="flex flex-col gap-2">
-                <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                <label className="text-sm font-semibold text-on-surface-variant">
                   Họ và tên
                 </label>
                 <input
@@ -322,7 +322,7 @@ export default function LoginPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-2">
-                  <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  <label className="text-sm font-semibold text-on-surface-variant">
                     Email
                   </label>
                   <input
@@ -335,7 +335,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  <label className="text-sm font-semibold text-on-surface-variant">
                     Số điện thoại
                   </label>
                   <input
@@ -351,7 +351,7 @@ export default function LoginPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex flex-col gap-2">
-                  <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  <label className="text-sm font-semibold text-on-surface-variant">
                     Mật khẩu
                   </label>
                   <input
@@ -364,7 +364,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[11px] font-bold tracking-[0.1em] uppercase text-on-surface-variant">
+                  <label className="text-sm font-semibold text-on-surface-variant">
                     Xác nhận mật khẩu
                   </label>
                   <input
@@ -389,7 +389,7 @@ export default function LoginPage() {
                 disabled={isSubmitting}
                 className={cn(
                   buttonVariants({ variant: "default" }),
-                  "w-full bg-primary text-on-primary h-14 rounded-lg text-sm font-bold tracking-widest uppercase flex items-center justify-center",
+                  "w-full bg-primary text-on-primary h-14 rounded-lg text-base font-semibold tracking-wide flex items-center justify-center",
                   isSubmitting && "opacity-70 cursor-not-allowed"
                 )}
               >

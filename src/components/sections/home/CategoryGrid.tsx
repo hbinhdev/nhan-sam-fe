@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -96,7 +96,7 @@ export function CategoryGrid({ title, subtitle, categories }: CategoryGridProps)
       <div className="max-w-[1280px] mx-auto px-6">
         <div className="text-center flex flex-col gap-3 mb-10">
           {subtitle ? (
-            <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{subtitle}</span>
+            <span className="font-semibold text-sm tracking-wider text-secondary">{subtitle}</span>
           ) : null}
           {title ? <h2 className="text-3xl md:text-4xl font-serif text-primary">{title}</h2> : null}
         </div>
@@ -189,7 +189,7 @@ function CategoryCard({
         <h3 className="text-2xl font-serif text-primary">{title}</h3>
         <p className="text-base text-on-surface-variant leading-relaxed line-clamp-3">{desc}</p>
       </div>
-      <span className="text-[12px] font-bold tracking-[0.15em] uppercase text-secondary flex flex-row items-center gap-2 group-hover:translate-x-2 transition-transform">
+      <span className="text-base font-semibold text-secondary flex flex-row items-center gap-2 group-hover:translate-x-2 transition-transform">
         Xem sản phẩm <span className="material-symbols-outlined text-sm">arrow_forward</span>
       </span>
     </button>

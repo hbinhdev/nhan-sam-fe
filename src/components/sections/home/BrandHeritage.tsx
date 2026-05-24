@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,7 @@ export function BrandHeritage({
 
         <div className="flex flex-col gap-8 order-1 md:order-2">
           <div className="flex flex-col gap-3">
-            {subtitle ? <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{subtitle}</span> : null}
+            {subtitle ? <span className="font-semibold text-sm tracking-wider text-secondary">{subtitle}</span> : null}
             {title ? <h2 className="text-3xl md:text-4xl font-serif text-primary leading-[1.2]">{title}</h2> : null}
           </div>
           {content ? <p className="text-lg text-on-surface-variant leading-relaxed">{content}</p> : null}
@@ -50,7 +50,7 @@ export function BrandHeritage({
               href={ctaLink || "#"}
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "border-primary text-primary h-12 px-8 rounded-lg text-xs font-bold tracking-widest uppercase flex items-center self-start",
+                "border-primary text-primary h-12 px-8 rounded-lg text-base font-semibold tracking-wide flex items-center self-start",
               )}
             >
               {ctaText}

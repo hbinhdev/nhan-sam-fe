@@ -1,4 +1,4 @@
-﻿import { ProductCard } from "@/components/shared/ProductCard";
+import { ProductCard } from "@/components/shared/ProductCard";
 import Link from "next/link";
 import {
   FilterSidebar,
@@ -179,7 +179,7 @@ export default async function ProductsPage({
   return (
     <main className="max-w-[1280px] mx-auto px-6 py-16 flex flex-col gap-12">
       <section className="text-center flex flex-col gap-6 mb-8">
-        <span className="font-bold text-[12px] tracking-[0.2em] uppercase text-secondary">
+        <span className="font-semibold text-sm tracking-wider text-secondary">
           Danh mục tuyển chọn
         </span>
         <h1 className="text-5xl md:text-6xl font-serif text-primary leading-[1.1] text-balance tracking-tight">
@@ -218,8 +218,8 @@ export default async function ProductsPage({
             <span className="text-sm text-on-surface-variant">
               Hiển thị {products.length}/{totalProducts} sản phẩm
             </span>
-            <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start sm:gap-4">
-              <span className="text-[11px] font-bold tracking-widest text-on-surface-variant/60 uppercase">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-semibold tracking-wide text-on-surface-variant/70">
                 Sắp xếp:
               </span>
               <ProductSortSelect sortBy={activeSortBy} sortOrder={activeSortOrder} />
@@ -252,6 +252,7 @@ export default async function ProductsPage({
                   image={product.imageUrl || "/images/product-root.png"}
                   aspectRatio="portrait"
                   href={`/products/${product.slug || product.id}`}
+                  description={product.shortDescription ?? undefined}
                 />
               ))}
             </div>

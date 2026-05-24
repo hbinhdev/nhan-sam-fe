@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { Hero } from "@/components/sections/home/Hero";
 import { Certifications } from "@/components/sections/home/Certifications";
@@ -9,6 +9,7 @@ import { ConsultationForm } from "@/components/sections/home/ConsultationForm";
 import { formatCurrencyVND, getBestSellerProducts } from "@/lib/product-api";
 import { getCategories, type Category } from "@/lib/category-api";
 import { getHomeSections, type HomeSection } from "@/lib/home-section-api";
+import { getBlogs, type BlogPostItem } from "@/lib/blog-api";
 
 type HomeSectionSeed = Omit<HomeSection, "id" | "createdAt" | "updatedAt">;
 
@@ -21,9 +22,9 @@ const DEFAULT_SECTIONS: HomeSectionSeed[] = [
     content:
       "Khám phá bí quyết trường thọ từ những củ sâm quý hiếm nhất, được nuôi dưỡng bởi tinh hoa đất trời và kỹ nghệ chế biến truyền thống 50 năm.",
     imageUrl: "/images/hero.png",
-    ctaText: "KHÁM PHÁ NGAY",
+    ctaText: "Khám phá ngay",
     ctaLink: "/products",
-    dataJson: { secondaryCtaText: "TÌM HIỂU THÊM", secondaryCtaLink: "#heritage" },
+    dataJson: { secondaryCtaText: "Tìm hiểu thêm", secondaryCtaLink: "#heritage" },
     isActive: true,
     sortOrder: 1,
   },
@@ -88,7 +89,7 @@ const DEFAULT_SECTIONS: HomeSectionSeed[] = [
     subtitle: "Danh mục ưa chuộng",
     content: null,
     imageUrl: null,
-    ctaText: "XEM TẤT CẢ",
+    ctaText: "Xem tất cả",
     ctaLink: "/products",
     dataJson: null,
     isActive: true,
@@ -101,7 +102,7 @@ const DEFAULT_SECTIONS: HomeSectionSeed[] = [
     subtitle: "Nhận tư vấn và quà tặng dành cho khách hàng mới.",
     content: null,
     imageUrl: null,
-    ctaText: "XEM ƯU ĐÃI",
+    ctaText: "Xem ưu đãi",
     ctaLink: "/products",
     dataJson: null,
     isActive: true,
@@ -115,7 +116,7 @@ const DEFAULT_SECTIONS: HomeSectionSeed[] = [
     content:
       "Bắt đầu từ những ngày đầu tiên tìm kiếm nguồn sâm quý tại các thung lũng sương mù Hàn Quốc, Heritage Ginseng đã dành trọn nửa thế kỷ để hoàn thiện quy trình chiết xuất tinh khiết nhất.",
     imageUrl: "/images/heritage.png",
-    ctaText: "KHÁM PHÁ HÀNH TRÌNH",
+    ctaText: "Khám phá hành trình",
     ctaLink: "#",
     dataJson: { quote: "Hành trình 50 năm gìn giữ tinh hoa." },
     isActive: true,
@@ -128,7 +129,7 @@ const DEFAULT_SECTIONS: HomeSectionSeed[] = [
     subtitle: "Góc chia sẻ",
     content: "Khám phá các bài viết mới nhất về cách dùng sâm, lưu ý theo thể trạng và kinh nghiệm chăm sóc sức khỏe bền vững.",
     imageUrl: null,
-    ctaText: "XEM BLOG",
+    ctaText: "Xem blog",
     ctaLink: "/blogs",
     dataJson: null,
     isActive: true,
@@ -172,7 +173,7 @@ const DEFAULT_SECTIONS: HomeSectionSeed[] = [
     subtitle: "Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng lắng nghe và tư vấn giải pháp sức khỏe tối ưu cho bạn.",
     content: "Để lại thông tin để chúng tôi có thể hỗ trợ bạn chọn lựa sản phẩm phù hợp nhất với thể trạng và nhu cầu sức khỏe của bạn.",
     imageUrl: null,
-    ctaText: "NHẬN TƯ VẤN NGAY",
+    ctaText: "Nhận tư vấn ngay",
     ctaLink: "#consultation",
     dataJson: { formTitle: "Nhận Tư Vấn Từ Chuyên Gia Sâm" },
     isActive: true,
@@ -201,12 +202,20 @@ export default async function Home() {
   let bestSellerProducts: Awaited<ReturnType<typeof getBestSellerProducts>>["data"] = [];
   let cmsSections: HomeSection[] = [];
   let categories: Category[] = [];
+  let latestBlogs: BlogPostItem[] = [];
 
   try {
     const response = await getBestSellerProducts(4);
     bestSellerProducts = response.data.slice(0, 4);
   } catch {
     bestSellerProducts = [];
+  }
+
+  try {
+    const blogRes = await getBlogs({ page: 1, limit: 3 });
+    latestBlogs = blogRes.data;
+  } catch {
+    latestBlogs = [];
   }
 
   try {
@@ -255,11 +264,11 @@ export default async function Home() {
         <div className="max-w-[1280px] mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
             <div className="flex flex-col gap-3">
-              {featuredProducts.subtitle ? <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{featuredProducts.subtitle}</span> : null}
+              {featuredProducts.subtitle ? <span className="font-semibold text-sm tracking-wider text-secondary">{featuredProducts.subtitle}</span> : null}
               {featuredProducts.title ? <h2 className="text-3xl md:text-4xl font-serif text-primary">{featuredProducts.title}</h2> : null}
             </div>
             {featuredProducts.ctaText ? (
-              <Link href={featuredProducts.ctaLink || "/products"} className="text-secondary text-sm font-bold tracking-widest uppercase border-b-2 border-secondary pb-1 hover:opacity-70 transition-opacity">
+              <Link href={featuredProducts.ctaLink || "/products"} className="text-secondary text-base font-semibold tracking-wide border-b-2 border-secondary pb-1 hover:opacity-70 transition-opacity">
                 {featuredProducts.ctaText}
               </Link>
             ) : null}
@@ -277,6 +286,7 @@ export default async function Home() {
                   tag={product.ginsengAge ?? product.category?.name ?? undefined}
                   image={product.imageUrl || product.thumbnail || "/images/product-root.png"}
                   href={`/products/${product.slug || product.id}`}
+                  description={product.shortDescription ?? undefined}
                 />
               ))}
             </div>
@@ -308,13 +318,61 @@ export default async function Home() {
         data={brandStory.dataJson}
       /> : null}
 
-      {featuredBlogs ? <section className="w-full py-24 bg-surface-container-low" id="featured-blogs">
-        <div className="max-w-[1280px] mx-auto px-6 text-center">
-          {featuredBlogs.subtitle ? <span className="font-bold text-[12px] tracking-[0.15em] uppercase text-secondary">{featuredBlogs.subtitle}</span> : null}
+      {featuredBlogs ? <section className="w-full pt-10 pb-4 bg-surface-container-low" id="featured-blogs">
+        <div className="max-w-[1280px] mx-auto px-6 text-center flex flex-col items-center">
+          {featuredBlogs.subtitle ? <span className="font-semibold text-sm tracking-wider text-secondary">{featuredBlogs.subtitle}</span> : null}
           {featuredBlogs.title ? <h2 className="mt-3 text-3xl md:text-4xl font-serif text-primary">{featuredBlogs.title}</h2> : null}
-          {featuredBlogs.content ? <p className="mx-auto mt-4 max-w-3xl text-on-surface-variant">{featuredBlogs.content}</p> : null}
+          {featuredBlogs.content ? <p className="mx-auto mt-3 max-w-3xl text-on-surface-variant text-sm md:text-base">{featuredBlogs.content}</p> : null}
+          
+          {latestBlogs.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 text-left w-full">
+              {latestBlogs.map((blog) => (
+                <Link
+                  key={blog.id}
+                  href={`/blogs/${blog.slug || blog.id}`}
+                  className="flex flex-col bg-white border border-stone-200/60 dark:border-stone-800/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 group"
+                >
+                  <div className="aspect-[16/10] relative overflow-hidden bg-stone-50/50">
+                    <img
+                      src={blog.thumbnail || "/images/blog-placeholder.png"}
+                      alt={blog.title}
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                    {blog.category && (
+                      <span className="absolute top-4 left-4 bg-primary/95 text-on-primary text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded shadow-sm backdrop-blur-sm z-10">
+                        {blog.category === "GINSENG_SEO"
+                          ? "Kiến thức"
+                          : blog.category === "PRODUCT_COMPARISON"
+                          ? "So sánh"
+                          : "Hướng dẫn"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-5 flex flex-col gap-3 flex-1 justify-between">
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none">
+                        {blog.authorName || "Ban biên tập"} • {blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString("vi-VN") : "Gần đây"}
+                      </p>
+                      <h3 className="text-base font-serif font-semibold text-primary leading-snug line-clamp-2 min-h-[44px] group-hover:text-secondary transition-colors duration-300">
+                        {blog.title}
+                      </h3>
+                      {blog.excerpt && (
+                        <p className="text-xs text-stone-500 leading-relaxed line-clamp-2 font-normal mt-0.5">
+                          {blog.excerpt}
+                        </p>
+                      )}
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-3 border-t border-stone-100 pt-2.5">
+                      Đọc bài viết <span className="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
           {featuredBlogs.ctaText ? (
-            <Link href={featuredBlogs.ctaLink || "/blogs"} className="mt-8 inline-flex h-12 items-center rounded-lg border border-primary px-6 text-sm font-bold text-primary">
+            <Link href={featuredBlogs.ctaLink || "/blogs"} className="mt-6 inline-flex h-11 items-center rounded-lg border border-primary px-6 text-sm font-semibold text-primary hover:bg-primary hover:text-white transition-all duration-300">
               {featuredBlogs.ctaText}
             </Link>
           ) : null}

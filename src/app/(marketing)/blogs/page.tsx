@@ -88,7 +88,7 @@ export default async function BlogsPage({ searchParams }: BlogsPageProps) {
   return (
     <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-10 px-6 py-16">
       <section className="mb-4 text-center">
-        <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-secondary">
+        <span className="font-semibold text-sm tracking-wider text-secondary">
           Chuyên mục kiến thức
         </span>
         <h1 className="mt-3 text-balance font-serif text-5xl leading-[1.1] tracking-tight text-primary md:text-6xl">
