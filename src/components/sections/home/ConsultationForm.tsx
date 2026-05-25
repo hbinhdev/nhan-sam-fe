@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { Reveal } from "@/components/motion/Reveal";
 import { cn } from "@/lib/utils";
 import {
   ACTIVE_CONSULTATION_MESSAGE,
@@ -136,7 +137,7 @@ export function ConsultationForm({
             href="#consultation"
             className={cn(
               buttonVariants({ variant: "default" }),
-              "bg-white text-primary h-14 px-12 rounded-lg text-base font-semibold tracking-wide hover:bg-surface-variant flex items-center",
+              "bg-white text-primary h-14 px-12 rounded-lg text-base font-semibold tracking-wide hover:bg-white hover:text-primary flex items-center",
             )}
           >
             {cms?.ctaButtonText || "Nhận tư vấn ngay"}
@@ -146,7 +147,13 @@ export function ConsultationForm({
 
       <section className="w-full py-24 bg-surface" id="consultation">
         <div className="max-w-[1280px] mx-auto px-6 flex flex-col lg:flex-row gap-20 items-center">
-          <div className="w-full lg:w-1/2 flex flex-col gap-6">
+          <Reveal
+            direction="left"
+            duration={1}
+            distance={40}
+            className="w-full lg:w-1/2"
+          >
+          <div className="flex flex-col gap-6">
             <h2 className="text-3xl md:text-4xl font-serif text-primary leading-tight">
               {cms?.formTitle || "Nhận Tư Vấn Từ Chuyên Gia Sâm"}
             </h2>
@@ -166,7 +173,15 @@ export function ConsultationForm({
               </div>
             </div>
           </div>
-          <div className="w-full lg:w-1/2 bg-white p-12 rounded-2xl shadow-xl border border-outline-variant/30">
+          </Reveal>
+          <Reveal
+            direction="right"
+            duration={1}
+            distance={40}
+            delay={0.14}
+            className="w-full lg:w-1/2"
+          >
+          <div className="bg-white p-12 rounded-2xl shadow-xl border border-outline-variant/30">
             <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-semibold text-on-surface-variant">Họ và tên</label>
@@ -243,6 +258,7 @@ export function ConsultationForm({
               </button>
             </form>
           </div>
+          </Reveal>
         </div>
       </section>
     </>
