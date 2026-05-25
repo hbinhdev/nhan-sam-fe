@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -227,7 +227,7 @@ export function ProductForm({
     }
   };
 
-  const handleGalleryUpload = async (
+  const handleMediaUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const selectedFiles = event.target.files
@@ -241,63 +241,26 @@ export function ProductForm({
     try {
       const uploadedUrls: string[] = [];
       const failedFiles: string[] = [];
-      console.info("[product-form][gallery] selected_files", {
-        count: selectedFiles.length,
-        files: selectedFiles.map((file) => ({
-          name: file.name,
-          type: file.type,
-          size: file.size,
-        })),
-      });
 
       for (const file of selectedFiles) {
-        const lowerFileName = file.name.toLowerCase();
-        const hasAllowedExtension = ALLOWED_IMAGE_EXTENSIONS.some((ext) =>
-          lowerFileName.endsWith(ext),
-        );
-        const hasAllowedMimeType =
-          !file.type || ALLOWED_IMAGE_MIME_TYPES.has(file.type);
+        const isImage = file.type.startsWith("image/");
+        const isVideo = file.type.startsWith("video/");
 
-        if (!hasAllowedMimeType || !hasAllowedExtension) {
-          console.warn("[product-form][gallery] rejected_by_type", {
-            name: file.name,
-            type: file.type,
-            hasAllowedExtension,
-            hasAllowedMimeType,
-          });
+        if (!isImage && !isVideo) {
           failedFiles.push(`${file.name} (định dạng không hỗ trợ)`);
           continue;
         }
 
-        if (file.size > MAX_IMAGE_FILE_SIZE_BYTES) {
-          console.warn("[product-form][gallery] rejected_by_size", {
-            name: file.name,
-            size: file.size,
-            maxSize: MAX_IMAGE_FILE_SIZE_BYTES,
-          });
-          failedFiles.push(`${file.name} (vượt quá 5MB)`);
-          continue;
-        }
-
         try {
-          const url = await uploadImage(file);
+          let url = "";
+          if (isImage) {
+            url = await uploadImage(file);
+          } else {
+            url = await uploadVideo(file);
+          }
           uploadedUrls.push(url);
-          console.info("[product-form][gallery] uploaded", {
-            name: file.name,
-            url,
-          });
         } catch (uploadError) {
-          console.error("[product-form][gallery] upload_failed", {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            uploadError,
-          });
-          const detail =
-            uploadError instanceof Error && uploadError.message.trim()
-              ? uploadError.message.trim()
-              : "tải lên thất bại";
-          failedFiles.push(`${file.name} (${detail})`);
+          failedFiles.push(`${file.name} (tải lên thất bại)`);
         }
       }
 
@@ -306,7 +269,8 @@ export function ProductForm({
           const nextImages = Array.from(
             new Set([...prev.images, ...uploadedUrls]),
           );
-          const nextThumbnail = prev.thumbnail || nextImages[0] || "";
+          // Set first image (not a video) as thumbnail if thumbnail is empty
+          const nextThumbnail = prev.thumbnail || nextImages.find(u => !/\.(mp4|webm|ogg|mov|avi|quicktime)(\?.*)?$/i.test(u)) || nextImages[0] || "";
 
           return {
             ...prev,
@@ -317,48 +281,15 @@ export function ProductForm({
       }
 
       if (failedFiles.length > 0) {
-        console.warn("[product-form][gallery] completed_with_failures", {
-          uploadedCount: uploadedUrls.length,
-          failedCount: failedFiles.length,
-          failedFiles,
-        });
         showToast(
-          `Một số ảnh không tải được: ${failedFiles.slice(0, 3).join(", ")}${
-            failedFiles.length > 3 ? "..." : ""
-          }`,
+          `Một số tệp tải lên thất bại: ${failedFiles.slice(0, 3).join(", ")}`,
           "error",
         );
       } else {
-        console.info("[product-form][gallery] completed_success", {
-          uploadedCount: uploadedUrls.length,
-        });
-        showToast("Tải ảnh chi tiết thành công.", "success");
+        showToast("Tải media thành công.", "success");
       }
     } finally {
       setUploadingGallery(false);
-    }
-  };
-
-  const handleVideoUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-
-    setUploadingVideo(true);
-    try {
-      const url = await uploadVideo(file);
-      setForm((prev) => ({ ...prev, videoUrl: url }));
-    } catch (uploadError) {
-      showToast(
-        uploadError instanceof Error
-          ? uploadError.message
-          : "Tải video thất bại.",
-        "error",
-      );
-    } finally {
-      setUploadingVideo(false);
     }
   };
 
@@ -595,158 +526,196 @@ export function ProductForm({
                 placeholder="Nhập hướng dẫn sử dụng..."
               />
             </div>
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-6 md:col-span-2">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800">Ảnh thumbnail</h3>
+                <p className="text-xs text-slate-500">Ảnh đại diện chính hiển thị cho sản phẩm.</p>
+              </div>
 
-            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-800">
-                    Ảnh thumbnail
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    PNG/JPG/JPEG/WEBP, max 5MB
-                  </p>
+              {form.thumbnail ? (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="relative group overflow-hidden rounded-xl border border-slate-200 w-28 h-28 flex-shrink-0 bg-slate-50">
+                    <img
+                      src={form.thumbnail}
+                      alt="Thumbnail preview"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      <button
+                        type="button"
+                        className="h-8 w-8 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 flex items-center justify-center transition-colors duration-200"
+                        title="Xóa thumbnail"
+                        onClick={() => setForm((prev) => ({ ...prev, thumbnail: "" }))}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold text-slate-800">Đã tải ảnh thumbnail thành công</h4>
+                    <p className="text-xs text-slate-500">Ảnh của bạn đang được hiển thị sắc nét. Bạn có thể xóa để chọn ảnh mới.</p>
+                    <label className="mt-2.5 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-colors">
+                      Thay đổi ảnh
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="hidden"
+                        onChange={handleThumbnailUpload}
+                      />
+                    </label>
+                  </div>
                 </div>
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                  {uploadingThumbnail ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
-                  Tải thumbnail
+              ) : (
+                <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-8 bg-white hover:bg-slate-50/50 hover:border-slate-400 transition-all duration-200 cursor-pointer group text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 group-hover:scale-105 transition-transform duration-200">
+                      {uploadingThumbnail ? (
+                        <Loader2 className="h-5 w-5 text-slate-600 animate-spin" />
+                      ) : (
+                        <Upload className="h-5 w-5 text-slate-500" />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-slate-700">Tải ảnh thumbnail</p>
+                      <p className="text-xs text-slate-500">Định dạng hỗ trợ: PNG, JPG, JPEG hoặc WEBP (Tối đa 5MB)</p>
+                    </div>
+                  </div>
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/jpg,image/webp"
                     className="hidden"
                     onChange={handleThumbnailUpload}
+                    disabled={uploadingThumbnail}
                   />
                 </label>
-              </div>
-
-              {form.thumbnail ? (
-                <div className="relative w-fit">
-                  <img
-                    src={form.thumbnail}
-                    alt="Thumbnail preview"
-                    className="h-28 w-28 rounded-lg border border-slate-200 object-cover bg-white"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon-sm"
-                    className="absolute -right-3 -top-3 h-9 w-9 rounded-full border border-white bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2"
-                    aria-label="Xóa thumbnail"
-                    title="Xóa thumbnail"
-                    onClick={() =>
-                      setForm((prev) => ({ ...prev, thumbnail: "" }))
-                    }
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-500">Chưa tải thumbnail.</p>
               )}
             </div>
 
-            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-800">
-                    Media sản phẩm
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Tải lên ảnh chi tiết và video sản phẩm.
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                    {uploadingGallery ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <ImagePlus className="h-4 w-4" />
-                    )}
-                    Tải ảnh chi tiết
+            {/* Premium Product Media (Images and Video) Section */}
+            <div className="space-y-6 rounded-xl border border-slate-200 bg-slate-50/50 p-6 md:col-span-2">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800">Media sản phẩm</h3>
+                <p className="text-xs text-slate-500">Tải lên các hình ảnh chi tiết và video của sản phẩm.</p>
+              </div>
+
+              <div className="space-y-4">
+                {form.images.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Danh sách media ({form.images.length})
+                      </h4>
+                      <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-colors">
+                        Tải thêm ảnh/video
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*,video/*"
+                          className="hidden"
+                          onChange={handleMediaUpload}
+                        />
+                      </label>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 animate-fade-in">
+                      {form.images.map((url, index) => {
+                        const lowercaseUrl = url.toLowerCase();
+                        const isVideo =
+                          lowercaseUrl.includes("/video/") ||
+                          lowercaseUrl.includes(".mp4") ||
+                          lowercaseUrl.includes(".webm") ||
+                          lowercaseUrl.includes(".mov") ||
+                          lowercaseUrl.includes(".avi") ||
+                          lowercaseUrl.includes(".quicktime") ||
+                          lowercaseUrl.includes(".m4v") ||
+                          lowercaseUrl.includes(".mkv") ||
+                          lowercaseUrl.includes(".3gp") ||
+                          lowercaseUrl.includes(".flv") ||
+                          lowercaseUrl.includes(".wmv") ||
+                          lowercaseUrl.includes(".ogg") ||
+                          lowercaseUrl.includes(".mpeg") ||
+                          lowercaseUrl.includes(".mpg") ||
+                          lowercaseUrl.includes(".ogv");
+                        return (
+                          <div key={`${url}-${index}`} className="relative group overflow-hidden rounded-xl border border-slate-200 aspect-square shadow-sm bg-slate-900 flex items-center justify-center">
+                            {isVideo ? (
+                              <video
+                                src={url}
+                                className="w-full h-full object-cover"
+                                muted
+                                playsInline
+                                autoPlay
+                                loop
+                                controls
+                              />
+                            ) : (
+                              <img
+                                src={url}
+                                alt={`Media ${index + 1}`}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                              <button
+                                type="button"
+                                className="h-8 w-8 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 flex items-center justify-center transition-colors duration-200"
+                                onClick={() => removeGalleryImage(url)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                            {isVideo && (
+                              <div className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full shadow">
+                                <Video className="h-3.5 w-3.5" />
+                              </div>
+                            )}
+                            <span className="absolute bottom-1.5 left-1.5 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-medium">
+                              #{index + 1}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      
+                      {/* Plus button inside the grid */}
+                      <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl aspect-square bg-white hover:bg-slate-50 hover:border-slate-400 transition-all duration-200 cursor-pointer text-center group shadow-sm">
+                        <ImagePlus className="h-6 w-6 text-slate-400 group-hover:text-slate-600 group-hover:scale-105 transition-all duration-200" />
+                        <span className="text-[11px] font-semibold text-slate-500 mt-2">Thêm media</span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*,video/*"
+                          className="hidden"
+                          onChange={handleMediaUpload}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-10 bg-white hover:bg-slate-50/50 hover:border-slate-400 transition-all duration-200 cursor-pointer group text-center animate-fade-in">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="h-14 w-14 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+                        {uploadingGallery ? (
+                          <Loader2 className="h-6 w-6 text-slate-600 animate-spin" />
+                        ) : (
+                          <Upload className="h-6 w-6 text-slate-500" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold text-slate-700">Tải ảnh/video sản phẩm</p>
+                        <p className="text-xs text-slate-500 max-w-sm">Định dạng hỗ trợ: JPG, JPEG, PNG, WEBP, MP4, WEBM, MOV, AVI (Tải lên nhiều tệp cùng lúc)</p>
+                      </div>
+                    </div>
                     <input
                       type="file"
                       multiple
-                      accept="image/*"
+                      accept="image/*,video/*"
                       className="hidden"
-                      onChange={handleGalleryUpload}
+                      onChange={handleMediaUpload}
+                      disabled={uploadingGallery}
                     />
                   </label>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                    {uploadingVideo ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Video className="h-4 w-4" />
-                    )}
-                    Tải video
-                    <input
-                      type="file"
-                      accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
-                      className="hidden"
-                      onChange={handleVideoUpload}
-                    />
-                  </label>
-                </div>
+                )}
               </div>
-
-              <div className="space-y-2">
-                <p className="text-xs text-slate-500">
-                  Ảnh: JPG/JPEG/PNG/WEBP. Video: MP4/WEBM/MOV/AVI.
-                </p>
-              </div>
-
-              {form.images.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                  {form.images.map((url, index) => (
-                    <div key={`${url}-${index}`} className="relative">
-                      <img
-                        src={url}
-                        alt={`Gallery ${index + 1}`}
-                        className="h-24 w-full rounded-lg border border-slate-200 object-cover bg-white"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon-sm"
-                        className="absolute -right-3 -top-3 h-9 w-9 rounded-full border border-white bg-red-600 text-white shadow-md hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2"
-                        aria-label="Xóa ảnh chi tiết"
-                        title="Xóa ảnh chi tiết"
-                        onClick={() => removeGalleryImage(url)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-slate-500">Chưa có ảnh chi tiết.</p>
-              )}
-
-              {form.videoUrl ? (
-                <div className="space-y-3">
-                  <video
-                    className="max-h-56 w-full rounded-lg border border-slate-200 bg-black"
-                    controls
-                    src={form.videoUrl}
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      className="h-10 min-w-24"
-                      onClick={() => {
-                        setForm((prev) => ({ ...prev, videoUrl: null }));
-                      }}
-                    >
-                      Xóa video
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-500">Chưa tải video.</p>
-              )}
             </div>
           </div>
         </div>

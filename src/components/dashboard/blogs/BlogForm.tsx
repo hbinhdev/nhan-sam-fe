@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ImagePlus, Trash2, Loader2, Upload } from "lucide-react";
 import {
   adminCreateBlog,
   adminUpdateBlog,
@@ -161,7 +162,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       <form className="flex flex-col" onSubmit={handleSubmitForm}>
         <div className="p-4 sm:p-6 space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Tiêu đề *</label>
               <Input
@@ -204,7 +205,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2 md:col-span-3">
               <label className="text-sm font-semibold text-slate-700">Tóm tắt</label>
               <textarea
                 value={form.excerpt}
@@ -215,7 +216,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2 md:col-span-3">
               <label className="text-sm font-semibold text-slate-700">Nội dung *</label>
               <RichTextEditor
                 value={form.content}
@@ -227,48 +228,71 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-semibold text-slate-700">Ảnh thumbnail</label>
-              <div className="rounded-lg border border-slate-300 bg-white p-3">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <label className="inline-flex cursor-pointer items-center rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/jpg,image/webp"
-                      className="hidden"
-                      onChange={handleUploadThumbnail}
-                      disabled={uploadingThumbnail || saving}
-                    />
-                    {uploadingThumbnail ? "Đang tải lên..." : "Tải ảnh thumbnail"}
-                  </label>
-                  {form.thumbnail ? (
-                    <button
-                      type="button"
-                      className="text-sm text-red-600 hover:underline"
-                      onClick={() =>
-                        setForm((prev) => ({ ...prev, thumbnail: "" }))
-                      }
-                      disabled={uploadingThumbnail || saving}
-                    >
-                      Xóa thumbnail
-                    </button>
-                  ) : null}
-                </div>
-                {form.thumbnail ? (
-                  <div className="mt-3">
+            <div className="space-y-2 md:col-span-3">
+              <label className="text-sm font-semibold text-slate-700">Ảnh đại diện (Thumbnail)</label>
+              
+              {form.thumbnail ? (
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-sm max-w-xl">
+                  <div className="relative group overflow-hidden rounded-xl border border-slate-200 w-28 h-28 flex-shrink-0 bg-slate-50 flex items-center justify-center">
                     <img
                       src={form.thumbnail}
                       alt="Thumbnail preview"
-                      className="h-36 w-full max-w-xs rounded-md border border-slate-200 object-cover"
+                      className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                      <button
+                        type="button"
+                        className="h-8 w-8 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 flex items-center justify-center transition-colors duration-200"
+                        title="Xóa thumbnail"
+                        onClick={() => setForm((prev) => ({ ...prev, thumbnail: "" }))}
+                        disabled={uploadingThumbnail || saving}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <p className="mt-3 text-xs text-slate-500">Chưa chọn thumbnail.</p>
-                )}
-              </div>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold text-slate-800">Đã tải ảnh đại diện thành công</h4>
+                    <p className="text-xs text-slate-500">Ảnh của bạn đang được hiển thị đầy đủ và sắc nét. Bạn có thể xóa để chọn ảnh mới.</p>
+                    <label className="mt-2.5 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-colors">
+                      {uploadingThumbnail ? "Đang tải ảnh mới..." : "Thay đổi ảnh"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="hidden"
+                        onChange={handleUploadThumbnail}
+                        disabled={uploadingThumbnail || saving}
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-8 max-w-xl bg-white hover:bg-slate-50/50 hover:border-slate-400 transition-all duration-200 cursor-pointer group text-center shadow-sm">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+                      {uploadingThumbnail ? (
+                        <Loader2 className="h-5 w-5 text-slate-600 animate-spin" />
+                      ) : (
+                        <Upload className="h-5 w-5 text-slate-500" />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-slate-700">Tải ảnh thumbnail bài viết</p>
+                      <p className="text-xs text-slate-500">Định dạng hỗ trợ: JPG, JPEG, PNG hoặc WEBP (Tối đa 5MB)</p>
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    className="hidden"
+                    onChange={handleUploadThumbnail}
+                    disabled={uploadingThumbnail || saving}
+                  />
+                </label>
+              )}
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2 md:col-span-3">
               <label className="text-sm font-semibold text-slate-700">Thẻ (phân tách bằng dấu phẩy)</label>
               <Input
                 value={form.tags}
@@ -280,7 +304,7 @@ export function BlogForm({ mode, initialData }: BlogFormProps) {
               />
             </div>
 
-            <label className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
+            <label className="mt-2 flex items-center gap-2 text-sm font-semibold text-slate-700 md:col-span-3">
               <input
                 type="checkbox"
                 checked={form.isPublished}

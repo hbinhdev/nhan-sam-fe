@@ -38,7 +38,24 @@ function toYouTubeEmbedUrl(url: string) {
 }
 
 function isDirectVideo(url: string) {
-  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+  const lowercaseUrl = url.toLowerCase();
+  return (
+    lowercaseUrl.includes("/video/") ||
+    lowercaseUrl.includes(".mp4") ||
+    lowercaseUrl.includes(".webm") ||
+    lowercaseUrl.includes(".mov") ||
+    lowercaseUrl.includes(".avi") ||
+    lowercaseUrl.includes(".quicktime") ||
+    lowercaseUrl.includes(".m4v") ||
+    lowercaseUrl.includes(".mkv") ||
+    lowercaseUrl.includes(".3gp") ||
+    lowercaseUrl.includes(".flv") ||
+    lowercaseUrl.includes(".wmv") ||
+    lowercaseUrl.includes(".ogg") ||
+    lowercaseUrl.includes(".mpeg") ||
+    lowercaseUrl.includes(".mpg") ||
+    lowercaseUrl.includes(".ogv")
+  );
 }
 
 export function ProductGallery({
@@ -59,14 +76,18 @@ export function ProductGallery({
       videoThumbnail?.trim() ||
       poster?.trim() ||
       thumbnail?.trim() ||
-      normalizedImages[0]?.trim() ||
       imageUrl?.trim() ||
       "/images/product-imperial-main.png";
-    const imageItems = (normalizedImages.length > 0 ? normalizedImages : [fallback]).map((src, idx) => ({
-      type: "image" as const,
-      src,
-      alt: idx === 0 ? name : `${name} view ${idx + 1}`,
-    }));
+
+    const imageItems = (normalizedImages.length > 0 ? normalizedImages : [fallback]).map((src, idx) => {
+      const isVideo = isDirectVideo(src) || Boolean(toYouTubeEmbedUrl(src));
+      return {
+        type: isVideo ? ("video" as const) : ("image" as const),
+        src,
+        alt: isVideo ? `${name} video ${idx + 1}` : (idx === 0 ? name : `${name} view ${idx + 1}`),
+        posterSrc: isVideo ? videoPoster : undefined,
+      };
+    });
 
     if (!videoUrl || !videoUrl.trim()) {
       return imageItems;
@@ -146,14 +167,23 @@ export function ProductGallery({
                 />
               ) : (
                 <>
-                  <Image
-                    alt={item.alt}
-                    src={item.posterSrc || "/images/product-imperial-main.png"}
-                    fill
-                    className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
-                  />
+                  {isDirectVideo(item.src) ? (
+                    <video
+                      src={item.src}
+                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <Image
+                      alt={item.alt}
+                      src={item.posterSrc || "/images/product-imperial-main.png"}
+                      fill
+                      className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-4xl">play_circle</span>
+                    <span className="material-symbols-outlined text-white text-4xl animate-pulse">play_circle</span>
                   </div>
                 </>
               )}
