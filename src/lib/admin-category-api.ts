@@ -22,6 +22,7 @@ export type AdminCategory = {
   name: string;
   slug: string;
   description?: string | null;
+  image?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -29,6 +30,7 @@ export type AdminCategory = {
 export type AdminCategoryPayload = {
   name: string;
   description?: string;
+  image?: string | null;
 };
 
 function getAdminToken() {
@@ -40,18 +42,14 @@ function getAdminToken() {
 }
 
 async function parseApiError(response: Response, fallback: string) {
-  try {
-    const payload = (await response.json()) as { message?: string | string[] };
-    if (Array.isArray(payload.message) && payload.message.length > 0) {
-      return payload.message[0];
-    }
-    if (typeof payload.message === "string" && payload.message.trim()) {
-      return payload.message;
-    }
-    return fallback;
-  } catch {
-    return fallback;
+  const payload = (await response.json().catch(() => ({}))) as { message?: string | string[] };
+  if (Array.isArray(payload.message) && payload.message.length > 0) {
+    return payload.message[0];
   }
+  if (typeof payload.message === "string" && payload.message.trim()) {
+    return payload.message;
+  }
+  return fallback;
 }
 
 function sanitizeCategory(value: unknown): AdminCategory | null {
@@ -73,6 +71,7 @@ function sanitizeCategory(value: unknown): AdminCategory | null {
     name: item.name,
     slug: item.slug,
     description: typeof item.description === "string" ? item.description : null,
+    image: typeof item.image === "string" ? item.image : null,
     createdAt: typeof item.createdAt === "string" ? item.createdAt : undefined,
     updatedAt: typeof item.updatedAt === "string" ? item.updatedAt : undefined,
   };

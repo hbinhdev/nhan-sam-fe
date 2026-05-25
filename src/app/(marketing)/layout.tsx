@@ -1,6 +1,7 @@
 import { AuthHeaderActions } from "@/components/shared/auth/AuthHeaderActions";
 import { AuthHeaderMenu } from "@/components/shared/auth/AuthHeaderMenu";
 import { LoadingLink } from "@/components/shared/routing/RouteLoadingProvider";
+import { ProductsNavLink } from "@/components/shared/ProductsNavLink";
 
 export default function MarketingLayout({
   children,
@@ -20,7 +21,7 @@ export default function MarketingLayout({
 
           <nav className="hidden items-center space-x-8 md:flex">
             <NavLink href="/">Trang chủ</NavLink>
-            <NavLink href="/products">Sản phẩm</NavLink>
+            <ProductsNavLink />
             <NavLink href="/blogs">Kiến thức</NavLink>
             <NavLink href="/contact">Liên hệ</NavLink>
           </nav>

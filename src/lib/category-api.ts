@@ -3,6 +3,7 @@ export type Category = {
   name: string;
   slug: string;
   description?: string | null;
+  image?: string | null;
 };
 
 const DEFAULT_API_BASE_URL = "http://localhost:3001/api";
@@ -71,6 +72,7 @@ export async function getCategories(): Promise<Category[]> {
         name: item.name,
         slug: item.slug,
         description: typeof value.description === "string" ? value.description : null,
+        image: typeof value.image === "string" ? value.image : null,
       };
     });
 }
