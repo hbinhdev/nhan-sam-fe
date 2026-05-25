@@ -3,7 +3,6 @@ import { ProductGallery } from "@/components/sections/product-detail/ProductGall
 import { ProductInfo } from "@/components/sections/product-detail/ProductInfo";
 import { CertificationSection } from "@/components/sections/product-detail/CertificationSection";
 import { ProductTabs } from "@/components/sections/product-detail/ProductTabs";
-import { ProductReviews } from "@/components/sections/product-detail/ProductReviews";
 import { ProductCard } from "@/components/shared/ProductCard";
 import {
   formatCurrencyVND,
@@ -11,12 +10,6 @@ import {
   getProducts,
   type ProductSummary,
 } from "@/lib/product-api";
-import {
-  getProductReviewSummary,
-  getProductReviews,
-  type ProductReview,
-  type ProductReviewSummary,
-} from "@/lib/product-review-api";
 
 const RELATED_PRODUCTS_LIMIT = 4;
 const SHORT_DESCRIPTION_MAX_LENGTH = 220;
@@ -116,23 +109,6 @@ export default async function ProductDetailPage({
     relatedProducts = [];
   }
 
-  let reviews: ProductReview[] = [];
-  let reviewSummary: ProductReviewSummary | undefined;
-
-  if (product.id) {
-    try {
-      const [reviewsResponse, summaryResponse] = await Promise.all([
-        getProductReviews(product.id),
-        getProductReviewSummary(product.id),
-      ]);
-      reviews = reviewsResponse.data;
-      reviewSummary = summaryResponse;
-    } catch {
-      reviews = [];
-      reviewSummary = undefined;
-    }
-  }
-
   return (
     <main className="max-w-[1280px] mx-auto px-6 py-12 flex flex-col">
       {/* SECTION 1: PRODUCT HERO */}
@@ -160,8 +136,6 @@ export default async function ProductDetailPage({
           origin={product.origin || undefined}
           brand={product.brand || undefined}
           sku={product.sku}
-          averageRating={reviewSummary?.averageRating ?? 0}
-          totalReviews={reviewSummary?.totalReviews ?? 0}
         />
       </section>
 
@@ -171,14 +145,7 @@ export default async function ProductDetailPage({
       {/* SECTION 3: DETAILED INFO TABS */}
       <ProductTabs product={product} />
 
-      {/* SECTION 4: REVIEWS */}
-      <ProductReviews
-        productId={product.id}
-        reviews={reviews}
-        summary={reviewSummary}
-      />
-
-      {/* SECTION 5: RELATED PRODUCTS */}
+      {/* SECTION 4: RELATED PRODUCTS */}
       <section className="py-24 border-t border-outline-variant/30">
         <div className="flex items-center gap-6 mb-16">
           <h2 className="text-3xl font-serif text-primary shrink-0">

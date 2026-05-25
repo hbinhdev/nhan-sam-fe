@@ -9,7 +9,7 @@ type ProductTabsProps = {
   product?: ProductSummary | null;
 };
 
-type TabKey = "description" | "information" | "usage" | "faq";
+type TabKey = "description" | "information" | "usage";
 
 export function ProductTabs({ product }: ProductTabsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("description");
@@ -71,12 +71,6 @@ export function ProductTabs({ product }: ProductTabsProps) {
         >
           Hướng dẫn sử dụng
         </TabButton>
-        <TabButton
-          active={activeTab === "faq"}
-          onClick={() => setActiveTab("faq")}
-        >
-          Câu hỏi thường gặp
-        </TabButton>
       </div>
 
       {activeTab === "description" && (
@@ -123,24 +117,6 @@ export function ProductTabs({ product }: ProductTabsProps) {
           </div>
         </div>
       )}
-
-      {activeTab === "faq" && (
-        <div className="flex flex-col gap-6">
-          <FaqItem
-            question="Sản phẩm này dùng như thế nào?"
-            answer={usageInstructions}
-          />
-          <FaqItem question="Sản phẩm phù hợp với ai?" answer={usagePurpose} />
-          <FaqItem
-            question="Sản phẩm còn hàng không?"
-            answer={
-              typeof product?.stock === "number"
-                ? `Hiện còn ${product.stock} sản phẩm trong kho.`
-                : "Thông tin tồn kho đang được cập nhật."
-            }
-          />
-        </div>
-      )}
     </section>
   );
 }
@@ -184,18 +160,10 @@ function InfoItem({
         <span className="material-symbols-outlined text-2xl">{icon}</span>
       </div>
       <h3 className="text-xl font-serif text-primary">{title}</h3>
-      <p className="text-on-surface-variant leading-relaxed">{desc}</p>
-    </div>
-  );
-}
-
-function FaqItem({ question, answer }: { question: string; answer: string }) {
-  return (
-    <div className="bg-surface-container-low p-6 border-l-4 border-primary rounded-r-2xl">
-      <h3 className="text-[12px] font-bold tracking-widest uppercase text-primary mb-3">
-        {question}
-      </h3>
-      <p className="text-on-surface-variant leading-relaxed">{answer}</p>
+      <div
+        className="text-on-surface-variant leading-relaxed [&_a]:text-primary [&_a]:underline [&_img]:my-4 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-xl [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6"
+        dangerouslySetInnerHTML={{ __html: normalizeBlogContentToHtml(desc) }}
+      />
     </div>
   );
 }

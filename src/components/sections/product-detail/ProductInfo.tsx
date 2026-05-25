@@ -11,8 +11,6 @@ type ProductInfoProps = {
   origin?: string;
   brand?: string;
   sku?: string | null;
-  averageRating?: number;
-  totalReviews?: number;
 };
 
 import { useState } from "react";
@@ -30,19 +28,11 @@ export function ProductInfo({
   origin,
   brand,
   sku,
-  averageRating = 0,
-  totalReviews = 0,
 }: ProductInfoProps) {
   const { addItem } = useCart();
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
 
-  const safeAverage = Number.isFinite(averageRating)
-    ? Math.max(0, Math.min(5, averageRating))
-    : 0;
-  const displayAverage = totalReviews === 0 ? 5 : safeAverage;
-  const filledStars = Math.round(displayAverage);
-  const stars = [1, 2, 3, 4, 5].map((index) => index <= filledStars);
   const safeShortDescription =
     shortDescription?.trim() ||
     description?.trim() ||
@@ -81,22 +71,6 @@ export function ProductInfo({
         <h1 className="text-4xl md:text-5xl font-serif text-primary leading-tight">
           {name}
         </h1>
-
-        <div className="flex items-center gap-4">
-          <div className="flex text-secondary">
-            {stars.map((active, i) => (
-              <span
-                key={i}
-                className={`material-symbols-outlined text-[20px] ${active ? "fill-1" : "fill-0 opacity-40"}`}
-              >
-                star
-              </span>
-            ))}
-          </div>
-          <span className="text-on-surface-variant text-sm font-medium">
-            {displayAverage.toFixed(1)} / 5 ({totalReviews} đánh giá)
-          </span>
-        </div>
 
         <div className="text-sm text-on-surface-variant">
           Mã sản phẩm:{" "}
