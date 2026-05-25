@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -199,7 +199,24 @@ export default function CategoriesPage() {
             <TableBody>
               {categories.map((category) => (
                 <TableRow key={category.id}>
-                  <TableCell className="font-medium break-words">{category.name}</TableCell>
+                  <TableCell className="font-medium break-words">
+                    <div className="flex items-center gap-3">
+                      {category.image ? (
+                        <div className="h-10 w-10 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 flex-shrink-0">
+                          <img
+                            src={category.image}
+                            alt={category.name}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-10 w-10 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-slate-400 flex-shrink-0">
+                          No Pic
+                        </div>
+                      )}
+                      <span className="truncate max-w-[120px] sm:max-w-none">{category.name}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="break-words">{category.slug}</TableCell>
                   <TableCell>
                     <p
@@ -267,16 +284,27 @@ export default function CategoriesPage() {
             {viewLoading ? <p className="text-slate-500">Đang tải chi tiết danh mục...</p> : null}
 
             {viewCategory ? (
-              <>
-                <p><strong>Tên:</strong> {viewCategory.name}</p>
-                <p><strong>Slug:</strong> {viewCategory.slug}</p>
-                <p>
-                  <strong>Mô tả:</strong>{" "}
-                  {viewCategory.description?.trim() || "Không có mô tả"}
-                </p>
-                <p><strong>Tạo lúc:</strong> {formatDate(viewCategory.createdAt)}</p>
-                <p><strong>Cập nhật lúc:</strong> {formatDate(viewCategory.updatedAt)}</p>
-              </>
+              <div className="space-y-4">
+                {viewCategory.image ? (
+                  <div className="relative aspect-video w-full max-h-56 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                    <img
+                      src={viewCategory.image}
+                      alt={viewCategory.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : null}
+                <div className="space-y-3">
+                  <p><strong>Tên:</strong> {viewCategory.name}</p>
+                  <p><strong>Slug:</strong> {viewCategory.slug}</p>
+                  <p>
+                    <strong>Mô tả:</strong>{" "}
+                    {viewCategory.description?.trim() || "Không có mô tả"}
+                  </p>
+                  <p><strong>Tạo lúc:</strong> {formatDate(viewCategory.createdAt)}</p>
+                  <p><strong>Cập nhật lúc:</strong> {formatDate(viewCategory.updatedAt)}</p>
+                </div>
+              </div>
             ) : null}
           </div>
         </DialogContent>
